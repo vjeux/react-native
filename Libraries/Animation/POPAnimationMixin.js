@@ -1,27 +1,17 @@
 /**
- * Copyright (c) 2015-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * Copyright 2004-present Facebook. All Rights Reserved.
  *
  * @providesModule POPAnimationMixin
  * @flow
  */
 'use strict';
 
-var POPAnimationOrNull = require('POPAnimation');
-
-if (!POPAnimationOrNull) {
+var POPAnimation = require('POPAnimation');
+if (!POPAnimation) {
   // POP animation isn't available in the OSS fork - this is a temporary
   // workaround to enable its availability to be determined at runtime.
-  module.exports = (null : ?{});
+  module.exports = null;
 } else {
-
-// At this point, POPAnimationOrNull is guaranteed to be
-// non-null. Bring it local to preserve type refinement.
-var POPAnimation = POPAnimationOrNull;
 
 var invariant = require('invariant');
 var warning = require('warning');
@@ -234,10 +224,12 @@ var POPAnimationMixin = {
       w: frame.width,
       h: frame.height
     };
+    frame = undefined;
+    var velocity = velocity || [0, 0];
     var posAnim = POPAnimation.createAnimation(type, {
       property: POPAnimation.Properties.position,
       toValue: [animFrame.x, animFrame.y],
-      velocity: velocity || [0, 0],
+      velocity: velocity,
     });
     var sizeAnim = POPAnimation.createAnimation(type, {
       property: POPAnimation.Properties.size,

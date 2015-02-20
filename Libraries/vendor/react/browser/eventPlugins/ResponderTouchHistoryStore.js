@@ -39,13 +39,6 @@ var touchHistory = {
   mostRecentTimeStamp: 0,
 };
 
-var timestampForTouch = function(touch) {
-  // The legacy internal implementation provides "timeStamp", which has been
-  // renamed to "timestamp". Let both work for now while we iron it out
-  // TODO (evv): rename timeStamp to timestamp in internal code
-  return touch.timeStamp || touch.timestamp;
-};
-
 /**
  * TODO: Instead of making gestures recompute filtered velocity, we could
  * include a built in velocity computation that can be reused globally.
@@ -54,29 +47,29 @@ var timestampForTouch = function(touch) {
 var initializeTouchData = function(touch) {
   return {
     touchActive: true,
-    startTimeStamp: timestampForTouch(touch),
+    startTimeStamp: touch.timeStamp,
     startPageX: touch.pageX,
     startPageY: touch.pageY,
     currentPageX: touch.pageX,
     currentPageY: touch.pageY,
-    currentTimeStamp: timestampForTouch(touch),
+    currentTimeStamp: touch.timeStamp,
     previousPageX: touch.pageX,
     previousPageY: touch.pageY,
-    previousTimeStamp: timestampForTouch(touch),
+    previousTimeStamp: touch.timeStamp,
   };
 };
 
 var reinitializeTouchTrack = function(touchTrack, touch) {
   touchTrack.touchActive = true;
-  touchTrack.startTimeStamp = timestampForTouch(touch);
+  touchTrack.startTimeStamp = touch.timeStamp;
   touchTrack.startPageX = touch.pageX;
   touchTrack.startPageY = touch.pageY;
   touchTrack.currentPageX = touch.pageX;
   touchTrack.currentPageY = touch.pageY;
-  touchTrack.currentTimeStamp = timestampForTouch(touch);
+  touchTrack.currentTimeStamp = touch.timeStamp;
   touchTrack.previousPageX = touch.pageX;
   touchTrack.previousPageY = touch.pageY;
-  touchTrack.previousTimeStamp = timestampForTouch(touch);
+  touchTrack.previousTimeStamp = touch.timeStamp;
 };
 
 var validateTouch = function(touch) {
@@ -103,7 +96,7 @@ var recordStartTouchData = function(touch) {
   } else {
     reinitializeTouchTrack(touchTrack, touch);
   }
-  touchHistory.mostRecentTimeStamp = timestampForTouch(touch);
+  touchHistory.mostRecentTimeStamp = touch.timeStamp;
 };
 
 var recordMoveTouchData = function(touch) {
@@ -119,8 +112,8 @@ var recordMoveTouchData = function(touch) {
   touchTrack.previousTimeStamp = touchTrack.currentTimeStamp;
   touchTrack.currentPageX = touch.pageX;
   touchTrack.currentPageY = touch.pageY;
-  touchTrack.currentTimeStamp = timestampForTouch(touch);
-  touchHistory.mostRecentTimeStamp = timestampForTouch(touch);
+  touchTrack.currentTimeStamp = touch.timeStamp;
+  touchHistory.mostRecentTimeStamp = touch.timeStamp;
 };
 
 var recordEndTouchData = function(touch) {
@@ -135,9 +128,9 @@ var recordEndTouchData = function(touch) {
   touchTrack.previousTimeStamp = touchTrack.currentTimeStamp;
   touchTrack.currentPageX = touch.pageX;
   touchTrack.currentPageY = touch.pageY;
-  touchTrack.currentTimeStamp = timestampForTouch(touch);
+  touchTrack.currentTimeStamp = touch.timeStamp;
   touchTrack.touchActive = false;
-  touchHistory.mostRecentTimeStamp = timestampForTouch(touch);
+  touchHistory.mostRecentTimeStamp = touch.timeStamp;
 };
 
 var ResponderTouchHistoryStore = {

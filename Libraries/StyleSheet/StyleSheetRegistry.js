@@ -1,13 +1,7 @@
 /**
- * Copyright (c) 2015-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * Copyright 2004-present Facebook. All Rights Reserved.
  *
  * @providesModule StyleSheetRegistry
- * @flow
  */
 'use strict';
 
@@ -16,7 +10,7 @@ var uniqueID = 1;
 var emptyStyle = {};
 
 class StyleSheetRegistry {
-  static registerStyle(style: Object): number {
+  static registerStyle(style) {
     var id = ++uniqueID;
     if (__DEV__) {
       Object.freeze(style);
@@ -25,7 +19,7 @@ class StyleSheetRegistry {
     return id;
   }
 
-  static getStyleByID(id: number): Object {
+  static getStyleByID(id) {
     if (!id) {
       // Used in the style={[condition && id]} pattern,
       // we want it to be a no-op when the value is false or null

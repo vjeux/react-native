@@ -1,13 +1,7 @@
 /**
- * Copyright (c) 2015-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * Copyright 2004-present Facebook. All Rights Reserved.
  *
  * @providesModule ReactIOSDefaultInjection
- * @flow
  */
 
 "use strict";
@@ -21,24 +15,21 @@ var EventPluginUtils = require('EventPluginUtils');
 var IOSDefaultEventPluginOrder = require('IOSDefaultEventPluginOrder');
 var IOSNativeBridgeEventPlugin = require('IOSNativeBridgeEventPlugin');
 var NodeHandle = require('NodeHandle');
-var ReactClass = require('ReactClass');
-var ReactComponentEnvironment = require('ReactComponentEnvironment');
+var ReactComponent = require('ReactComponent');
+var ReactCompositeComponent = require('ReactCompositeComponent');
 var ReactDefaultBatchingStrategy = require('ReactDefaultBatchingStrategy');
-var ReactEmptyComponent = require('ReactEmptyComponent');
+var ReactElement = require('ReactElement');
 var ReactInstanceHandles = require('ReactInstanceHandles');
 var ReactIOSComponentEnvironment = require('ReactIOSComponentEnvironment');
 var ReactIOSComponentMixin = require('ReactIOSComponentMixin');
 var ReactIOSGlobalInteractionHandler = require('ReactIOSGlobalInteractionHandler');
 var ReactIOSGlobalResponderHandler = require('ReactIOSGlobalResponderHandler');
 var ReactIOSMount = require('ReactIOSMount');
-var ReactIOSTextComponent = require('ReactIOSTextComponent');
-var ReactNativeComponent = require('ReactNativeComponent');
+var ReactTextComponent = require('ReactTextComponent');
 var ReactUpdates = require('ReactUpdates');
 var ResponderEventPlugin = require('ResponderEventPlugin');
+var RKRawText = require('RKRawText');
 var UniversalWorkerNodeHandle = require('UniversalWorkerNodeHandle');
-
-var createReactIOSNativeComponentClass = require('createReactIOSNativeComponentClass');
-var invariant = require('invariant');
 
 // Just to ensure this gets packaged, since its only caller is from Native.
 require('RCTEventEmitter');
@@ -77,31 +68,22 @@ function inject() {
     ReactDefaultBatchingStrategy
   );
 
-  ReactComponentEnvironment.injection.injectEnvironment(
+  ReactComponent.injection.injectEnvironment(
     ReactIOSComponentEnvironment
   );
 
-  // Can't import View here because it depends on React to make its composite
-  var RCTView = createReactIOSNativeComponentClass({
-    validAttributes: {},
-    uiViewClassName: 'RCTView',
-  });
-  ReactEmptyComponent.injection.injectEmptyComponent(RCTView);
-
   EventPluginUtils.injection.injectMount(ReactIOSMount);
 
-  ReactClass.injection.injectMixin(ReactIOSComponentMixin);
+  ReactCompositeComponent.injection.injectMixin(ReactIOSComponentMixin);
 
-  ReactNativeComponent.injection.injectTextComponentClass(
-    ReactIOSTextComponent
-  );
-  ReactNativeComponent.injection.injectAutoWrapper(function(tag) {
-    // Show a nicer error message for non-function tags
-    var info = '';
-    if (typeof tag === 'string' && /^[a-z]/.test(tag)) {
-      info += ' Each component name should start with an uppercase letter.';
-    }
-    invariant(false, 'Expected a component class, got %s.%s', tag, info);
+  ReactTextComponent.inject(function(initialText) {
+    // RKRawText is a class so we can't invoke it directly. Instead of using
+    // a factory, we use the internal fast path to create a descriptor.
+    // RKRawText is not quite a class yet, so we access the real class from
+    // the type property. TODO: Change this once factory wrappers are gone.
+    return new ReactElement(RKRawText.type, null, null, null, null, {
+      text: initialText
+    });
   });
 
   NodeHandle.injection.injectImplementation(UniversalWorkerNodeHandle);

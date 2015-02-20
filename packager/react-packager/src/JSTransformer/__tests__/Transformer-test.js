@@ -1,15 +1,8 @@
-/**
- * Copyright (c) 2015-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- */
 'use strict';
 
 jest
   .dontMock('worker-farm')
+  .dontMock('q')
   .dontMock('os')
   .dontMock('../index');
 
@@ -43,7 +36,7 @@ describe('Transformer', function() {
       callback(null, 'content');
     });
 
-    return new Transformer(OPTIONS).loadFileAndTransform('file')
+    return new Transformer(OPTIONS).loadFileAndTransform([], 'file', {})
       .then(function(data) {
         expect(data).toEqual({
           code: 'transformed',
@@ -66,7 +59,7 @@ describe('Transformer', function() {
       callback(null, {error: esprimaError});
     });
 
-    return new Transformer(OPTIONS).loadFileAndTransform('foo-file.js')
+    return new Transformer(OPTIONS).loadFileAndTransform([], 'foo-file.js', {})
       .catch(function(error) {
         expect(error.type).toEqual('TransformError');
         expect(error.snippet).toEqual([

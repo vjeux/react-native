@@ -1,110 +1,70 @@
-/**
- * Copyright (c) 2015-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- */
 'use strict';
 
 var assert = require('assert');
 var fs = require('fs');
 var path = require('path');
-var Promise = require('bluebird');
+var q = require('q');
+var Promise = require('q').Promise;
 var Transformer = require('../JSTransformer');
 var DependencyResolver = require('../DependencyResolver');
 var _ = require('underscore');
 var Package = require('./Package');
 var Activity = require('../Activity');
-var declareOpts = require('../lib/declareOpts');
-var imageSize = require('image-size');
 
-var validateOpts = declareOpts({
-  projectRoots: {
-    type: 'array',
-    required: true,
-  },
-  blacklistRE: {
-    type: 'object', // typeof regex is object
-  },
-  moduleFormat: {
-    type: 'string',
-    default: 'haste',
-  },
-  polyfillModuleNames: {
-    type: 'array',
-    default: [],
-  },
-  cacheVersion: {
-    type: 'string',
-    default: '1.0',
-  },
-  resetCache: {
-    type: 'boolean',
-    default: false,
-  },
-  transformModulePath: {
-    type:'string',
-    required: false,
-  },
-  nonPersistent: {
-    type: 'boolean',
-    default: false,
-  },
-  assetRoots: {
-    type: 'array',
-    required: false,
-  },
-  assetExts: {
-    type: 'array',
-    default: ['png'],
-  },
-  fileWatcher: {
-    type: 'object',
-    required: true,
-  },
-});
+var DEFAULT_CONFIG = {
+  /**
+   * RegExp used to ignore paths when scanning the filesystem to calculate the
+   * dependency graph.
+   */
+  blacklistRE: null,
 
-function Packager(options) {
-  var opts = this._opts = validateOpts(options);
+  /**
+   * The kind of module system/transport wrapper to use for the modules bundled
+   * in the package.
+   */
+  moduleFormat: 'haste',
 
-  opts.projectRoots.forEach(verifyRootExists);
+  /**
+   * An ordered list of module names that should be considered as dependencies
+   * of every module in the system. The list is ordered because every item in
+   * the list will have an implicit dependency on all items before it.
+   *
+   * (This ordering is necessary to build, for example, polyfills that build on
+   *  each other)
+   */
+  polyfillModuleNames: [],
 
-  this._resolver = new DependencyResolver({
-    projectRoots: opts.projectRoots,
-    blacklistRE: opts.blacklistRE,
-    polyfillModuleNames: opts.polyfillModuleNames,
-    nonPersistent: opts.nonPersistent,
-    moduleFormat: opts.moduleFormat,
-    assetRoots: opts.assetRoots,
-    fileWatcher: opts.fileWatcher,
-  });
+  nonPersistent: false,
+};
 
-  this._transformer = new Transformer({
-    projectRoots: opts.projectRoots,
-    blacklistRE: opts.blacklistRE,
-    cacheVersion: opts.cacheVersion,
-    resetCache: opts.resetCache,
-    transformModulePath: opts.transformModulePath,
-    nonPersistent: opts.nonPersistent,
-  });
+function Packager(projectConfig) {
+  projectConfig.projectRoots.forEach(verifyRootExists);
 
-  this._projectRoots = opts.projectRoots;
+  this._config = Object.create(DEFAULT_CONFIG);
+  for (var key in projectConfig) {
+    this._config[key] = projectConfig[key];
+  }
+
+  this._resolver = new DependencyResolver(this._config);
+
+  this._transformer = new Transformer(projectConfig);
 }
 
 Packager.prototype.kill = function() {
-  return this._transformer.kill();
+  return q.all([
+    this._transformer.kill(),
+    this._resolver.end(),
+  ]);
 };
 
-Packager.prototype.package = function(main, runModule, sourceMapUrl, isDev) {
+Packager.prototype.package = function(main, runModule, sourceMapUrl) {
   var transformModule = this._transformModule.bind(this);
   var ppackage = new Package(sourceMapUrl);
 
   var findEventId = Activity.startEvent('find dependencies');
   var transformEventId;
 
-  return this.getDependencies(main, isDev)
+  return this.getDependencies(main)
     .then(function(result) {
       Activity.endEvent(findEventId);
       transformEventId = Activity.startEvent('transform');
@@ -132,30 +92,19 @@ Packager.prototype.package = function(main, runModule, sourceMapUrl, isDev) {
 
 Packager.prototype.invalidateFile = function(filePath) {
   this._transformer.invalidateFile(filePath);
-};
+}
 
-Packager.prototype.getDependencies = function(main, isDev) {
-  return this._resolver.getDependencies(main, { dev: isDev });
+Packager.prototype.getDependencies = function(main) {
+  return this._resolver.getDependencies(main);
 };
 
 Packager.prototype._transformModule = function(module) {
-  var transform;
-
-  if (module.isAsset_DEPRECATED) {
-    transform = Promise.resolve(generateAssetModule_DEPRECATED(module));
-  } else if (module.isAsset) {
-    transform = generateAssetModule(
-      module,
-      getPathRelativeToRoot(this._projectRoots, module.path)
-    );
-  } else {
-    transform = this._transformer.loadFileAndTransform(
-      path.resolve(module.path)
-    );
-  }
-
   var resolver = this._resolver;
-  return transform.then(function(transformed) {
+  return this._transformer.loadFileAndTransform(
+    ['es6'],
+    path.resolve(module.path),
+    this._config.transformer || {}
+  ).then(function(transformed) {
     return _.extend(
       {},
       transformed,
@@ -174,52 +123,5 @@ Packager.prototype.getGraphDebugInfo = function() {
   return this._resolver.getDebugInfo();
 };
 
-function generateAssetModule_DEPRECATED(module) {
-  var code = 'module.exports = ' + JSON.stringify({
-    uri: module.id.replace(/^[^!]+!/, ''),
-    isStatic: true,
-  }) + ';';
-
-  return {
-    code: code,
-    sourceCode: code,
-    sourcePath: module.path,
-  };
-}
-
-var sizeOf = Promise.promisify(imageSize);
-
-function generateAssetModule(module, relPath) {
-  return sizeOf(module.path).then(function(dimensions) {
-    var img = {
-      isStatic: true,
-      path: module.path, //TODO(amasad): this should be path inside tar file.
-      uri: relPath,
-      width: dimensions.width,
-      height: dimensions.height,
-    };
-
-    var code = 'module.exports = ' + JSON.stringify(img) + ';';
-
-    return {
-      code: code,
-      sourceCode: code,
-      sourcePath: module.path,
-    };
-  });
-}
-
-function getPathRelativeToRoot(roots, absPath) {
-  for (var i = 0; i < roots.length; i++) {
-    var relPath = path.relative(roots[i], absPath);
-    if (relPath[0] !== '.') {
-      return relPath;
-    }
-  }
-
-  throw new Error(
-    'Expected root module to be relative to one of the project roots'
-  );
-}
 
 module.exports = Packager;

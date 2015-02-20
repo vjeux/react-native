@@ -1,22 +1,14 @@
-/**
- * Copyright (c) 2015-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- */
 'use strict';
 
 jest
   .setMock('worker-farm', function() { return function() {};})
   .dontMock('path')
+  .dontMock('q')
   .dontMock('os')
   .dontMock('underscore')
-  .setMock('uglify-js')
   .dontMock('../');
 
-var Promise = require('bluebird');
+var q = require('q');
 
 describe('Packager', function() {
   var getDependencies;
@@ -43,34 +35,22 @@ describe('Packager', function() {
       };
     });
 
-    var packager = new Packager({projectRoots: ['/root']});
+    var packager = new Packager({projectRoots: []});
     var modules = [
       {id: 'foo', path: '/root/foo.js', dependencies: []},
       {id: 'bar', path: '/root/bar.js', dependencies: []},
-      {
-        id: 'image!img',
-        path: '/root/img/img.png',
-        isAsset_DEPRECATED: true,
-        dependencies: [],
-      },
-      {
-        id: 'new_image.png',
-        path: '/root/img/new_image.png',
-        isAsset: true,
-        dependencies: []
-      }
     ];
 
     getDependencies.mockImpl(function() {
-      return Promise.resolve({
+      return q({
         mainModuleId: 'foo',
         dependencies: modules
       });
     });
 
     require('../../JSTransformer').prototype.loadFileAndTransform
-      .mockImpl(function(path) {
-        return Promise.resolve({
+      .mockImpl(function(tsets, path) {
+        return q({
           code: 'transformed ' + path,
           sourceCode: 'source ' + path,
           sourcePath: path
@@ -79,10 +59,6 @@ describe('Packager', function() {
 
     wrapModule.mockImpl(function(module, code) {
       return 'lol ' + code + ' lol';
-    });
-
-    require('image-size').mockImpl(function(path, cb) {
-      cb(null, { width: 50, height: 100 });
     });
 
     return packager.package('/root/foo.js', true, 'source_map_url')
@@ -96,33 +72,6 @@ describe('Packager', function() {
           'lol transformed /root/bar.js lol',
           'source /root/bar.js',
           '/root/bar.js'
-        ]);
-        expect(p.addModule.mock.calls[2]).toEqual([
-          'lol module.exports = ' +
-            JSON.stringify({ uri: 'img', isStatic: true}) +
-            '; lol',
-          'module.exports = ' +
-            JSON.stringify({ uri: 'img', isStatic: true}) +
-            ';',
-          '/root/img/img.png'
-        ]);
-
-        var imgModule = {
-          isStatic: true,
-          path: '/root/img/new_image.png',
-          uri: 'img/new_image.png',
-          width: 50,
-          height: 100,
-        };
-
-        expect(p.addModule.mock.calls[3]).toEqual([
-          'lol module.exports = ' +
-            JSON.stringify(imgModule) +
-            '; lol',
-          'module.exports = ' +
-            JSON.stringify(imgModule) +
-            ';',
-          '/root/img/new_image.png'
         ]);
 
         expect(p.finalize.mock.calls[0]).toEqual([

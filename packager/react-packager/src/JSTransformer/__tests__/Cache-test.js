@@ -1,21 +1,14 @@
-/**
- * Copyright (c) 2015-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- */
 'use strict';
 
 jest
   .dontMock('underscore')
   .dontMock('path')
+  .dontMock('q')
   .dontMock('absolute-path')
-  .dontMock('crypto')
+  .dontMock('../../fb-path-utils')
   .dontMock('../Cache');
 
-var Promise = require('bluebird');
+var q = require('q');
 
 describe('JSTransformer Cache', function() {
   var Cache;
@@ -28,11 +21,11 @@ describe('JSTransformer Cache', function() {
     Cache = require('../Cache');
   });
 
-  describe('getting/setting', function() {
+  describe('getting/settig', function() {
     it('calls loader callback for uncached file', function() {
       var cache = new Cache({projectRoots: ['/rootDir']});
       var loaderCb = jest.genMockFn().mockImpl(function() {
-        return Promise.resolve();
+        return q();
       });
       cache.get('/rootDir/someFile', loaderCb);
       expect(loaderCb).toBeCalledWith('/rootDir/someFile');
@@ -48,7 +41,7 @@ describe('JSTransformer Cache', function() {
       });
       var cache = new Cache({projectRoots: ['/rootDir']});
       var loaderCb = jest.genMockFn().mockImpl(function() {
-        return Promise.resolve('lol');
+        return q('lol');
       });
       return cache.get('/rootDir/someFile', loaderCb).then(function(value) {
         expect(value).toBe('lol');
@@ -65,7 +58,7 @@ describe('JSTransformer Cache', function() {
       });
       var cache = new Cache({projectRoots: ['/rootDir']});
       var loaderCb = jest.genMockFn().mockImpl(function() {
-        return Promise.resolve('lol');
+        return q('lol');
       });
       return cache.get('/rootDir/someFile', loaderCb).then(function() {
         var shouldNotBeCalled = jest.genMockFn();
@@ -152,7 +145,7 @@ describe('JSTransformer Cache', function() {
 
       var cache = new Cache({projectRoots: ['/rootDir']});
       var loaderCb = jest.genMockFn().mockImpl(function() {
-        return Promise.resolve('new value');
+        return q('new value');
       });
 
       return cache.get('/rootDir/someFile', loaderCb).then(function(value) {
@@ -193,16 +186,16 @@ describe('JSTransformer Cache', function() {
 
       var cache = new Cache({projectRoots: ['/rootDir']});
       cache.get('/rootDir/bar', function() {
-        return Promise.resolve('bar value');
+        return q('bar value');
       });
       cache.get('/rootDir/foo', function() {
-        return Promise.resolve('foo value');
+        return q('foo value');
       });
       cache.get('/rootDir/baz', function() {
-        return Promise.resolve('baz value');
+        return q('baz value');
       });
 
-      jest.runAllTicks();
+      jest.runAllTimers();
       expect(fs.writeFile).toBeCalled();
     });
   });

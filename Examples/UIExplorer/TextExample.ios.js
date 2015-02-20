@@ -1,17 +1,7 @@
 /**
- * The examples provided by Facebook are for non-commercial testing and
- * evaluation purposes only.
+ * Copyright 2004-present Facebook. All Rights Reserved.
  *
- * Facebook reserves all rights not expressly granted.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
- * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NON INFRINGEMENT. IN NO EVENT SHALL
- * FACEBOOK BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
- * AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
- * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- *
- * @flow
+ * @providesModule TextExample
  */
 'use strict';
 
@@ -34,7 +24,7 @@ var Entity = React.createClass({
 
 var AttributeToggler = React.createClass({
   getInitialState: function() {
-    return {fontWeight: '500', fontSize: 15};
+    return {fontWeight: 'bold', fontSize: 15};
   },
   increaseSize: function() {
     this.setState({
@@ -64,7 +54,6 @@ var AttributeToggler = React.createClass({
 
 exports.title = '<Text>';
 exports.description = 'Base component for rendering styled text.';
-exports.displayName = 'TextExample';
 exports.examples = [
 {
   title: 'Wrap',
@@ -73,15 +62,6 @@ exports.examples = [
       <Text>
         The text should wrap if it goes on multiple lines. See, this is going to
         the next line.
-      </Text>
-    );
-  },
-}, {
-  title: 'Padding',
-  render: function() {
-    return (
-      <Text style={{padding: 10}}>
-        This text is indented by 10px padding on all sides.
       </Text>
     );
   },
@@ -143,37 +123,9 @@ exports.examples = [
   title: 'Font Weight',
   render: function() {
     return (
-      <View>
-        <Text style={{fontWeight: '100'}}>
-          Move fast and be ultralight
-        </Text>
-        <Text style={{fontWeight: '200'}}>
-          Move fast and be light
-        </Text>
-        <Text style={{fontWeight: 'normal'}}>
-          Move fast and be normal
-        </Text>
-        <Text style={{fontWeight: 'bold'}}>
-          Move fast and be bold
-        </Text>
-        <Text style={{fontWeight: '900'}}>
-          Move fast and be ultrabold
-        </Text>
-      </View>
-    );
-  },
-},  {
-  title: 'Font Style',
-  render: function() {
-    return (
-      <View>
-        <Text style={{fontStyle: 'normal'}}>
-          Normal text
-        </Text>
-        <Text style={{fontStyle: 'italic'}}>
-          Italic text
-        </Text>
-      </View>
+      <Text style={{fontWeight: 'bold'}}>
+        Move fast and be bold
+      </Text>
     );
   },
 }, {
@@ -249,7 +201,7 @@ exports.examples = [
   },
 }, {
   title: 'Toggling Attributes',
-  render: function(): ReactElement {
+  render: function() {
     return <AttributeToggler />;
   },
 }, {
@@ -321,7 +273,7 @@ var styles = StyleSheet.create({
     backgroundColor: 'rgba(100, 100, 100, 0.3)'
   },
   entity: {
-    fontWeight: '500',
+    fontWeight: 'bold',
     color: '#527fe4',
   },
 });

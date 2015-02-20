@@ -1,24 +1,20 @@
 /**
- * Copyright (c) 2015-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * Copyright 2004-present Facebook. All Rights Reserved.
  *
  * @providesModule ViewStylePropTypes
- * @flow
  */
 'use strict';
 
 var LayoutPropTypes = require('LayoutPropTypes');
 var ReactPropTypes = require('ReactPropTypes');
 
+var merge = require('merge');
+
 /**
  * Warning: Some of these properties may not be supported in all releases.
  */
-var ViewStylePropTypes = {
-  ...LayoutPropTypes,
+var ViewStylePropTypes = merge(
+  LayoutPropTypes, {
   backgroundColor: ReactPropTypes.string,
   borderColor: ReactPropTypes.string,
   borderTopColor: ReactPropTypes.string,
@@ -40,6 +36,6 @@ var ViewStylePropTypes = {
   scaleY: ReactPropTypes.number,
   translateX: ReactPropTypes.number,
   translateY: ReactPropTypes.number,
-};
+});
 
 module.exports = ViewStylePropTypes;

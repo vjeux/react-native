@@ -636,7 +636,7 @@ var TouchableMixin = {
     }
 
     if (IsPressingIn[curState] && signal === Signals.RESPONDER_RELEASE) {
-      var hasLongPressHandler = !!this.props.onLongPress;
+      var hasLongPressHandler = !!this.touchableHandleLongPress;
       var pressIsLongButStillCallOnPress =
         IsLongPressingIn[curState] && (    // We *are* long pressing..
           !hasLongPressHandler ||          // But either has no long handler

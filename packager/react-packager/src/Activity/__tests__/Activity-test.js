@@ -1,13 +1,3 @@
-/**
- * Copyright (c) 2015-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- */
-'use strict';
-
 jest.autoMockOff();
 
 describe('Activity', function() {
@@ -18,7 +8,6 @@ describe('Activity', function() {
   beforeEach(function() {
     console.log = jest.genMockFn();
     Activity = require('../');
-    jest.runOnlyPendingTimers();
   });
 
   afterEach(function() {
@@ -69,15 +58,12 @@ describe('Activity', function() {
 
       expect(function() {
         Activity.endEvent(eid);
-      }).toThrow('event(3) has already ended!');
-
-      jest.runOnlyPendingTimers();
+      }).toThrow('event(1) has already ended!');
     });
   });
 
   describe('signal', function() {
     it('writes a SIGNAL event out to the console', function() {
-
       var EVENT_NAME = 'EVENT_NAME';
       var DATA = {someData: 42};
 

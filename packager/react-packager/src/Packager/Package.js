@@ -1,21 +1,12 @@
-/**
- * Copyright (c) 2015-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- */
 'use strict';
 
 var _ = require('underscore');
+var SourceMapGenerator = require('source-map').SourceMapGenerator;
 var base64VLQ = require('./base64-vlq');
-var UglifyJS = require('uglify-js');
 
 module.exports = Package;
 
 function Package(sourceMapUrl) {
-  this._finalized = false;
   this._modules = [];
   this._sourceMapUrl = sourceMapUrl;
 }
@@ -37,7 +28,6 @@ Package.prototype.addModule = function(
 };
 
 Package.prototype.finalize = function(options) {
-  options = options || {};
   if (options.runMainModule) {
     var runCode = ';require("' + this._mainModuleId + '");';
     this.addModule(
@@ -49,89 +39,17 @@ Package.prototype.finalize = function(options) {
 
   Object.freeze(this._modules);
   Object.seal(this._modules);
-  this._finalized = true;
 };
 
-Package.prototype._assertFinalized = function() {
-  if (!this._finalized) {
-    throw new Error('Package need to be finalized before getting any source');
-  }
-};
-
-Package.prototype._getSource = function() {
-  if (this._source == null) {
-    this._source = _.pluck(this._modules, 'transformedCode').join('\n');
-  }
-  return this._source;
-};
-
-Package.prototype._getInlineSourceMap = function() {
-  if (this._inlineSourceMap == null) {
-    var sourceMap = this.getSourceMap({excludeSource: true});
-    var encoded = new Buffer(JSON.stringify(sourceMap)).toString('base64');
-    this._inlineSourceMap = 'data:application/json;base64,' + encoded;
-  }
-  return this._inlineSourceMap;
-};
-
-Package.prototype.getSource = function(options) {
-  this._assertFinalized();
-
-  options = options || {};
-
-  if (options.minify) {
-    return this.getMinifiedSourceAndMap().code;
-  }
-
-  var source = this._getSource();
-  source += '\n\/\/@ sourceMappingURL=';
-
-  if (options.inlineSourceMap) {
-    source += this._getInlineSourceMap();
-  } else {
-    source += this._sourceMapUrl;
-  }
-
-  return source;
-};
-
-Package.prototype.getMinifiedSourceAndMap = function() {
-  this._assertFinalized();
-
-  var source = this._getSource();
-  try {
-    return UglifyJS.minify(source, {
-      fromString: true,
-      outSourceMap: 'bundle.js',
-      inSourceMap: this.getSourceMap(),
-    });
-  } catch(e) {
-    // Sometimes, when somebody is using a new syntax feature that we
-    // don't yet have transform for, the untransformed line is sent to
-    // uglify, and it chokes on it. This code tries to print the line
-    // and the module for easier debugging
-    var errorMessage = 'Error while minifying JS\n';
-    if (e.line) {
-      errorMessage += 'Transformed code line: "' +
-        source.split('\n')[e.line - 1] + '"\n';
-    }
-    if (e.pos) {
-      var fromIndex = source.lastIndexOf('__d(\'', e.pos);
-      if (fromIndex > -1) {
-        fromIndex += '__d(\''.length;
-        var toIndex = source.indexOf('\'', fromIndex);
-        errorMessage += 'Module name (best guess): ' +
-          source.substring(fromIndex, toIndex) + '\n';
-      }
-    }
-    errorMessage += e.toString();
-    throw new Error(errorMessage);
-  }
+Package.prototype.getSource = function() {
+  return this._source || (
+    this._source = _.pluck(this._modules, 'transformedCode').join('\n') + '\n' +
+    'RAW_SOURCE_MAP = ' + JSON.stringify(this.getSourceMap({excludeSource: true})) +
+    ';\n' + '\/\/@ sourceMappingURL=' + this._sourceMapUrl
+  );
 };
 
 Package.prototype.getSourceMap = function(options) {
-  this._assertFinalized();
-
   options = options || {};
   var mappings = this._getMappings();
   var map = {
@@ -145,6 +63,7 @@ Package.prototype.getSourceMap = function(options) {
   };
   return map;
 };
+
 
 Package.prototype._getMappings = function() {
   var modules = this._modules;
@@ -183,7 +102,7 @@ Package.prototype._getMappings = function() {
         mappings += ';';
       }
     }
-    if (i !== modules.length - 1) {
+    if (i != modules.length - 1) {
       mappings += ';';
     }
   }

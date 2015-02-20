@@ -1,20 +1,17 @@
-/**
- * Copyright (c) 2015-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- */
-'use strict';
-
-var Promise = require('bluebird');
+var Promise = require('q').Promise;
 var ModuleDescriptor = require('../ModuleDescriptor');
 
 var mdeps = require('module-deps');
 var path = require('path');
+var fs = require('fs');
 
-exports.getRuntimeCode = function() {};
+// var REQUIRE_RUNTIME = fs.readFileSync(
+//   path.join(__dirname, 'require.js')
+// ).toString();
+
+exports.getRuntimeCode = function() {
+  return REQUIRE_RUNTIME;
+};
 
 exports.wrapModule = function(id, source) {
   return Promise.resolve(
@@ -24,7 +21,7 @@ exports.wrapModule = function(id, source) {
 };
 
 exports.getDependencies = function(root, fileEntryPath) {
-  return new Promise(function(resolve) {
+  return new Promise(function(resolve, reject) {
     fileEntryPath = path.join(process.cwd(), root, fileEntryPath);
 
     var md = mdeps();

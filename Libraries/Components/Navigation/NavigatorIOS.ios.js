@@ -1,20 +1,14 @@
 /**
- * Copyright (c) 2015-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * Copyright 2004-present Facebook. All Rights Reserved.
  *
  * @providesModule NavigatorIOS
- * @flow
  */
 'use strict';
 
 var EventEmitter = require('EventEmitter');
 var React = require('React');
 var ReactIOSViewAttributes = require('ReactIOSViewAttributes');
-var RCTNavigatorManager = require('NativeModules').NavigatorManager;
+var { RKUIManager } = require('NativeModules');
 var StyleSheet = require('StyleSheet');
 var StaticContainer = require('StaticContainer.react');
 var View = require('View');
@@ -25,96 +19,13 @@ var invariant = require('invariant');
 var logError = require('logError');
 var merge = require('merge');
 
-var TRANSITIONER_REF = 'transitionerRef';
-
-var PropTypes = React.PropTypes;
-
-var __uid = 0;
-function getuid() {
-  return __uid++;
-}
-
-var RCTNavigator = createReactIOSNativeComponentClass({
-  validAttributes: merge(ReactIOSViewAttributes.UIView, {
-    requestedTopOfStack: true
-  }),
-  uiViewClassName: 'RCTNavigator',
-});
-
-var RCTNavigatorItem = createReactIOSNativeComponentClass({
-  validAttributes: {
-    // TODO: Remove or fix the attributes that are not fully functional.
-    //  NavigatorIOS does not use them all, because some are problematic
-    title: true,
-    barTintColor: true,
-    rightButtonTitle: true,
-    onNavRightButtonTap: true,
-    tintColor: true,
-    navigationBarHidden: true,
-    backButtonTitle: true,
-    titleTextColor: true,
-    style: true,
-  },
-  uiViewClassName: 'RCTNavItem',
-});
-
-var NavigatorTransitionerIOS = React.createClass({
-  requestSchedulingNavigation: function(cb) {
-    RCTNavigatorManager.requestSchedulingJavaScriptNavigation(
-      (this: any).getNodeHandle(),
-      logError,
-      cb
-    );
-  },
-
-  render: function() {
-    return (
-      <RCTNavigator {...this.props}/>
-    );
-  },
-});
-
-type Route = {
-  component: Function;
-  title: string;
-  passProps: Object;
-  backButtonTitle: string;
-  rightButtonTitle: string;
-  onRightButtonPress: Function;
-  wrapperStyle: any;
-};
-
-type State = {
-  idStack: Array<number>;
-  routeStack: Array<Route>;
-  requestedTopOfStack: number;
-  observedTopOfStack: number;
-  progress: number;
-  fromIndex: number;
-  toIndex: number;
-  makingNavigatorRequest: boolean;
-  updatingAllIndicesAtOrBeyond: number;
-}
-
-type Event = Object;
-
-/**
- * Think of `<NavigatorIOS>` as simply a component that renders an
- * `RCTNavigator`, and moves the `RCTNavigator`'s `requestedTopOfStack` pointer
- * forward and backward. The `RCTNavigator` interprets changes in
- * `requestedTopOfStack` to be pushes and pops of children that are rendered.
- * `<NavigatorIOS>` always ensures that whenever the `requestedTopOfStack`
- * pointer is moved, that we've also rendered enough children so that the
- * `RCTNavigator` can carry out the push/pop with those children.
- * `<NavigatorIOS>` also removes children that will no longer be needed
- * (after the pop of a child has been fully completed/animated out).
- */
-
 /**
  * NavigatorIOS wraps UIKit navigation and allows you to add back-swipe
  * functionality across your app.
  *
- * #### Routes
+ * See UIExplorerApp and NavigatorIOSExample for a full example
+ *
+ * ======================= NavigatorIOS Routes ================================
  * A route is an object used to describe each page in the navigator. The first
  * route is provided to NavigatorIOS as `initialRoute`:
  *
@@ -126,8 +37,7 @@ type Event = Object;
  *         component: MyView,
  *         title: 'My View Title',
  *         passProps: { myProp: 'foo' },
- *       }}
- *     />
+ *       }}/>
  *   );
  * },
  * ```
@@ -138,8 +48,7 @@ type Event = Object;
  *
  * See the initialRoute propType for a complete definition of a route.
  *
- * #### Navigator
- *
+ * ====================== NavigatorIOS Navigator ==============================
  * A `navigator` is an object of navigation functions that a view can call. It
  * is passed as a prop to any component rendered by NavigatorIOS.
  *
@@ -156,7 +65,6 @@ type Event = Object;
  * ```
  *
  * A navigation object contains the following functions:
- *
  *  - `push(route)` - Navigate forward to a new route
  *  - `pop()` - Go back one page
  *  - `popN(n)` - Go back N pages at once. When N=1, behavior matches `pop()`
@@ -178,13 +86,72 @@ type Event = Object;
  *   },
  *   render: () => (
  *     <NavigatorIOS
- *       ref="nav"
- *       initialRoute={...}
- *     />
+ *       ref='nav',
+ *       initialRoute={...}/>
  *   ),
  * });
  * ```
  *
+ */
+var TRANSITIONER_REF = 'transitionerRef';
+
+var PropTypes = React.PropTypes;
+
+var __uid = 0;
+function getuid() {
+  return __uid++;
+}
+
+var RKNavigator = createReactIOSNativeComponentClass({
+  validAttributes: merge(ReactIOSViewAttributes.UIView, {
+    requestedTopOfStack: true
+  }),
+  uiViewClassName: 'RCTNavigator',
+});
+
+var RKNavigatorItem = createReactIOSNativeComponentClass({
+  validAttributes: {
+    // TODO: Remove or fix the attributes that are not fully functional.
+    //  NavigatorIOS does not use them all, because some are problematic
+    title: true,
+    barTintColor: true,
+    rightButtonTitle: true,
+    onNavRightButtonTap: true,
+    tintColor: true,
+    backButtonTitle: true,
+    titleTextColor: true,
+    style: true,
+  },
+  uiViewClassName: 'RCTNavItem',
+});
+
+var NavigatorTransitionerIOS = React.createClass({
+  requestSchedulingNavigation: function(cb) {
+    RKUIManager.requestSchedulingJavaScriptNavigation(
+      this.getNodeHandle(),
+      logError,
+      cb
+    );
+  },
+
+  render: function() {
+    return (
+      <RKNavigator {...this.props}/>
+    );
+  },
+});
+
+
+/**
+ * Think of `<NavigatorIOS>` as simply a component that renders an
+ * `RKNavigator`, and moves the `RKNavigator`'s `requestedTopOfStack` pointer
+ * forward and backward. The `RKNavigator` interprets changes in
+ * `requestedTopOfStack` to be pushes and pops of children that are rendered.
+ * `<NavigatorIOS>` always ensures that whenever the `requestedTopOfStack`
+ * pointer is moved, that we've also rendered enough children so that the
+ * `RKNavigator` can carry out the push/pop with those children.
+ * `<NavigatorIOS>` also removes children that will no longer be needed
+ * (after the pop of a child has been fully completed/animated out).
  */
 var NavigatorIOS = React.createClass({
 
@@ -232,20 +199,15 @@ var NavigatorIOS = React.createClass({
       /**
        * Styles for the navigation item containing the component
        */
-      wrapperStyle: View.propTypes.style,
+      wrapperStyle: View.stylePropType,
 
     }).isRequired,
-
-    /**
-     * A Boolean value that indicates whether the navigation bar is hidden
-     */
-    navigationBarHidden: PropTypes.bool,
 
     /**
      * The default wrapper style for components in the navigator.
      * A common use case is to set the backgroundColor for every page
      */
-    itemWrapperStyle: View.propTypes.style,
+    itemWrapperStyle: View.stylePropType,
 
     /**
      * The color used for buttons in the navigation bar
@@ -253,8 +215,6 @@ var NavigatorIOS = React.createClass({
     tintColor: PropTypes.string,
 
   },
-
-  navigator: (undefined: ?Object),
 
   componentWillMount: function() {
     // Precompute a pack of callbacks that's frequently generated and passed to
@@ -272,7 +232,7 @@ var NavigatorIOS = React.createClass({
     };
   },
 
-  getInitialState: function(): State {
+  getInitialState: function() {
     return {
       idStack: [getuid()],
       routeStack: [this.props.initialRoute],
@@ -298,9 +258,7 @@ var NavigatorIOS = React.createClass({
     };
   },
 
-  _toFocusOnNavigationComplete: (undefined: any),
-
-  _handleFocusRequest: function(item: any) {
+  _handleFocusRequest: function(item) {
     if (this.state.makingNavigatorRequest) {
       this._toFocusOnNavigationComplete = item;
     } else {
@@ -308,22 +266,14 @@ var NavigatorIOS = React.createClass({
     }
   },
 
-  _focusEmitter: (undefined: ?EventEmitter),
-
-  _getFocusEmitter: function(): EventEmitter {
-    // Flow not yet tracking assignments to instance fields.
-    var focusEmitter = this._focusEmitter;
-    if (!focusEmitter) {
-      focusEmitter = new EventEmitter();
-      this._focusEmitter = focusEmitter;
+  _getFocusEmitter: function() {
+    if (!this._focusEmitter) {
+      this._focusEmitter = new EventEmitter();
     }
-    return focusEmitter;
+    return this._focusEmitter;
   },
 
-  getChildContext: function(): {
-    onFocusRequested: Function;
-    focusEmitter: EventEmitter;
-  } {
+  getChildContext: function() {
     return {
       onFocusRequested: this._handleFocusRequest,
       focusEmitter: this._getFocusEmitter(),
@@ -335,13 +285,13 @@ var NavigatorIOS = React.createClass({
     focusEmitter: React.PropTypes.instanceOf(EventEmitter),
   },
 
-  _tryLockNavigator: function(cb: () => void) {
+  _tryLockNavigator: function(cb) {
     this.refs[TRANSITIONER_REF].requestSchedulingNavigation(
       (acquiredLock) => acquiredLock && cb()
     );
   },
 
-  _handleNavigatorStackChanged: function(e: Event) {
+  _handleNavigatorStackChanged: function(e) {
     var newObservedTopOfStack = e.nativeEvent.stackLength - 1;
     invariant(
       newObservedTopOfStack <= this.state.requestedTopOfStack,
@@ -394,7 +344,7 @@ var NavigatorIOS = React.createClass({
     });
   },
 
-  push: function(route: Route) {
+  push: function(route) {
     invariant(!!route, 'Must supply route to push');
     // Make sure all previous requests are caught up first. Otherwise reject.
     if (this.state.requestedTopOfStack === this.state.observedTopOfStack) {
@@ -414,7 +364,7 @@ var NavigatorIOS = React.createClass({
     }
   },
 
-  popN: function(n: number) {
+  popN: function(n) {
     if (n === 0) {
       return;
     }
@@ -448,7 +398,7 @@ var NavigatorIOS = React.createClass({
    * `index` specifies the route in the stack that should be replaced.
    * If it's negative, it counts from the back.
    */
-  replaceAtIndex: function(route: Route, index: number) {
+  replaceAtIndex: function(route, index) {
     invariant(!!route, 'Must supply route to replace');
     if (index < 0) {
       index += this.state.routeStack.length;
@@ -476,14 +426,14 @@ var NavigatorIOS = React.createClass({
   /**
    * Replaces the top of the navigation stack.
    */
-  replace: function(route: Route) {
+  replace: function(route) {
     this.replaceAtIndex(route, -1);
   },
 
   /**
    * Replace the current route's parent.
    */
-  replacePrevious: function(route: Route) {
+  replacePrevious: function(route) {
     this.replaceAtIndex(route, -2);
   },
 
@@ -491,7 +441,7 @@ var NavigatorIOS = React.createClass({
     this.popToRoute(this.state.routeStack[0]);
   },
 
-  popToRoute: function(route: Route) {
+  popToRoute: function(route) {
     var indexOfRoute = this.state.routeStack.indexOf(route);
     invariant(
       indexOfRoute !== -1,
@@ -501,7 +451,7 @@ var NavigatorIOS = React.createClass({
     this.popN(numToPop);
   },
 
-  replacePreviousAndPop: function(route: Route) {
+  replacePreviousAndPop: function(route) {
     // Make sure all previous requests are caught up first. Otherwise reject.
     if (this.state.requestedTopOfStack !== this.state.observedTopOfStack) {
       return;
@@ -518,7 +468,7 @@ var NavigatorIOS = React.createClass({
     });
   },
 
-  resetTo: function(route: Route) {
+  resetTo: function(route) {
     invariant(!!route, 'Must supply route to push');
     // Make sure all previous requests are caught up first. Otherwise reject.
     if (this.state.requestedTopOfStack !== this.state.observedTopOfStack) {
@@ -528,7 +478,7 @@ var NavigatorIOS = React.createClass({
     this.popToRoute(route);
   },
 
-  handleNavigationComplete: function(e: Event) {
+  handleNavigationComplete: function(e) {
     if (this._toFocusOnNavigationComplete) {
       this._getFocusEmitter().emit('focus', this._toFocusOnNavigationComplete);
       this._toFocusOnNavigationComplete = null;
@@ -536,14 +486,14 @@ var NavigatorIOS = React.createClass({
     this._handleNavigatorStackChanged(e);
   },
 
-  _routeToStackItem: function(route: Route, i: number) {
+  _routeToStackItem: function(route, i) {
     var Component = route.component;
     var shouldUpdateChild = this.state.updatingAllIndicesAtOrBeyond !== null &&
       this.state.updatingAllIndicesAtOrBeyond >= i;
 
     return (
       <StaticContainer key={'nav' + i} shouldUpdate={shouldUpdateChild}>
-        <RCTNavigatorItem
+        <RKNavigatorItem
           title={route.title}
           style={[
             styles.stackItem,
@@ -553,14 +503,13 @@ var NavigatorIOS = React.createClass({
           backButtonTitle={route.backButtonTitle}
           rightButtonTitle={route.rightButtonTitle}
           onNavRightButtonTap={route.onRightButtonPress}
-          navigationBarHidden={this.props.navigationBarHidden}
           tintColor={this.props.tintColor}>
           <Component
             navigator={this.navigator}
             route={route}
             {...route.passProps}
           />
-        </RCTNavigatorItem>
+        </RKNavigatorItem>
       </StaticContainer>
     );
   },

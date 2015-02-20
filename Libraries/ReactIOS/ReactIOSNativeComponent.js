@@ -1,23 +1,18 @@
 /**
- * Copyright (c) 2015-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * Copyright 2004-present Facebook. All Rights Reserved.
  *
  * @providesModule ReactIOSNativeComponent
- * @flow
  */
 'use strict';
 
 var NativeMethodsMixin = require('NativeMethodsMixin');
+var ReactComponent = require('ReactComponent');
 var ReactIOSComponentMixin = require('ReactIOSComponentMixin');
 var ReactIOSEventEmitter = require('ReactIOSEventEmitter');
 var ReactIOSStyleAttributes = require('ReactIOSStyleAttributes');
 var ReactIOSTagHandles = require('ReactIOSTagHandles');
 var ReactMultiChild = require('ReactMultiChild');
-var RCTUIManager = require('NativeModules').UIManager;
+var RKUIManager = require('NativeModulesDeprecated').RKUIManager;
 
 var styleDiffer = require('styleDiffer');
 var deepFreezeAndThrowOnMutationInDev = require('deepFreezeAndThrowOnMutationInDev');
@@ -29,21 +24,16 @@ var registrationNames = ReactIOSEventEmitter.registrationNames;
 var putListener = ReactIOSEventEmitter.putListener;
 var deleteAllListeners = ReactIOSEventEmitter.deleteAllListeners;
 
-type ReactIOSNativeComponentViewConfig = {
-  validAttributes: Object;
-  uiViewClassName: string;
-}
-
 /**
  * @constructor ReactIOSNativeComponent
  * @extends ReactComponent
  * @extends ReactMultiChild
  * @param {!object} UIKit View Configuration.
  */
-var ReactIOSNativeComponent = function(
-  viewConfig: ReactIOSNativeComponentViewConfig
-) {
+var ReactIOSNativeComponent = function(viewConfig) {
   this.viewConfig = viewConfig;
+  this.props = null;
+  this.previousFlattenedStyle = null;
 };
 
 /**
@@ -75,19 +65,10 @@ cachedIndexArray._cache = {};
  * which is a `viewID` ... see the return value for `mountComponent` !
  */
 ReactIOSNativeComponent.Mixin = {
-  getPublicInstance: function() {
-    // TODO: This should probably use a composite wrapper
-    return this;
-  },
-
-  construct: function(element) {
-    this._currentElement = element;
-  },
-
   unmountComponent: function() {
     deleteAllListeners(this._rootNodeID);
+    ReactComponent.Mixin.unmountComponent.call(this);
     this.unmountChildren();
-    this._rootNodeID = null;
   },
 
   /**
@@ -98,8 +79,8 @@ ReactIOSNativeComponent.Mixin = {
    * a child of a container can confidently record that in
    * `ReactIOSTagHandles`.
    */
-  initializeChildren: function(children, containerTag, transaction, context) {
-    var mountImages = this.mountChildren(children, transaction, context);
+  initializeChildren: function(children, containerTag, transaction) {
+    var mountImages = this.mountChildren(children, transaction);
     // In a well balanced tree, half of the nodes are in the bottom row and have
     // no children - let's avoid calling out to the native bridge for a large
     // portion of the children.
@@ -122,7 +103,7 @@ ReactIOSNativeComponent.Mixin = {
         );
         createdTags[i] = mountImage.tag;
       }
-      RCTUIManager
+      RKUIManager
         .manageChildren(containerTag, null, null, createdTags, indexes, null);
     }
   },
@@ -177,23 +158,26 @@ ReactIOSNativeComponent.Mixin = {
   /**
    * Updates the component's currently mounted representation.
    *
-   * @param {object} nextElement
    * @param {ReactReconcileTransaction} transaction
-   * @param {object} context
+   * @param {object} prevDescriptor
    * @internal
    */
-  receiveComponent: function(nextElement, transaction, context) {
-    var prevElement = this._currentElement;
-    this._currentElement = nextElement;
+  updateComponent: function(transaction, prevDescriptor) {
+    ReactComponent.Mixin.updateComponent.call(
+      this,
+      transaction,
+      prevDescriptor
+    );
+    var nextDescriptor = this._currentElement;
 
     var updatePayload = this.computeUpdatedProperties(
-      prevElement.props,
-      nextElement.props,
+      prevDescriptor.props,
+      nextDescriptor.props,
       this.viewConfig.validAttributes
     );
 
     if (updatePayload) {
-      RCTUIManager.updateView(
+      RKUIManager.updateView(
         ReactIOSTagHandles.mostRecentMountedNodeHandleForRootNodeID(this._rootNodeID),
         this.viewConfig.uiViewClassName,
         updatePayload
@@ -201,10 +185,10 @@ ReactIOSNativeComponent.Mixin = {
     }
 
     this._reconcileListenersUponUpdate(
-      prevElement.props,
-      nextElement.props
+      prevDescriptor.props,
+      nextDescriptor.props
     );
-    this.updateChildren(nextElement.props.children, transaction, context);
+    this.updateChildren(this.props.children, transaction);
   },
 
   /**
@@ -239,26 +223,25 @@ ReactIOSNativeComponent.Mixin = {
    * @param {Transaction} transaction For creating/updating.
    * @return {string} Unique iOS view tag.
    */
-  mountComponent: function(rootID, transaction, context) {
-    this._rootNodeID = rootID;
-
+  mountComponent: function(rootID, transaction, mountDepth) {
+    ReactComponent.Mixin.mountComponent.call(
+      this,
+      rootID,
+      transaction,
+      mountDepth
+    );
     var tag = ReactIOSTagHandles.allocateTag();
 
     this.previousFlattenedStyle = {};
     var updatePayload = this.computeUpdatedProperties(
       {}, // previous props
-      this._currentElement.props, // next props
+      this.props, // next props
       this.viewConfig.validAttributes
     );
-    RCTUIManager.createView(tag, this.viewConfig.uiViewClassName, updatePayload);
+    RKUIManager.createView(tag, this.viewConfig.uiViewClassName, updatePayload);
 
-    this._registerListenersUponCreation(this._currentElement.props);
-    this.initializeChildren(
-      this._currentElement.props.children,
-      tag,
-      transaction,
-      context
-    );
+    this._registerListenersUponCreation(this.props);
+    this.initializeChildren(this.props.children, tag, transaction);
     return {
       rootNodeID: rootID,
       tag: tag
@@ -272,6 +255,7 @@ ReactIOSNativeComponent.Mixin = {
  */
 Object.assign(
   ReactIOSNativeComponent.prototype,
+  ReactComponent.Mixin,
   ReactMultiChild.Mixin,
   ReactIOSNativeComponent.Mixin,
   NativeMethodsMixin,

@@ -1,13 +1,8 @@
 /**
- * Copyright (c) 2015-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * Copyright 2004-present Facebook. All Rights Reserved.
  *
  * @providesModule ReactIOSEventEmitter
- * @flow
+ * @typechecks static-only
  */
 
 "use strict";
@@ -57,27 +52,21 @@ var touchSubsequence = function(touches, indices) {
  * @param {Array<number>} indices Indices to remove from `touches`.
  * @return {Array<Touch>} Subsequence of removed touch objects.
  */
-var removeTouchesAtIndices = function(
-  touches: Array<Object>,
-  indices: Array<number>
-): Array<Object> {
+var removeTouchesAtIndices = function(touches, indices) {
   var rippedOut = [];
-  // use an unsafe downcast to alias to nullable elements,
-  // so we can delete and then compact.
-  var temp: Array<?Object> = (touches: Array<any>);
   for (var i = 0; i < indices.length; i++) {
     var index = indices[i];
     rippedOut.push(touches[index]);
-    temp[index] = null;
+    touches[index] = null;
   }
   var fillAt = 0;
-  for (var j = 0; j < temp.length; j++) {
-    var cur = temp[j];
+  for (var j = 0; j < touches.length; j++) {
+    var cur = touches[j];
     if (cur !== null) {
-      temp[fillAt++] = cur;
+      touches[fillAt++] = cur;
     }
   }
-  temp.length = fillAt;
+  touches.length = fillAt;
   return rippedOut;
 };
 
@@ -112,11 +101,7 @@ var ReactIOSEventEmitter = merge(ReactEventEmitterMixin, {
    * @param {TopLevelType} topLevelType Top level type of event.
    * @param {object} nativeEventParam Object passed from native.
    */
-  _receiveRootNodeIDEvent: function(
-    rootNodeID: ?string,
-    topLevelType: string,
-    nativeEventParam: Object
-  ) {
+  _receiveRootNodeIDEvent: function(rootNodeID, topLevelType, nativeEventParam) {
     var nativeEvent = nativeEventParam || EMPTY_NATIVE_EVENT;
     ReactIOSEventEmitter.handleTopLevel(
       topLevelType,
@@ -133,11 +118,7 @@ var ReactIOSEventEmitter = merge(ReactEventEmitterMixin, {
    * @param {TopLevelType} topLevelType Top level type of event.
    * @param {object} nativeEventParam Object passed from native.
    */
-  receiveEvent: function(
-    tag: number,
-    topLevelType: string,
-    nativeEventParam: Object
-  ) {
+  receiveEvent: function(tag, topLevelType, nativeEventParam) {
     var rootNodeID = ReactIOSTagHandles.tagToRootNodeID[tag];
     ReactIOSEventEmitter._receiveRootNodeIDEvent(
       rootNodeID,
@@ -170,11 +151,7 @@ var ReactIOSEventEmitter = merge(ReactEventEmitterMixin, {
    * Web desktop polyfills only need to construct a fake touch event with
    * identifier 0, also abandoning traditional click handlers.
    */
-  receiveTouches: function(
-    eventTopLevelType: string,
-    touches: Array<Object>,
-    changedIndices: Array<number>
-  ) {
+  receiveTouches: function(eventTopLevelType, touches, changedIndices) {
     var changedTouches =
       eventTopLevelType === topLevelTypes.topTouchEnd ||
       eventTopLevelType === topLevelTypes.topTouchCancel ?

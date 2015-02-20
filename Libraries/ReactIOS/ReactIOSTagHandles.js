@@ -1,13 +1,7 @@
 /**
- * Copyright (c) 2015-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * Copyright 2004-present Facebook. All Rights Reserved.
  *
  * @providesModule ReactIOSTagHandles
- * @flow
  */
 'use strict';
 
@@ -32,7 +26,7 @@ var ReactIOSTagHandles = {
   tagsStartAt: INITIAL_TAG_COUNT,
   tagCount: INITIAL_TAG_COUNT,
 
-  allocateTag: function(): number {
+  allocateTag: function() {
     // Skip over root IDs as those are reserved for native
     while (this.reactTagIsNativeTopRootID(ReactIOSTagHandles.tagCount)) {
       ReactIOSTagHandles.tagCount++;
@@ -51,18 +45,13 @@ var ReactIOSTagHandles = {
    * `unmountComponent` isn't the correct time because that doesn't imply that
    * the native node has been natively unmounted.
    */
-  associateRootNodeIDWithMountedNodeHandle: function(
-    rootNodeID: ?string,
-    tag: ?number
-  ) {
+  associateRootNodeIDWithMountedNodeHandle: function(rootNodeID, tag) {
     warning(rootNodeID && tag, 'Root node or tag is null when associating');
-    if (rootNodeID && tag) {
-      ReactIOSTagHandles.tagToRootNodeID[tag] = rootNodeID;
-      ReactIOSTagHandles.rootNodeIDToTag[rootNodeID] = tag;
-    }
+    ReactIOSTagHandles.tagToRootNodeID[tag] = rootNodeID;
+    ReactIOSTagHandles.rootNodeIDToTag[rootNodeID] = tag;
   },
 
-  allocateRootNodeIDForTag: function(tag: number): string {
+  allocateRootNodeIDForTag: function(tag) {
     invariant(
       this.reactTagIsNativeTopRootID(tag),
       'Expect a native root tag, instead got ', tag
@@ -70,7 +59,7 @@ var ReactIOSTagHandles = {
     return '.r[' + tag + ']{TOP_LEVEL}';
   },
 
-  reactTagIsNativeTopRootID: function(reactTag: number): bool {
+  reactTagIsNativeTopRootID: function(reactTag) {
     // We reserve all tags that are 1 mod 10 for native root views
     return reactTag % 10 === 1;
   },
@@ -87,15 +76,13 @@ var ReactIOSTagHandles = {
    * @return {number} Tag ID of native view for most recent mounting of
    * `rootNodeID`.
    */
-  mostRecentMountedNodeHandleForRootNodeID: function(
-    rootNodeID: string
-  ): number {
+  mostRecentMountedNodeHandleForRootNodeID: function(rootNodeID) {
     return ReactIOSTagHandles.rootNodeIDToTag[rootNodeID];
   },
 
-  tagToRootNodeID: ([] : Array<string>),
+  tagToRootNodeID: [],
 
-  rootNodeIDToTag: ({} : {[key: string]: number})
+  rootNodeIDToTag: {}
 };
 
 module.exports = ReactIOSTagHandles;

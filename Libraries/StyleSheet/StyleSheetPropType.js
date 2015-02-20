@@ -1,24 +1,16 @@
 /**
- * Copyright (c) 2015-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * Copyright 2004-present Facebook. All Rights Reserved.
  *
  * @providesModule StyleSheetPropType
- * @flow
  */
 'use strict';
 
 var createStrictShapeTypeChecker = require('createStrictShapeTypeChecker');
 var flattenStyle = require('flattenStyle');
 
-function StyleSheetPropType(
-  shape: {[key: string]: ReactPropsCheckType}
-): ReactPropsCheckType {
+function StyleSheetPropType(shape) {
   var shapePropType = createStrictShapeTypeChecker(shape);
-  return function(props, propName, componentName, location?) {
+  return function(props, propName, componentName, location) {
     var newProps = props;
     if (props[propName]) {
       // Just make a dummy prop object with only the flattened style

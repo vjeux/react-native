@@ -1,13 +1,7 @@
 /**
- * Copyright (c) 2015-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * Copyright 2004-present Facebook. All Rights Reserved.
  *
  * @providesModule RCTLog
- * @flow
  */
  /* globals nativeLoggingHook */
 'use strict';
@@ -32,7 +26,7 @@ class RCTLog {
       logFn,
       'Level "' + level + '" not one of ' + Object.keys(levelsMap)
     );
-    if (typeof global.nativeLoggingHook === 'undefined') {
+    if (typeof nativeLoggingHook === 'undefined') {
       // We already printed in xcode, so only log here if using a js debugger
       console[logFn].apply(console, args);
     }

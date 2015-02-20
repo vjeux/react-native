@@ -1,13 +1,7 @@
 /**
- * Copyright (c) 2015-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * Copyright 2004-present Facebook. All Rights Reserved.
  *
  * @providesModule TextInputState
- * @flow
  *
  * This class is responsible for coordinating the "focused"
  * state for TextInputs. All calls relating to the keyboard
@@ -15,19 +9,19 @@
  */
 'use strict';
 
-var RCTUIManager = require('NativeModules').UIManager;
+var RKUIManager = require('NativeModulesDeprecated').RKUIManager;
 
 var TextInputState = {
    /**
    * Internal state
    */
-  _currentlyFocusedID: (null: ?string),
+  _currentlyFocusedID: null,
 
   /**
    * Returns the ID of the currently focused text field, if one exists
    * If no text field is focused it returns null
    */
-  currentlyFocusedField: function(): ?string {
+  currentlyFocusedField: function() {
     return this._currentlyFocusedID;
   },
 
@@ -36,10 +30,10 @@ var TextInputState = {
    * Focuses the specified text field
    * noop if the text field was already focused
    */
-  focusTextInput: function(textFieldID: string) {
-    if (this._currentlyFocusedID !== textFieldID && textFieldID !== null) {
+  focusTextInput: function(textFieldID) {
+    if (this._currentlyFocusedID != textFieldID && textFieldID != null) {
       this._currentlyFocusedID = textFieldID;
-      RCTUIManager.focus(textFieldID);
+      RKUIManager.focus(textFieldID);
     }
   },
 
@@ -48,10 +42,10 @@ var TextInputState = {
    * Unfocuses the specified text field
    * noop if it wasn't focused
    */
-  blurTextInput: function(textFieldID: string) {
-    if (this._currentlyFocusedID === textFieldID && textFieldID !== null) {
+  blurTextInput: function(textFieldID) {
+    if (this._currentlyFocusedID == textFieldID && textFieldID != null) {
       this._currentlyFocusedID = null;
-      RCTUIManager.blur(textFieldID);
+      RKUIManager.blur(textFieldID);
     }
   }
 };

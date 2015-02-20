@@ -1,16 +1,7 @@
 /**
- * The examples provided by Facebook are for non-commercial testing and
- * evaluation purposes only.
+ * Copyright 2004-present Facebook. All Rights Reserved.
  *
- * Facebook reserves all rights not expressly granted.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
- * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NON INFRINGEMENT. IN NO EVENT SHALL
- * FACEBOOK BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
- * AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
- * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- *
+ * @providesModule ListViewPagingExample
  * @flow
  */
 'use strict';
@@ -20,6 +11,7 @@ var {
   Image,
   LayoutAnimation,
   ListView,
+  ListViewDataSource,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -80,7 +72,7 @@ var ListViewPagingExample = React.createClass({
       return dataBlob[rowID];
     };
 
-    var dataSource = new ListView.DataSource({
+    var dataSource = new ListViewDataSource({
       getRowData: getRowData,
       getSectionHeaderData: getSectionData,
       rowHasChanged: (row1, row2) => row1 !== row2,
@@ -108,11 +100,11 @@ var ListViewPagingExample = React.createClass({
     };
   },
 
-  renderRow: function(rowData: string, sectionID: string, rowID: string): ReactElement {
+  renderRow: function(rowData, sectionID, rowID) {
     return (<Thumb text={rowData}/>);
   },
 
-  renderSectionHeader: function(sectionData: string, sectionID: string) {
+  renderSectionHeader: function(sectionData, sectionID) {
     return (
       <View style={styles.section}>
         <Text style={styles.text}>
@@ -225,9 +217,9 @@ var styles = StyleSheet.create({
 var animations = {
   layout: {
     spring: {
-      duration: 750,
+      duration: 0.75,
       create: {
-        duration: 300,
+        duration: 0.3,
         type: LayoutAnimation.Types.easeInEaseOut,
         property: LayoutAnimation.Properties.opacity,
       },
@@ -237,13 +229,13 @@ var animations = {
       },
     },
     easeInEaseOut: {
-      duration: 300,
+      duration: 0.3,
       create: {
         type: LayoutAnimation.Types.easeInEaseOut,
         property: LayoutAnimation.Properties.scaleXY,
       },
       update: {
-        delay: 100,
+        delay: 0.1,
         type: LayoutAnimation.Types.easeInEaseOut,
       },
     },

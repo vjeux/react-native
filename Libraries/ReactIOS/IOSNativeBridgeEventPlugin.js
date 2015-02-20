@@ -1,28 +1,22 @@
 /**
- * Copyright (c) 2015-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * Copyright 2004-present Facebook. All Rights Reserved.
  *
  * @providesModule IOSNativeBridgeEventPlugin
- * @flow
  */
 
 "use strict";
 
 var EventPropagators = require('EventPropagators');
-var NativeModules = require('NativeModules');
+var NativeModulesDeprecated = require('NativeModulesDeprecated');
 var SyntheticEvent = require('SyntheticEvent');
 
 var merge = require('merge');
 var warning = require('warning');
 
-var RCTUIManager = NativeModules.UIManager;
+var RKUIManager = NativeModulesDeprecated.RKUIManager;
 
-var customBubblingEventTypes = RCTUIManager.customBubblingEventTypes;
-var customDirectEventTypes = RCTUIManager.customDirectEventTypes;
+var customBubblingEventTypes = RKUIManager.customBubblingEventTypes;
+var customDirectEventTypes = RKUIManager.customDirectEventTypes;
 
 var allTypesByEventName = {};
 
@@ -52,11 +46,10 @@ var IOSNativeBridgeEventPlugin = {
    * @see {EventPluginHub.extractEvents}
    */
   extractEvents: function(
-    topLevelType: string,
-    topLevelTarget: EventTarget,
-    topLevelTargetID: string,
-    nativeEvent: Event
-  ): ?Object {
+      topLevelType,
+      topLevelTarget,
+      topLevelTargetID,
+      nativeEvent) {
     var bubbleDispatchConfig = customBubblingEventTypes[topLevelType];
     var directDispatchConfig = customDirectEventTypes[topLevelType];
     var event = SyntheticEvent.getPooled(

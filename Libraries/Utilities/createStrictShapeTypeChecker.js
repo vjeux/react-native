@@ -1,13 +1,7 @@
 /**
- * Copyright (c) 2015-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * Copyright 2004-present Facebook. All Rights Reserved.
  *
  * @providesModule createStrictShapeTypeChecker
- * @flow
  */
 'use strict';
 
@@ -16,10 +10,8 @@ var ReactPropTypeLocationNames = require('ReactPropTypeLocationNames');
 var invariant = require('invariant');
 var merge = require('merge');
 
-function createStrictShapeTypeChecker(
-  shapeTypes: {[key: string]: ReactPropsCheckType}
-): ReactPropsChainableTypeChecker {
-  function checkType(isRequired, props, propName, componentName, location?) {
+function createStrictShapeTypeChecker(shapeTypes) {
+  function checkType(isRequired, props, propName, componentName, location) {
     if (!props[propName]) {
       if (isRequired) {
         invariant(
@@ -32,8 +24,7 @@ function createStrictShapeTypeChecker(
     }
     var propValue = props[propName];
     var propType = typeof propValue;
-    var locationName =
-      location && ReactPropTypeLocationNames[location] || '(unknown)';
+    var locationName = ReactPropTypeLocationNames[location];
     if (propType !== 'object') {
       invariant(
         false,
@@ -61,17 +52,11 @@ function createStrictShapeTypeChecker(
           error.message +
             `\nBad object: ` + JSON.stringify(props[propName], null, '  ')
         );
+        return error;
       }
     }
   }
-  function chainedCheckType(
-    props: {[key: string]: any},
-    propName: string,
-    componentName: string,
-    location?: string
-  ): ?Error {
-    return checkType(false, props, propName, componentName, location);
-  }
+  var chainedCheckType = checkType.bind(null, false);
   chainedCheckType.isRequired = checkType.bind(null, true);
   return chainedCheckType;
 }

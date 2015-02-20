@@ -1,30 +1,12 @@
 /**
- * Copyright (c) 2015-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * Copyright 2004-present Facebook. All Rights Reserved.
  *
  * @providesModule queryLayoutByID
- * @flow
  */
 'use strict';
 
 var ReactIOSTagHandles = require('ReactIOSTagHandles');
-var RCTUIManager = require('NativeModules').UIManager;
-
-type OnSuccessCallback = (
-  left: number,
-  top: number,
-  width: number,
-  height: number,
-  pageX: number,
-  pageY: number
-) => void
-
-// I don't know what type error is...
-type OnErrorCallback = (error: any) => void
+var RKUIManager = require('NativeModulesDeprecated').RKUIManager;
 
 /**
  * Queries the layout of a view. The layout does not reflect the element as
@@ -45,13 +27,9 @@ type OnErrorCallback = (error: any) => void
  * @param {function} onError `func(error)`
  * @param {function} onSuccess `func(left, top, width, height, pageX, pageY)`
  */
-var queryLayoutByID = function(
-  rootNodeID: string,
-  onError: OnErrorCallback,
-  onSuccess: OnSuccessCallback
-): void {
+var queryLayoutByID = function(rootNodeID, onError, onSuccess) {
   // Native bridge doesn't *yet* surface errors.
-  RCTUIManager.measure(
+  RKUIManager.measure(
     ReactIOSTagHandles.rootNodeIDToTag[rootNodeID],
     onSuccess
   );

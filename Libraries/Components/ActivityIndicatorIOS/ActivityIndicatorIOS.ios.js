@@ -1,18 +1,12 @@
 /**
- * Copyright (c) 2015-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * Copyright 2004-present Facebook. All Rights Reserved.
  *
  * @providesModule ActivityIndicatorIOS
- * @flow
  */
 'use strict';
 
 var NativeMethodsMixin = require('NativeMethodsMixin');
-var NativeModules = require('NativeModules');
+var NativeModulesDeprecated = require('NativeModulesDeprecated');
 var PropTypes = require('ReactPropTypes');
 var React = require('React');
 var ReactIOSViewAttributes = require('ReactIOSViewAttributes');
@@ -21,6 +15,7 @@ var View = require('View');
 
 var createReactIOSNativeComponentClass = require('createReactIOSNativeComponentClass');
 var keyMirror = require('keyMirror');
+var keyOf = require('keyOf');
 var merge = require('merge');
 
 var SpinnerSize = keyMirror({
@@ -29,12 +24,6 @@ var SpinnerSize = keyMirror({
 });
 
 var GRAY = '#999999';
-
-type DefaultProps = {
-  animating: boolean;
-  size: 'small' | 'large';
-  color: string;
-};
 
 var ActivityIndicatorIOS = React.createClass({
   mixins: [NativeMethodsMixin],
@@ -48,17 +37,15 @@ var ActivityIndicatorIOS = React.createClass({
      * The foreground color of the spinner (default is gray).
      */
     color: PropTypes.string,
-
     /**
-     * Size of the indicator. Small has a height of 20, large has a height of 36.
+     * The size of the spinner, must be one of:
+     * - ActivityIndicatorIOS.size.large
+     * - ActivityIndicatorIOS.size.small (default)
      */
-    size: PropTypes.oneOf([
-      'small',
-      'large',
-    ]),
+    size: PropTypes.oneOf([SpinnerSize.large, SpinnerSize.small]),
   },
 
-  getDefaultProps: function(): DefaultProps {
+  getDefaultProps: function() {
     return {
       animating: true,
       size: SpinnerSize.small,
@@ -66,11 +53,15 @@ var ActivityIndicatorIOS = React.createClass({
     };
   },
 
+  statics: {
+    size: SpinnerSize,
+  },
+
   render: function() {
     var style = styles.sizeSmall;
-    var NativeConstants = NativeModules.UIManager.UIActivityIndicatorView.Constants;
+    var NativeConstants = NativeModulesDeprecated.RKUIManager.UIActivityIndicatorView.Constants;
     var activityIndicatorViewStyle = NativeConstants.StyleWhite;
-    if (this.props.size === 'large') {
+    if (this.props.size == SpinnerSize.large) {
       style = styles.sizeLarge;
       activityIndicatorViewStyle = NativeConstants.StyleWhiteLarge;
     }

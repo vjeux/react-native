@@ -1,14 +1,10 @@
-/**
- * Copyright (c) 2015-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- */
 'use strict';
 
-jest.autoMockOff();
+jest
+  .dontMock('underscore')
+  .dontMock('../base64-vlq')
+  .dontMock('source-map')
+  .dontMock('../Package');
 
 var SourceMapGenerator = require('source-map').SourceMapGenerator;
 
@@ -32,7 +28,8 @@ describe('Package', function() {
       expect(ppackage.getSource()).toBe([
         'transformed foo;',
         'transformed bar;',
-        '\/\/@ sourceMappingURL=test_url'
+        'RAW_SOURCE_MAP = "test-source-map";',
+        '\/\/@ sourceMappingURL=test_url',
       ].join('\n'));
     });
 
@@ -45,35 +42,21 @@ describe('Package', function() {
         'transformed foo;',
         'transformed bar;',
         ';require("foo");',
+        'RAW_SOURCE_MAP = "test-source-map";',
         '\/\/@ sourceMappingURL=test_url',
       ].join('\n'));
-    });
-
-    it('should get minified source', function() {
-      var minified = {
-        code: 'minified',
-        map: 'map',
-      };
-
-      require('uglify-js').minify = function() {
-        return minified;
-      };
-
-      ppackage.addModule('transformed foo;', 'source foo', 'foo path');
-      ppackage.finalize();
-      expect(ppackage.getMinifiedSourceAndMap()).toBe(minified);
     });
   });
 
   describe('sourcemap package', function() {
     it('should create sourcemap', function() {
-      var p = new Package('test_url');
-      p.addModule('transformed foo;\n', 'source foo', 'foo path');
-      p.addModule('transformed bar;\n', 'source bar', 'bar path');
-      p.setMainModuleId('foo');
-      p.finalize({runMainModule: true});
-      var s = p.getSourceMap();
-      expect(s).toEqual(genSourceMap(p._modules));
+      var ppackage = new Package('test_url');
+      ppackage.addModule('transformed foo;\n', 'source foo', 'foo path');
+      ppackage.addModule('transformed bar;\n', 'source bar', 'bar path');
+      ppackage.setMainModuleId('foo');
+      ppackage.finalize({runMainModule: true});
+      var s = ppackage.getSourceMap();
+      expect(s).toEqual(genSourceMap(ppackage._modules));
     });
   });
 });
@@ -109,4 +92,4 @@ describe('Package', function() {
      );
    }
    return sourceMapGen.toJSON();
- }
+};

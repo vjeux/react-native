@@ -1,22 +1,12 @@
 /**
- * The examples provided by Facebook are for non-commercial testing and
- * evaluation purposes only.
- *
- * Facebook reserves all rights not expressly granted.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
- * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NON INFRINGEMENT. IN NO EVENT SHALL
- * FACEBOOK BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
- * AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
- * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- *
+ * Copyright 2004-present Facebook. All Rights Reserved.
  * @flow
  */
 'use strict';
 
 var React = require('react-native');
 var {
+  ExpandingText,
   Image,
   PixelRatio,
   ScrollView,
@@ -50,9 +40,10 @@ var MovieScreen = React.createClass({
           </View>
         </View>
         <View style={styles.separator} />
-        <Text>
-          {this.props.movie.synopsis}
-        </Text>
+        <ExpandingText
+          truncLength={200}
+          text={this.props.movie.synopsis}
+        />
         <View style={styles.separator} />
         <Cast actors={this.props.movie.abridged_cast} />
       </ScrollView>
@@ -114,7 +105,7 @@ var styles = StyleSheet.create({
   movieTitle: {
     flex: 1,
     fontSize: 16,
-    fontWeight: '500',
+    fontWeight: 'bold',
   },
   rating: {
     marginTop: 10,
@@ -124,7 +115,7 @@ var styles = StyleSheet.create({
   },
   ratingValue: {
     fontSize: 28,
-    fontWeight: '500',
+    fontWeight: 'bold',
   },
   mpaaWrapper: {
     alignSelf: 'flex-start',
@@ -136,7 +127,7 @@ var styles = StyleSheet.create({
   mpaaText: {
     fontFamily: 'Palatino',
     fontSize: 13,
-    fontWeight: '500',
+    fontWeight: 'bold',
   },
   mainSection: {
     flexDirection: 'row',
@@ -153,7 +144,7 @@ var styles = StyleSheet.create({
     marginVertical: 10,
   },
   castTitle: {
-    fontWeight: '500',
+    fontWeight: 'bold',
     marginBottom: 3,
   },
   castActor: {

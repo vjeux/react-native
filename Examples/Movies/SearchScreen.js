@@ -1,46 +1,29 @@
 /**
- * The examples provided by Facebook are for non-commercial testing and
- * evaluation purposes only.
- *
- * Facebook reserves all rights not expressly granted.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
- * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NON INFRINGEMENT. IN NO EVENT SHALL
- * FACEBOOK BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
- * AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
- * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- *
+ * Copyright 2004-present Facebook. All Rights Reserved.
  * @flow
  */
 'use strict';
 
 var React = require('react-native');
 var {
-  ActivityIndicatorIOS,
   ListView,
+  ListViewDataSource,
+  ScrollView,
+  ActivityIndicatorIOS,
   StyleSheet,
   Text,
   TextInput,
+  TimerMixin,
   View,
 } = React;
-var TimerMixin = require('react-timer-mixin');
 
 var MovieCell = require('./MovieCell');
 var MovieScreen = require('./MovieScreen');
 
 var fetch = require('fetch');
 
-/**
- * This is for demo purposes only, and rate limited.
- * In case you want to use the Rotten Tomatoes' API on a real app you should
- * create an account at http://developer.rottentomatoes.com/
- */
 var API_URL = 'http://api.rottentomatoes.com/api/public/v1.0/';
-var API_KEYS = [
-  '7waqfqbprs7pajbz28mqf6vz',
-  // 'y4vwv8m33hed9ety83jmv52f', Fallback api_key
-];
+var API_KEYS = ['7waqfqbprs7pajbz28mqf6vz', 'y4vwv8m33hed9ety83jmv52f'];
 
 // Results should be cached keyed by the query
 // with values of null meaning "being fetched"
@@ -57,13 +40,11 @@ var LOADING = {};
 var SearchScreen = React.createClass({
   mixins: [TimerMixin],
 
-  timeoutID: (null: any),
-
   getInitialState: function() {
     return {
       isLoading: false,
       isLoadingTail: false,
-      dataSource: new ListView.DataSource({
+      dataSource: new ListViewDataSource({
         rowHasChanged: (row1, row2) => row1 !== row2,
       }),
       filter: '',
@@ -119,15 +100,6 @@ var SearchScreen = React.createClass({
 
     fetch(this._urlForQueryAndPage(query, 1))
       .then((response) => response.json())
-      .catch((error) => {
-        LOADING[query] = false;
-        resultsCache.dataForQuery[query] = undefined;
-
-        this.setState({
-          dataSource: this.getDataSource([]),
-          isLoading: false,
-        });
-      })
       .then((responseData) => {
         LOADING[query] = false;
         resultsCache.totalForQuery[query] = responseData.total;
@@ -144,7 +116,15 @@ var SearchScreen = React.createClass({
           dataSource: this.getDataSource(responseData.movies),
         });
       })
-      .done();
+      .catch((error) => {
+        LOADING[query] = false;
+        resultsCache.dataForQuery[query] = undefined;
+
+        this.setState({
+          dataSource: this.getDataSource([]),
+          isLoading: false,
+        });
+      });
   },
 
   hasMore: function(): boolean {
@@ -178,13 +158,6 @@ var SearchScreen = React.createClass({
     var page = resultsCache.nextPageNumberForQuery[query];
     fetch(this._urlForQueryAndPage(query, page))
       .then((response) => response.json())
-      .catch((error) => {
-        console.error(error);
-        LOADING[query] = false;
-        this.setState({
-          isLoadingTail: false,
-        });
-      })
       .then((responseData) => {
         var moviesForQuery = resultsCache.dataForQuery[query].slice();
 
@@ -210,10 +183,16 @@ var SearchScreen = React.createClass({
           dataSource: this.getDataSource(resultsCache.dataForQuery[query]),
         });
       })
-      .done();
+      .catch((error) => {
+        console.error(error);
+        LOADING[query] = false;
+        this.setState({
+          isLoadingTail: false,
+        });
+      });
   },
 
-  getDataSource: function(movies: Array<any>): ListView.DataSource {
+  getDataSource: function(movies: Array<any>): ListViewDataSource {
     return this.state.dataSource.cloneWithRows(movies);
   },
 
@@ -261,7 +240,7 @@ var SearchScreen = React.createClass({
         renderRow={this.renderRow}
         onEndReached={this.onEndReached}
         automaticallyAdjustContentInsets={false}
-        keyboardDismissMode="onDrag"
+        keyboardDismissMode={ScrollView.keyboardDismissMode.OnDrag}
         keyboardShouldPersistTaps={true}
         showsVerticalScrollIndicator={false}
       />;
@@ -304,7 +283,7 @@ var SearchBar = React.createClass({
     return (
       <View style={styles.searchBar}>
         <TextInput
-          autoCapitalize="none"
+          autoCapitalize={TextInput.autoCapitalizeMode.none}
           autoCorrect={false}
           onChange={this.props.onSearchChange}
           placeholder="Search a movie..."

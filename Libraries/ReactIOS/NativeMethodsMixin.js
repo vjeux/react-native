@@ -1,45 +1,22 @@
 /**
- * Copyright (c) 2015-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * Copyright 2004-present Facebook. All Rights Reserved.
  *
  * @providesModule NativeMethodsMixin
- * @flow
  */
 'use strict';
 
 var NativeModules = require('NativeModules');
-var RCTPOPAnimationManager = NativeModules.POPAnimationManager;
-var RCTUIManager = NativeModules.UIManager;
+var NativeModulesDeprecated = require('NativeModulesDeprecated');
+var RKUIManager = NativeModules.RKUIManager;
+var RKUIManagerDeprecated = NativeModulesDeprecated.RKUIManager;
+var RKPOPAnimationManagerDeprecated = NativeModulesDeprecated.RKPOPAnimationManager;
 var TextInputState = require('TextInputState');
 
 var flattenStyle = require('flattenStyle');
 var invariant = require('invariant');
 var mergeFast = require('mergeFast');
 
-type MeasureOnSuccessCallback = (
-  x: number,
-  y: number,
-  width: number,
-  height: number,
-  pageX: number,
-  pageY: number
-) => void
-
-type MeasureLayoutOnSuccessCallback = (
-  left: number,
-  top: number,
-  width: number,
-  height: number
-) => void
-
-var animationIDInvariant = function(
-  funcName: string,
-  anim: number
-) {
+var animationIDInvariant = function(funcName, anim) {
   invariant(
     anim,
     funcName + ' must be called with a valid animation ID returned from' +
@@ -48,26 +25,22 @@ var animationIDInvariant = function(
 };
 
 var NativeMethodsMixin = {
-  addAnimation: function(anim: number, callback?: (finished: bool) => void) {
+  addAnimation: function(anim, callback) {
     animationIDInvariant('addAnimation', anim);
-    RCTPOPAnimationManager.addAnimation(this.getNodeHandle(), anim, callback);
+    RKPOPAnimationManagerDeprecated.addAnimation(this.getNodeHandle(), anim, callback);
   },
 
-  removeAnimation: function(anim: number) {
+  removeAnimation: function(anim) {
     animationIDInvariant('removeAnimation', anim);
-    RCTPOPAnimationManager.removeAnimation(this.getNodeHandle(), anim);
+    RKPOPAnimationManagerDeprecated.removeAnimation(this.getNodeHandle(), anim);
   },
 
-  measure: function(callback: MeasureOnSuccessCallback) {
-    RCTUIManager.measure(this.getNodeHandle(), callback);
+  measure: function(callback) {
+    RKUIManagerDeprecated.measure(this.getNodeHandle(), callback);
   },
 
-  measureLayout: function(
-    relativeToNativeNode: number,
-    onSuccess: MeasureLayoutOnSuccessCallback,
-    onFail: () => void /* currently unused */
-  ) {
-    RCTUIManager.measureLayout(
+  measureLayout: function(relativeToNativeNode, onSuccess, onFail) {
+    RKUIManager.measureLayout(
       this.getNodeHandle(),
       relativeToNativeNode,
       onFail,
@@ -80,7 +53,7 @@ var NativeMethodsMixin = {
    * in future diff process, this means that if you do not include them in the
    * next render, they will remain active.
    */
-  setNativeProps: function(nativeProps: Object) {
+  setNativeProps: function(nativeProps) {
     // nativeProps contains a style attribute that's going to be flattened
     // and all the attributes expanded in place. In order to make this
     // process do as few allocations and copies as possible, we return
@@ -104,7 +77,7 @@ var NativeMethodsMixin = {
       props = mergeFast(nativeProps, style);
     }
 
-    RCTUIManager.updateView(
+    RKUIManagerDeprecated.updateView(
       this.getNodeHandle(),
       this.viewConfig.uiViewClassName,
       props
@@ -134,19 +107,15 @@ function throwOnStylesProp(component, props) {
   }
 }
 if (__DEV__) {
-  // hide this from Flow since we can't define these properties outside of
-  // __DEV__ without actually implementing them (setting them to undefined
-  // isn't allowed by ReactClass)
-  var NativeMethodsMixin_DEV = (NativeMethodsMixin: any);
   invariant(
-    !NativeMethodsMixin_DEV.componentWillMount &&
-    !NativeMethodsMixin_DEV.componentWillReceiveProps,
+    !NativeMethodsMixin.componentWillMount &&
+    !NativeMethodsMixin.componentWillReceiveProps,
     'Do not override existing functions.'
   );
-  NativeMethodsMixin_DEV.componentWillMount = function () {
+  NativeMethodsMixin.componentWillMount = function () {
     throwOnStylesProp(this, this.props);
   };
-  NativeMethodsMixin_DEV.componentWillReceiveProps = function (newProps) {
+  NativeMethodsMixin.componentWillReceiveProps = function (newProps) {
     throwOnStylesProp(this, newProps);
   };
 }

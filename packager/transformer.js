@@ -1,10 +1,5 @@
 /**
- * Copyright (c) 2015-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * Copyright 2004-present Facebook. All Rights Reserved.
  *
  * Note: This is a fork of the fb-specific transform.js
  */
@@ -21,35 +16,27 @@ var staticTypeSyntax =
 var visitorList = reactVisitors;
 
 
-function transform(srcTxt, filename) {
-  var options = {
-    es3: true,
-    sourceType: 'nonStrictModule',
-    filename: filename,
-  };
+function transform(transformSets, srcTxt, options) {
+  options = options || {};
 
   // These tranforms mostly just erase type annotations and static typing
   // related statements, but they were conflicting with other tranforms.
   // Running them first solves that problem
   var staticTypeSyntaxResult = jstransform(
     staticTypeSyntax,
-    srcTxt,
-    options
+    srcTxt
   );
 
-  return jstransform(
-    visitorList,
-    staticTypeSyntaxResult.code,
-    options
-  );
+  return jstransform(visitorList, staticTypeSyntaxResult.code);
 }
 
 module.exports = function(data, callback) {
   var result;
   try {
     result = transform(
+      data.transformSets,
       data.sourceCode,
-      data.filename
+      data.options
     );
   } catch (e) {
     return callback(null, {

@@ -1,18 +1,11 @@
 /**
- * Copyright (c) 2015-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * Copyright 2004-present Facebook. All Rights Reserved.
  *
  * @providesModule ReactIOSComponentMixin
- * @flow
  */
 'use strict';
 
 var ReactIOSTagHandles = require('ReactIOSTagHandles');
-var ReactInstanceMap = require('ReactInstanceMap');
 
 /**
  * ReactNative vs ReactWeb
@@ -62,17 +55,11 @@ var ReactIOSComponentMixin = {
    * `getNodeHandle`.
    */
   getNativeNode: function() {
-    // TODO (balpert): Wrap iOS native components in a composite wrapper, then
-    // ReactInstanceMap.get here will always succeed
-    return ReactIOSTagHandles.rootNodeIDToTag[
-      (ReactInstanceMap.get(this) || this)._rootNodeID
-    ];
+    return ReactIOSTagHandles.rootNodeIDToTag[this._rootNodeID];
   },
 
   getNodeHandle: function() {
-    return ReactIOSTagHandles.rootNodeIDToTag[
-      (ReactInstanceMap.get(this) || this)._rootNodeID
-    ];
+    return ReactIOSTagHandles.rootNodeIDToTag[this._rootNodeID];
   }
 };
 

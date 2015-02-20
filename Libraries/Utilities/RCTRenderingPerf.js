@@ -1,13 +1,7 @@
 /**
- * Copyright (c) 2015-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * Copyright 2004-present Facebook. All Rights Reserved.
  *
  * @providesModule RCTRenderingPerf
- * @flow
  */
 'use strict';
 
@@ -15,11 +9,6 @@ var ReactDefaultPerf = require('ReactDefaultPerf');
 var ReactPerf = require('ReactPerf');
 
 var invariant = require('invariant');
-
-type perfModule = {
-  start: () => void;
-  stop: () => void;
-}
 
 var perfModules = [];
 var enabled = false;
@@ -48,23 +37,10 @@ var RCTRenderingPerf = {
     ReactDefaultPerf.stop();
     ReactDefaultPerf.printInclusive();
     ReactDefaultPerf.printWasted();
-
-    var totalRender = 0;
-    var totalTime = 0;
-    var measurements = ReactDefaultPerf.getLastMeasurements();
-    for (var ii = 0; ii < measurements.length; ii++) {
-      var render = measurements[ii].render;
-      for (var nodeName in render) {
-        totalRender += render[nodeName];
-      }
-      totalTime += measurements[ii].totalTime;
-    }
-    console.log('Total time spent in render(): ' + totalRender + 'ms');
-
     perfModules.forEach((module) => module.stop());
   },
 
-  register: function(module: perfModule) {
+  register: function(module) {
     invariant(
       typeof module.start === 'function',
       'Perf module should have start() function'

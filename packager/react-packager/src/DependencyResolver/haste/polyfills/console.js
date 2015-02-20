@@ -1,10 +1,17 @@
 /**
- * Copyright (c) 2015-present, Facebook, Inc.
- * All rights reserved.
+ * Copyright 2013 Facebook, Inc.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  *
  * This pipes all of our console logging functions to native logging so that
  * JavaScript errors in required modules show up in Xcode via NSLog.
@@ -13,18 +20,9 @@
  * @polyfill
  */
 
-/*eslint global-strict:0*/
 (function(global) {
-  'use strict';
 
   var OBJECT_COLUMN_NAME = '(index)';
-  var LOG_LEVELS = {
-    trace: 0,
-    log: 1,
-    info: 2,
-    warn: 3,
-    error: 4
-  };
 
   function setupConsole(global) {
 
@@ -32,32 +30,30 @@
       return;
     }
 
-    function getNativeLogFunction(level) {
-      return function() {
-        var str = Array.prototype.map.call(arguments, function(arg) {
-          if (arg == null) {
-            return arg === null ? 'null' : 'undefined';
-          } else if (typeof arg === 'string') {
-            return '"' + arg + '"';
-          } else {
-            // Perform a try catch, just in case the object has a circular
-            // reference or stringify throws for some other reason.
-            try {
-              return JSON.stringify(arg);
-            } catch (e) {
-              if (typeof arg.toString === 'function') {
-                try {
-                  return arg.toString();
-                } catch (E) {
-                  return 'unknown';
-                }
+    function doNativeLog() {
+      var str = Array.prototype.map.call(arguments, function(arg) {
+        if (arg == null) {
+          return arg === null ? 'null' : 'undefined';
+        } else if (typeof arg === 'string') {
+          return '"' + arg + '"';
+        } else {
+          // Perform a try catch, just in case the object has a circular
+          // reference or stringify throws for some other reason.
+          try {
+            return JSON.stringify(arg);
+          } catch (e) {
+            if (typeof arg.toString === 'function') {
+              try {
+                return arg.toString();
+              } catch (e) {
+                return 'unknown';
               }
             }
           }
-        }).join(', ');
-        global.nativeLoggingHook(str, level);
-      };
-    }
+        }
+      }).join(', ');
+      global.nativeLoggingHook(str);
+    };
 
     var repeat = function(element, n) {
       return Array.apply(null, Array(n)).map(function() { return element; });
@@ -77,7 +73,7 @@
         }
       }
       if (rows.length === 0) {
-        global.nativeLoggingHook('', LOG_LEVELS.log);
+        global.nativeLoggingHook('');
         return;
       }
 
@@ -123,19 +119,18 @@
       // Native logging hook adds "RCTLog >" at the front of every
       // logged string, which would shift the header and screw up
       // the table
-      global.nativeLoggingHook('\n' + table.join('\n'), LOG_LEVELS.log);
-    }
+      global.nativeLoggingHook('\n' + table.join('\n'));
+    };
 
     global.console = {
-      error: getNativeLogFunction(LOG_LEVELS.error),
-      info: getNativeLogFunction(LOG_LEVELS.info),
-      log: getNativeLogFunction(LOG_LEVELS.log),
-      warn: getNativeLogFunction(LOG_LEVELS.warn),
-      trace: getNativeLogFunction(LOG_LEVELS.trace),
+      error: doNativeLog,
+      info: doNativeLog,
+      log: doNativeLog,
+      warn: doNativeLog,
       table: consoleTablePolyfill
     };
 
-  }
+  };
 
   if (typeof module !== 'undefined') {
     module.exports = setupConsole;

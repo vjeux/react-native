@@ -1,46 +1,22 @@
-/**
- * Copyright (c) 2015-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- */
 'use strict';
 
-var _ = require('underscore');
-var crypto = require('crypto');
-var declareOpts = require('../lib/declareOpts');
-var fs = require('fs');
-var isAbsolutePath = require('absolute-path');
 var path = require('path');
-var Promise = require('bluebird');
+var version = require('../../package.json').version;
 var tmpdir = require('os').tmpDir();
-var version = require('../../../../package.json').version;
+var pathUtils = require('../fb-path-utils');
+var fs = require('fs');
+var _ = require('underscore');
+var q = require('q');
 
-var validateOpts = declareOpts({
-  resetCache: {
-    type: 'boolean',
-    default: false,
-  },
-  cacheVersion: {
-    type: 'string',
-    default: '1.0',
-  },
-  projectRoots: {
-    type: 'array',
-    required: true,
-  },
-});
+var Promise = q.Promise;
+
 module.exports = Cache;
 
-function Cache(options) {
-  var opts = validateOpts(options);
-
-  this._cacheFilePath = cacheFilePath(opts);
+function Cache(projectConfig) {
+  this._cacheFilePath = cacheFilePath(projectConfig);
 
   var data;
-  if (!opts.resetCache) {
+  if (!projectConfig.resetCache) {
     data = loadCacheSync(this._cacheFilePath);
   } else {
     data = Object.create(null);
@@ -55,7 +31,7 @@ function Cache(options) {
 }
 
 Cache.prototype.get = function(filepath, loaderCb) {
-  if (!isAbsolutePath(filepath)) {
+  if (!pathUtils.isAbsolutePath(filepath)) {
     throw new Error('Use absolute paths');
   }
 
@@ -69,10 +45,10 @@ Cache.prototype.get = function(filepath, loaderCb) {
 };
 
 Cache.prototype._set = function(filepath, loaderPromise) {
-  this._data[filepath] = loaderPromise.then(function(data) {
+  return this._data[filepath] = loaderPromise.then(function(data) {
     return [
       data,
-      Promise.promisify(fs.stat)(filepath)
+      q.nfbind(fs.stat)(filepath)
     ];
   }).spread(function(data, stat) {
     this._persistEventually();
@@ -81,15 +57,13 @@ Cache.prototype._set = function(filepath, loaderPromise) {
       mtime: stat.mtime.getTime(),
     };
   }.bind(this));
-
-  return this._data[filepath];
 };
 
 Cache.prototype.invalidate = function(filepath){
-  if (this._has(filepath)) {
+  if(this._has(filepath)) {
     delete this._data[filepath];
   }
-};
+}
 
 Cache.prototype.end = function() {
   return this._persistCache();
@@ -103,39 +77,27 @@ Cache.prototype._persistCache = function() {
   var data = this._data;
   var cacheFilepath = this._cacheFilePath;
 
-  this._persisting = Promise.all(_.values(data))
+  return this._persisting = q.all(_.values(data))
     .then(function(values) {
       var json = Object.create(null);
       Object.keys(data).forEach(function(key, i) {
         json[key] = values[i];
       });
-      return Promise.promisify(fs.writeFile)(cacheFilepath, JSON.stringify(json));
+      return q.nfbind(fs.writeFile)(cacheFilepath, JSON.stringify(json));
     })
     .then(function() {
       this._persisting = null;
       return true;
     }.bind(this));
-
-  return this._persisting;
 };
 
-function loadCacheSync(cachePath) {
+function loadCacheSync(cacheFilepath) {
   var ret = Object.create(null);
-  if (!fs.existsSync(cachePath)) {
+  if (!fs.existsSync(cacheFilepath)) {
     return ret;
   }
 
-  var cacheOnDisk;
-  try {
-    cacheOnDisk = JSON.parse(fs.readFileSync(cachePath));
-  } catch (e) {
-    if (e instanceof SyntaxError) {
-      console.warn('Unable to parse cache file. Will clear and continue.');
-      fs.unlinkSync(cachePath);
-      return ret;
-    }
-    throw e;
-  }
+  var cacheOnDisk = JSON.parse(fs.readFileSync(cacheFilepath));
 
   // Filter outdated cache and convert to promises.
   Object.keys(cacheOnDisk).forEach(function(key) {
@@ -152,16 +114,16 @@ function loadCacheSync(cachePath) {
   return ret;
 }
 
-function cacheFilePath(options) {
-  var hash = crypto.createHash('md5');
-  hash.update(version);
-
-  var roots = options.projectRoots.join(',').split(path.sep).join('-');
-  hash.update(roots);
-
-  var cacheVersion = options.cacheVersion || '0';
-  hash.update(cacheVersion);
-
-  var name = 'react-packager-cache-' + hash.digest('hex');
-  return path.join(tmpdir, name);
+function cacheFilePath(projectConfig) {
+  var roots = projectConfig.projectRoots.join(',').split(path.sep).join('-');
+  var cacheVersion = projectConfig.cacheVersion || '0';
+  return path.join(
+    tmpdir,
+    [
+      'react-packager-cache',
+      version,
+      cacheVersion,
+      roots,
+    ].join('-')
+  );
 }

@@ -1,13 +1,7 @@
 /**
- * Copyright (c) 2015-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * Copyright 2004-present Facebook. All Rights Reserved.
  *
  * @providesModule InteractionManager
- * @flow
  */
 'use strict';
 
@@ -19,14 +13,6 @@ var invariant = require('invariant');
 var keyMirror = require('keyMirror');
 var setImmediate = require('setImmediate');
 
-var _emitter = new EventEmitter();
-var _interactionSet = new Set();
-var _addInteractionSet = new Set();
-var _deleteInteractionSet = new Set();
-var _nextUpdateHandle = null;
-var _queue = [];
-var _inc = 0;
-
 /**
  * InteractionManager allows long-running work to be scheduled after any
  * interactions/animations have completed. In particular, this allows JavaScript
@@ -34,14 +20,11 @@ var _inc = 0;
  *
  * Applications can schedule tasks to run after interactions with the following:
  *
- * ```
- * InteractionManager.runAfterInteractions(() => {
- *   // ...long-running synchronous task...
- * });
- * ```
+ *   InteractionManager.runAfterInteractions(() => {
+ *      // ...long-running synchronous task...
+ *   });
  *
  * Compare this to other scheduling alternatives:
- *
  * - requestAnimationFrame(): for code that animates a view over time.
  * - setImmediate/setTimeout(): run code later, note this may delay animations.
  * - runAfterInteractions(): run code later, without delaying active animations.
@@ -54,14 +37,21 @@ var _inc = 0;
  * creating an interaction 'handle' on animation start, and clearing it upon
  * completion:
  *
- * ```
- * var handle = InteractionManager.createInteractionHandle();
- * // run animation... (`runAfterInteractions` tasks are queued)
- * // later, on animation completion:
- * InteractionManager.clearInteractionHandle(handle);
- * // queued tasks run if all handles were cleared
- * ```
+ *   var handle = InteractionManager.createInteractionHandle();
+ *   // run animation... (`runAfterInteractions` tasks are queued)
+ *   // later, on animation completion:
+ *   InteractionManager.clearInteractionHandle(handle);
+ *   // queued tasks run if all handles were cleared
  */
+
+var _emitter = new EventEmitter();
+var _interactionSet = new Set();
+var _addInteractionSet = new Set();
+var _deleteInteractionSet = new Set();
+var _nextUpdateHandle = null;
+var _queue = [];
+var _inc = 0;
+
 var InteractionManager = {
   Events: keyMirror({
     interactionStart: true,
@@ -69,21 +59,9 @@ var InteractionManager = {
   }),
 
   /**
-   * Schedule a function to run after all interactions have completed.
-   */
-  runAfterInteractions(callback: Function) {
-    invariant(
-      typeof callback === 'function',
-      'Must specify a function to schedule.'
-    );
-    scheduleUpdate();
-    _queue.push(callback);
-  },
-
-  /**
    * Notify manager that an interaction has started.
    */
-  createInteractionHandle(): number {
+  createInteractionHandle() {
     scheduleUpdate();
     var handle = ++_inc;
     _addInteractionSet.add(handle);
@@ -93,7 +71,7 @@ var InteractionManager = {
   /**
    * Notify manager that an interaction has completed.
    */
-  clearInteractionHandle(handle: number) {
+  clearInteractionHandle(handle) {
     invariant(
       !!handle,
       'Must provide a handle to clear.'
@@ -101,6 +79,20 @@ var InteractionManager = {
     scheduleUpdate();
     _addInteractionSet.delete(handle);
     _deleteInteractionSet.add(handle);
+  },
+
+  /**
+   * Schedule a function to run after all interactions have completed.
+   *
+   * @param  {function} callback
+   */
+  runAfterInteractions(callback) {
+    invariant(
+      typeof callback === 'function',
+      'Must specify a function to schedule.'
+    );
+    scheduleUpdate();
+    _queue.push(callback);
   },
 
   addListener: _emitter.addListener.bind(_emitter),
@@ -119,8 +111,6 @@ function scheduleUpdate() {
  * Notify listeners, process queue, etc
  */
 function processUpdate() {
-  _nextUpdateHandle = null;
-
   var interactionCount = _interactionSet.size;
   _addInteractionSet.forEach(handle =>
     _interactionSet.add(handle)
@@ -140,13 +130,12 @@ function processUpdate() {
 
   // process the queue regardless of a transition
   if (nextInteractionCount === 0) {
-    var queue = _queue;
-    _queue = [];
-    queue.forEach(callback => {
+    _queue.forEach(callback => {
       ErrorUtils.applyWithGuard(callback);
     });
+    _queue = [];
   }
-
+  _nextUpdateHandle = null;
   _addInteractionSet.clear();
   _deleteInteractionSet.clear();
 }

@@ -1,18 +1,36 @@
-/**
- * Copyright (c) 2015-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- *
- * @flow
- */
+declare module "react-native" {
+  declare class ListViewDataSource {
+    constructor(params: Object): void;
+  }
 
-// see also react-native.js
+  declare var AppRegistry: ReactClass<any, any, any>;
+  declare var ExpandingText: ReactClass<any, any, any>;
+  declare var Image: ReactClass<any, any, any>;
+  declare var ListView: ReactClass<any, any, any>;
+  declare var NavigatorIOS: ReactClass<any, any, any>;
+  declare var NavigatorItemIOS: ReactClass<any, any, any>;
+  declare var PixelRatio: ReactClass<any, any, any>;
+  declare var ScrollView: ReactClass<any, any, any>;
+  declare var ActivityIndicatorIOS: ReactClass<any, any, any>;
+  declare var StyleSheet: ReactClass<any, any, any>;
+  declare var Text: ReactClass<any, any, any>;
+  declare var TextInput: ReactClass<any, any, any>;
+  declare var TimerMixin: ReactClass<any, any, any>;
+  declare var TouchableHighlight: ReactClass<any, any, any>;
+  declare var TouchableWithoutFeedback: ReactClass<any, any, any>;
+  declare var View: ReactClass<any, any, any>;
+  declare var invariant: Function;
+  declare var ix: Function;
+}
+
+declare module "addons" {
+  declare var NavigatorIOS: ReactClass<any, any, any>;
+  declare var NavigatorItemIOS: ReactClass<any, any, any>;
+  declare var StyleSheet: ReactClass<any, any, any>;
+}
 
 declare var __DEV__: boolean;
 
-declare var __REACT_DEVTOOLS_GLOBAL_HOOK__: any; /*?{
-  inject: ?((stuff: Object) => void)
-};*/
+declare module "fetch" {
+  declare function exports(url: string, options?: Object): Object;
+}

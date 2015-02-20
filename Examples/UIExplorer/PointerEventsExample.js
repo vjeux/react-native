@@ -1,17 +1,7 @@
 /**
- * The examples provided by Facebook are for non-commercial testing and
- * evaluation purposes only.
+ * Copyright 2004-present Facebook. All Rights Reserved.
  *
- * Facebook reserves all rights not expressly granted.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
- * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NON INFRINGEMENT. IN NO EVENT SHALL
- * FACEBOOK BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
- * AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
- * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- *
- * @flow
+ * @providesModule PointerEventsExample
  */
 'use strict';
 
@@ -71,7 +61,7 @@ var NoneExample = React.createClass({
           A: unspecified
         </DemoText>
         <View
-          pointerEvents="none"
+          pointerEvents={View.pointerEvents.none}
           onTouchStart={() => this.props.onLog('B none touched')}
           style={[styles.box, styles.boxPassedThrough]}>
           <DemoText style={[styles.text, styles.textPassedThrough]}>
@@ -97,7 +87,7 @@ var NoneExample = React.createClass({
 var DemoText = React.createClass({
   render: function() {
     return (
-      <View pointerEvents="none">
+      <View pointerEvents={View.pointerEvents.none}>
         <Text
           style={this.props.style}>
           {this.props.children}
@@ -117,11 +107,11 @@ var BoxNoneExample = React.createClass({
           A: unspecified
         </DemoText>
         <View
-          pointerEvents="box-none"
-          onTouchStart={() => this.props.onLog('B box-none touched')}
+          pointerEvents={View.pointerEvents.boxNone}
+          onTouchStart={() => this.props.onLog('B boxNone touched')}
           style={[styles.box, styles.boxPassedThrough]}>
           <DemoText style={[styles.text, styles.textPassedThrough]}>
-            B: box-none
+            B: boxNone
           </DemoText>
           <View
             onTouchStart={() => this.props.onLog('C unspecified touched')}
@@ -131,7 +121,7 @@ var BoxNoneExample = React.createClass({
             </DemoText>
           </View>
           <View
-            pointerEvents="auto"
+            pointerEvents={View.pointerEvents.unspecified}
             onTouchStart={() => this.props.onLog('C explicitly unspecified touched')}
             style={[styles.box]}>
             <DemoText style={[styles.text]}>
@@ -154,11 +144,11 @@ var BoxOnlyExample = React.createClass({
           A: unspecified
         </DemoText>
         <View
-          pointerEvents="box-only"
-          onTouchStart={() => this.props.onLog('B box-only touched')}
+          pointerEvents={View.pointerEvents.boxOnly}
+          onTouchStart={() => this.props.onLog('B boxOnly touched')}
           style={styles.box}>
           <DemoText style={styles.text}>
-            B: box-only
+            B: boxOnly
           </DemoText>
           <View
             onTouchStart={() => this.props.onLog('C unspecified touched')}
@@ -168,7 +158,7 @@ var BoxOnlyExample = React.createClass({
             </DemoText>
           </View>
           <View
-            pointerEvents="auto"
+            pointerEvents={View.pointerEvents.unspecified}
             onTouchStart={() => this.props.onLog('C explicitly unspecified touched')}
             style={[styles.box, styles.boxPassedThrough]}>
             <DemoText style={[styles.text, styles.textPassedThrough]}>
@@ -189,13 +179,13 @@ var exampleClasses = [
   },
   {
     Component: BoxNoneExample,
-    title: '`box-none`',
-    description: '`box-none` causes touch events on the container to pass through and will only detect touch events on its child components.',
+    title: '`boxNone`',
+    description: '`boxNone` causes touch events on the container to pass through and will only detect touch events on its child components.',
   },
   {
     Component: BoxOnlyExample,
-    title: '`box-only`',
-    description: '`box-only` causes touch events on the container\'s child components to pass through and will only detect touch events on the container itself.',
+    title: '`boxOnly`',
+    description: '`boxOnly` causes touch events on the container\'s child components to pass through and will only detect touch events on the container itself.',
   }
 ];
 

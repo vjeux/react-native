@@ -1,73 +1,29 @@
-/**
- * Copyright (c) 2015-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- */
+
 'use strict';
 
+var os = require('os');
 var fs = require('fs');
-var Promise = require('bluebird');
+var q = require('q');
 var Cache = require('./Cache');
+var _ = require('underscore');
 var workerFarm = require('worker-farm');
-var declareOpts = require('../lib/declareOpts');
-var util = require('util');
 
-var readFile = Promise.promisify(fs.readFile);
+var readFile = q.nfbind(fs.readFile);
 
 module.exports = Transformer;
 Transformer.TransformError = TransformError;
 
-var validateOpts = declareOpts({
-  projectRoots: {
-    type: 'array',
-    required: true,
-  },
-  blacklistRE: {
-    type: 'object', // typeof regex is object
-  },
-  polyfillModuleNames: {
-    type: 'array',
-    default: [],
-  },
-  cacheVersion: {
-    type: 'string',
-    default: '1.0',
-  },
-  resetCache: {
-    type: 'boolean',
-    default: false,
-  },
-  transformModulePath: {
-    type:'string',
-    required: false,
-  },
-  nonPersistent: {
-    type: 'boolean',
-    default: false,
-  },
-});
+function Transformer(projectConfig) {
+  this._cache = projectConfig.nonPersistent
+    ? new DummyCache() : new Cache(projectConfig);
 
-function Transformer(options) {
-  var opts = validateOpts(options);
-
-  this._cache = opts.nonPersistent
-    ? new DummyCache()
-    : new Cache({
-      resetCache: options.resetCache,
-      cacheVersion: options.cacheVersion,
-      projectRoots: options.projectRoots,
-    });
-
-  if (options.transformModulePath != null) {
+  if (projectConfig.transformModulePath == null) {
+    this._failedToStart = q.Promise.reject(new Error('No transfrom module'));
+  } else {
     this._workers = workerFarm(
-      {autoStart: true, maxConcurrentCallsPerWorker: 1},
-      options.transformModulePath
+      {autoStart: true},
+      projectConfig.transformModulePath
     );
-
-    this._transform = Promise.promisify(this._workers);
   }
 }
 
@@ -78,26 +34,33 @@ Transformer.prototype.kill = function() {
 
 Transformer.prototype.invalidateFile = function(filePath) {
   this._cache.invalidate(filePath);
-};
+  //TODO: We can read the file and put it into the cache right here
+  //      This would simplify some caching logic as we can be sure that the cache is up to date
+}
 
-Transformer.prototype.loadFileAndTransform = function(filePath) {
-  if (this._transform == null) {
-    return Promise.reject(new Error('No transfrom module'));
+Transformer.prototype.loadFileAndTransform = function(
+  transformSets,
+  filePath,
+  options
+) {
+  if (this._failedToStart) {
+    return this._failedToStart;
   }
 
-  var transform = this._transform;
+  var workers = this._workers;
   return this._cache.get(filePath, function() {
     return readFile(filePath)
       .then(function(buffer) {
         var sourceCode = buffer.toString();
-
-        return transform({
+        var opts = _.extend({}, options, {filename: filePath});
+        return q.nfbind(workers)({
+          transformSets: transformSets,
           sourceCode: sourceCode,
-          filename: filePath,
+          options: opts,
         }).then(
           function(res) {
             if (res.error) {
-              throw formatError(res.error, filePath, sourceCode);
+              throw formatEsprimaError(res.error, filePath, sourceCode);
             }
 
             return {
@@ -112,28 +75,13 @@ Transformer.prototype.loadFileAndTransform = function(filePath) {
 };
 
 function TransformError() {}
-util.inherits(TransformError, SyntaxError);
-
-function formatError(err, filename, source) {
-  if (err.lineNumber && err.column) {
-    return formatEsprimaError(err, filename, source);
-  } else {
-    return formatGenericError(err, filename, source);
-  }
-}
-
-function formatGenericError(err, filename) {
-  var msg = 'TransformError: ' + filename + ': ' + err.message;
-  var error = new TransformError();
-  var stack = (err.stack || '').split('\n').slice(0, -1);
-  stack.push(msg);
-  error.stack = stack.join('\n');
-  error.message = msg;
-  error.type = 'TransformError';
-  return error;
-}
+TransformError.__proto__ = SyntaxError.prototype;
 
 function formatEsprimaError(err, filename, source) {
+  if (!(err.lineNumber && err.column)) {
+    return err;
+  }
+
   var stack = err.stack.split('\n');
   stack.shift();
 

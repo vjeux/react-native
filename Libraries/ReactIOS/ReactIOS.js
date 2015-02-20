@@ -1,19 +1,13 @@
 /**
- * Copyright (c) 2015-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * Copyright 2004-present Facebook. All Rights Reserved.
  *
  * @providesModule ReactIOS
- * @flow
  */
+
 "use strict";
 
-var ReactChildren = require('ReactChildren');
-var ReactClass = require('ReactClass');
 var ReactComponent = require('ReactComponent');
+var ReactCompositeComponent = require('ReactCompositeComponent');
 var ReactContext = require('ReactContext');
 var ReactCurrentOwner = require('ReactCurrentOwner');
 var ReactElement = require('ReactElement');
@@ -21,23 +15,29 @@ var ReactElementValidator = require('ReactElementValidator');
 var ReactInstanceHandles = require('ReactInstanceHandles');
 var ReactIOSDefaultInjection = require('ReactIOSDefaultInjection');
 var ReactIOSMount = require('ReactIOSMount');
+var ReactLegacyElement = require('ReactLegacyElement');
 var ReactPropTypes = require('ReactPropTypes');
 
 var deprecated = require('deprecated');
 var invariant = require('invariant');
-var onlyChild = require('onlyChild');
 
 ReactIOSDefaultInjection.inject();
 
 var createElement = ReactElement.createElement;
 var createFactory = ReactElement.createFactory;
-var cloneElement = ReactElement.cloneElement;
 
 if (__DEV__) {
   createElement = ReactElementValidator.createElement;
   createFactory = ReactElementValidator.createFactory;
-  cloneElement = ReactElementValidator.cloneElement;
 }
+
+// TODO: Drop legacy elements once classes no longer export these factories
+createElement = ReactLegacyElement.wrapCreateElement(
+  createElement
+);
+createFactory = ReactLegacyElement.wrapCreateFactory(
+  createFactory
+);
 
 var resolveDefaultProps = function(element) {
   // Could be optimized, but not currently in heavy use.
@@ -51,7 +51,7 @@ var resolveDefaultProps = function(element) {
 };
 
 // Experimental optimized element creation
-var augmentElement = function(element: ReactElement) {
+var augmentElement = function(element) {
   if (__DEV__) {
     invariant(
       false,
@@ -67,31 +67,28 @@ var augmentElement = function(element: ReactElement) {
   return element;
 };
 
-var render = function(
-  element: ReactElement,
-  mountInto: number,
-  callback?: ?(() => void)
-): ?ReactComponent {
-  return ReactIOSMount.renderComponent(element, mountInto, callback);
+var render = function(component, mountInto) {
+  ReactIOSMount.renderComponent(component, mountInto);
 };
 
 var ReactIOS = {
   hasReactIOSInitialized: false,
-  Children: {
-    map: ReactChildren.map,
-    forEach: ReactChildren.forEach,
-    count: ReactChildren.count,
-    only: onlyChild
-  },
-  Component: ReactComponent,
   PropTypes: ReactPropTypes,
-  createClass: ReactClass.createClass,
+  createClass: ReactCompositeComponent.createClass,
   createElement: createElement,
   createFactory: createFactory,
-  cloneElement: cloneElement,
   _augmentElement: augmentElement,
   render: render,
   unmountComponentAtNode: ReactIOSMount.unmountComponentAtNode,
+  /**
+   * Used by the debugger.
+   */
+  __internals: {
+    Component: ReactComponent,
+    CurrentOwner: ReactCurrentOwner,
+    InstanceHandles: ReactInstanceHandles,
+    Mount: ReactIOSMount,
+  },
 
  // Hook for JSX spread, don't use this for anything else.
   __spread: Object.assign,
@@ -116,20 +113,5 @@ var ReactIOS = {
     ReactElement.isValidElement
   )
 };
-
-// Inject the runtime into a devtools global hook regardless of browser.
-// Allows for debugging when the hook is injected on the page.
-/* globals __REACT_DEVTOOLS_GLOBAL_HOOK__ */
-if (
-  typeof __REACT_DEVTOOLS_GLOBAL_HOOK__ !== 'undefined' &&
-  typeof __REACT_DEVTOOLS_GLOBAL_HOOK__.inject === 'function') {
-  __REACT_DEVTOOLS_GLOBAL_HOOK__.inject({
-    CurrentOwner: ReactCurrentOwner,
-    InstanceHandles: ReactInstanceHandles,
-    Mount: ReactIOSMount,
-    Reconciler: require('ReactReconciler'),
-    TextComponent: require('ReactIOSTextComponent'),
-  });
-}
 
 module.exports = ReactIOS;

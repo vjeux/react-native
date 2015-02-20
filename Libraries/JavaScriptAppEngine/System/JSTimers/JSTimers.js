@@ -1,10 +1,5 @@
 /**
- * Copyright (c) 2015-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * Copyright 2004-present Facebook. All Rights Reserved.
  *
  * @providesModule JSTimers
  */
@@ -12,7 +7,7 @@
 
 // Note that the module JSTimers is split into two in order to solve a cycle
 // in dependencies. NativeModules > BatchedBridge > MessageQueue > JSTimersExecution
-var RCTTiming = require('NativeModules').Timing;
+var RKTiming = require('NativeModules').RKTiming;
 var JSTimersExecution = require('JSTimersExecution');
 
 /**
@@ -48,7 +43,7 @@ var JSTimers = {
       return func.apply(undefined, args);
     };
     JSTimersExecution.types[freeIndex] = JSTimersExecution.Type.setTimeout;
-    RCTTiming.createTimer(newID, duration, Date.now(), /** recurring */ false);
+    RKTiming.createTimer(newID, duration, Date.now(), /** recurring */ false);
     return newID;
   },
 
@@ -65,7 +60,7 @@ var JSTimers = {
       return func.apply(undefined, args);
     };
     JSTimersExecution.types[freeIndex] = JSTimersExecution.Type.setInterval;
-    RCTTiming.createTimer(newID, duration, Date.now(), /** recurring */ true);
+    RKTiming.createTimer(newID, duration, Date.now(), /** recurring */ true);
     return newID;
   },
 
@@ -95,7 +90,7 @@ var JSTimers = {
     JSTimersExecution.timerIDs[freeIndex] = newID;
     JSTimersExecution.callbacks[freeIndex] = func;
     JSTimersExecution.types[freeIndex] = JSTimersExecution.Type.requestAnimationFrame;
-    RCTTiming.createTimer(newID, 1, Date.now(), /** recurring */ false);
+    RKTiming.createTimer(newID, 0, Date.now(), /** recurring */ false);
     return newID;
   },
 
@@ -131,7 +126,7 @@ var JSTimers = {
     if (index !== -1) {
       JSTimersExecution._clearIndex(index);
       if (JSTimersExecution.types[index] !== JSTimersExecution.Type.setImmediate) {
-        RCTTiming.deleteTimer(timerID);
+        RKTiming.deleteTimer(timerID);
       }
     }
   },

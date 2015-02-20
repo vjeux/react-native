@@ -1,10 +1,5 @@
 /**
- * Copyright (c) 2015-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * Copyright 2004-present Facebook. All Rights Reserved.
  *
  * Sets up global variables typical in most JavaScript environments.
  *
@@ -22,8 +17,16 @@
 /* eslint global-strict: 0 */
 /* globals GLOBAL: true, window: true */
 
-// Just to make sure the JS gets packaged up.
+var JSTimers = require('JSTimers');
+
+// Just to make sure the JS gets packaged up
 require('RCTDeviceEventEmitter');
+var ErrorUtils = require('ErrorUtils');
+var RKAlertManager = require('RKAlertManager');
+var RKExceptionsManager = require('NativeModules').RKExceptionsManager;
+
+var errorToString = require('errorToString');
+var loadSourceMap = require('loadSourceMap');
 
 if (typeof GLOBAL === 'undefined') {
   GLOBAL = this;
@@ -33,10 +36,33 @@ if (typeof window === 'undefined') {
   window = GLOBAL;
 }
 
-/**
- * The document must be shimmed before anything else that might define the
- * `ExecutionEnvironment` module (which checks for `document.createElement`).
- */
+function handleErrorWithRedBox(e) {
+  GLOBAL.console.error(
+    'Error: ' +
+    '\n stack: \n' + e.stack +
+    '\n URL: ' + e.sourceURL +
+    '\n line: ' + e.line +
+    '\n message: ' + e.message
+  );
+
+  if (RKExceptionsManager) {
+    RKExceptionsManager.reportUnhandledException(e.message, errorToString(e));
+    if (__DEV__) {
+      try {
+        var sourceMapInstance = loadSourceMap();
+        var prettyStack = errorToString(e, sourceMapInstance);
+        RKExceptionsManager.updateExceptionMessage(e.message, prettyStack);
+      } catch (ee) {
+        GLOBAL.console.error('#CLOWNTOWN (error while displaying error): ' + ee.message);
+      }
+    }
+  }
+}
+
+function setupRedBoxErrorHandler() {
+  ErrorUtils.setGlobalHandler(handleErrorWithRedBox);
+}
+
 function setupDocumentShim() {
   // The browser defines Text and Image globals by default. If you forget to
   // require them, then the error message is very confusing.
@@ -56,38 +82,24 @@ function setupDocumentShim() {
       throw getInvalidGlobalUseError('Image');
     }
   };
-  // Force `ExecutionEnvironment.canUseDOM` to be false.
-  if (GLOBAL.document) {
-    GLOBAL.document.createElement = null;
-  }
 
-  // There is no DOM so MutationObserver doesn't make sense. It is used
-  // as feature detection in Bluebird Promise implementation
-  GLOBAL.MutationObserver = undefined;
-}
-
-function handleErrorWithRedBox(e) {
-  try {
-    require('ExceptionsManager').handleException(e);
-  } catch(ee) {
-    console.log('Failed to print error: ', ee.message);
-  }
-}
-
-function setupRedBoxErrorHandler() {
-  var ErrorUtils = require('ErrorUtils');
-  ErrorUtils.setGlobalHandler(handleErrorWithRedBox);
+  GLOBAL.document = {
+    // This shouldn't be needed but scroller library fails without it. If
+    // we fixed the scroller, we wouldn't need this.
+    body: {},
+    // Workaround for setImmediate
+    createElement: function() {return {};}
+  };
 }
 
 /**
  * Sets up a set of window environment wrappers that ensure that the
  * BatchedBridge is flushed after each tick. In both the case of the
- * `UIWebView` based `RCTJavaScriptCaller` and `RCTContextCaller`, we
+ * `UIWebView` based `RKJavaScriptCaller` and `RKContextCaller`, we
  * implement our own custom timing bridge that should be immune to
  * unexplainably dropped timing signals.
  */
 function setupTimers() {
-  var JSTimers = require('JSTimers');
   GLOBAL.setTimeout = JSTimers.setTimeout;
   GLOBAL.setInterval = JSTimers.setInterval;
   GLOBAL.setImmediate = JSTimers.setImmediate;
@@ -102,7 +114,6 @@ function setupTimers() {
 }
 
 function setupAlert() {
-  var RCTAlertManager = require('NativeModules').AlertManager;
   if (!GLOBAL.alert) {
     GLOBAL.alert = function(text) {
       var alertOpts = {
@@ -110,7 +121,7 @@ function setupAlert() {
         message: '' + text,
         buttons: [{'cancel': 'Okay'}],
       };
-      RCTAlertManager.alertWithArgs(alertOpts, null);
+      RKAlertManager.alertWithArgs(alertOpts, null);
     };
   }
 }
@@ -128,15 +139,9 @@ function setupXHR() {
   GLOBAL.fetch = require('fetch');
 }
 
-function setupGeolocation() {
-  GLOBAL.navigator = GLOBAL.navigator || {};
-  GLOBAL.navigator.geolocation = require('Geolocation');
-}
-
-setupDocumentShim();
 setupRedBoxErrorHandler();
+setupDocumentShim();
 setupTimers();
 setupAlert();
 setupPromise();
 setupXHR();
-setupGeolocation();

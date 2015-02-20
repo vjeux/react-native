@@ -1,20 +1,15 @@
 /**
- * Copyright (c) 2015-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * Copyright 2004-present Facebook. All Rights Reserved.
  *
  * @providesModule ReactIOSDOMIDOperations
- * @flow
+ * @typechecks static-only
  */
 
 "use strict";
 
 var ReactIOSTagHandles = require('ReactIOSTagHandles');
 var ReactMultiChildUpdateTypes = require('ReactMultiChildUpdateTypes');
-var RCTUIManager = require('NativeModules').UIManager;
+var RKUIManager = require('NativeModulesDeprecated').RKUIManager;
 var ReactPerf = require('ReactPerf');
 
 /**
@@ -60,7 +55,7 @@ var dangerouslyProcessChildrenUpdates = function(childrenUpdates, markupList) {
   for (var updateParentTagString in byContainerTag) {
     var updateParentTagNumber = +updateParentTagString;
     var childUpdatesToSend = byContainerTag[updateParentTagNumber];
-    RCTUIManager.manageChildren(
+    RKUIManager.manageChildren(
       updateParentTagNumber,
       childUpdatesToSend.moveFromIndices,
       childUpdatesToSend.moveToIndices,
@@ -94,7 +89,7 @@ var ReactIOSDOMIDOperations = {
     'dangerouslyReplaceNodeWithMarkupByID',
     function(id, mountImage) {
       var oldTag = ReactIOSTagHandles.mostRecentMountedNodeHandleForRootNodeID(id);
-      RCTUIManager.replaceExistingNonRootView(oldTag, mountImage.tag);
+      RKUIManager.replaceExistingNonRootView(oldTag, mountImage.tag);
       ReactIOSTagHandles.associateRootNodeIDWithMountedNodeHandle(id, mountImage.tag);
     }
   ),

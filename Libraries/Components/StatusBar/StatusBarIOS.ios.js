@@ -1,39 +1,34 @@
 /**
- * Copyright (c) 2015-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * Copyright 2004-present Facebook. All Rights Reserved.
  *
  * @providesModule StatusBarIOS
  * @flow
  */
 'use strict';
 
-var RCTStatusBarManager = require('NativeModules').StatusBarManager;
+var { RKStatusBarManager } = require('NativeModules');
 
 var StatusBarIOS = {
 
   Style: {
-    default: RCTStatusBarManager.Style.default,
-    lightContent: RCTStatusBarManager.Style.lightContent
+    default: RKStatusBarManager.Style.default,
+    lightContent: RKStatusBarManager.Style.lightContent
   },
 
   Animation: {
-    none: RCTStatusBarManager.Animation.none,
-    fade: RCTStatusBarManager.Animation.fade,
-    slide: RCTStatusBarManager.Animation.slide,
+    none: RKStatusBarManager.Animation.none,
+    fade: RKStatusBarManager.Animation.fade,
+    slide: RKStatusBarManager.Animation.slide,
   },
 
-  setStyle(style: number, animated?: boolean) {
+  setStyle(style: number, animated: boolean) {
     animated = animated || false;
-    RCTStatusBarManager.setStyle(style, animated);
+    RKStatusBarManager.setStyle(style, animated);
   },
 
   setHidden(hidden: boolean, animation: number) {
     animation = animation || StatusBarIOS.Animation.none;
-    RCTStatusBarManager.setHidden(hidden, animation);
+    RKStatusBarManager.setHidden(hidden, animation);
   },
 };
 

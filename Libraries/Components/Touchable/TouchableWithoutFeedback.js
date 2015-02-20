@@ -1,18 +1,15 @@
 /**
- * Copyright (c) 2015-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * Copyright 2004-present Facebook. All Rights Reserved.
  *
  * @providesModule TouchableWithoutFeedback
- * @flow
  */
 'use strict';
 
 var React = require('React');
 var Touchable = require('Touchable');
+var View = require('View');
+
+var copyProperties = require('copyProperties');
 var onlyChild = require('onlyChild');
 
 /**
@@ -23,7 +20,6 @@ var onlyChild = require('onlyChild');
  */
 var PRESS_RECT_OFFSET = {top: 20, left: 20, right: 20, bottom: 30};
 
-type Event = Object;
 
 /**
  * Do not use unless you have a very good reason. All the elements that
@@ -34,10 +30,6 @@ var TouchableWithoutFeedback = React.createClass({
   mixins: [Touchable.Mixin],
 
   propTypes: {
-    /**
-     * Called when the touch is released, but not if cancelled (e.g. by a scroll
-     * that steals the responder lock).
-     */
     onPress: React.PropTypes.func,
     onPressIn: React.PropTypes.func,
     onPressOut: React.PropTypes.func,
@@ -52,7 +44,7 @@ var TouchableWithoutFeedback = React.createClass({
    * `Touchable.Mixin` self callbacks. The mixin will invoke these if they are
    * defined on your component.
    */
-  touchableHandlePress: function(e: Event) {
+  touchableHandlePress: function(e) {
     this.props.onPress && this.props.onPress(e);
   },
 
@@ -68,17 +60,18 @@ var TouchableWithoutFeedback = React.createClass({
     this.props.onLongPress && this.props.onLongPress();
   },
 
-  touchableGetPressRectOffset: function(): typeof PRESS_RECT_OFFSET {
+  touchableGetPressRectOffset: function() {
     return PRESS_RECT_OFFSET;   // Always make sure to predeclare a constant!
   },
 
-  touchableGetHighlightDelayMS: function(): number {
+  touchableGetHighlightDelayMS: function() {
     return 0;
   },
 
-  render: function(): ReactElement {
-    // Note(avik): remove dynamic typecast once Flow has been upgraded
-    return (React: any).cloneElement(onlyChild(this.props.children), {
+  render: function() {
+    // Note(vjeux): use cloneWithProps once React has been upgraded
+    var child = onlyChild(this.props.children);
+    copyProperties(child.props, {
       accessible: true,
       testID: this.props.testID,
       onStartShouldSetResponder: this.touchableHandleStartShouldSetResponder,
@@ -88,6 +81,7 @@ var TouchableWithoutFeedback = React.createClass({
       onResponderRelease: this.touchableHandleResponderRelease,
       onResponderTerminate: this.touchableHandleResponderTerminate
     });
+    return child;
   }
 });
 

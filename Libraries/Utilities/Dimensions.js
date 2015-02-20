@@ -1,21 +1,16 @@
 /**
- * Copyright (c) 2015-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * Copyright 2004-present Facebook. All Rights Reserved.
  *
  * @providesModule Dimensions
- * @flow
  */
 'use strict';
 
 var NativeModules = require('NativeModules');
 
 var invariant = require('invariant');
+var mergeInto = require('mergeInto');
 
-var dimensions = NativeModules.UIManager.Dimensions;
+var dimensions = NativeModules.RKUIManager.Dimensions;
 
 class Dimensions {
   /**
@@ -23,8 +18,8 @@ class Dimensions {
    *
    * @param {object} dims Simple string-keyed object of dimensions to set
    */
-  static set(dims: {[key:string]: any}): bool {
-    Object.assign(dimensions, dims);
+  static set(dims) {
+    mergeInto(dimensions, dims);
     return true;
   }
 
@@ -41,7 +36,7 @@ class Dimensions {
    * @param {string} dim Name of dimension as defined when calling `set`.
    * @returns {Object?} Value for the dimension.
    */
-  static get(dim: string): Object {
+  static get(dim) {
     invariant(dimensions[dim], 'No dimension set for key ' + dim);
     return dimensions[dim];
   }

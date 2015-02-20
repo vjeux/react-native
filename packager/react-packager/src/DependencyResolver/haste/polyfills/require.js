@@ -1,4 +1,3 @@
-/* eslint global-strict:0,eqeqeq:0,no-bitwise:0,no-undef:0 */
 (function(global) {
 
   // avoid redefining require()
@@ -196,7 +195,7 @@
     if (!module) {
       msg = 'Requiring unknown module "' + id + '"';
       if (__DEV__) {
-        msg += '. If you are sure the module is there, try restarting the packager.';
+        msg += '. It may not be loaded yet. Did you forget to run arc build?';
       }
       throw new ModuleError(msg);
     }
@@ -586,11 +585,15 @@
   _register('module', 0);
   _register('exports', 0);
 
+  _register('define', define);
   _register('global', global);
   _register('require', require);
   _register('requireDynamic', require);
   _register('requireLazy', requireLazy);
 
+  define.amd = {};
+
+  global.define = define;
   global.require = require;
   global.requireDynamic = require;
   global.requireLazy = requireLazy;

@@ -1,88 +1,51 @@
-/**
- * Copyright (c) 2015-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- */
 'use strict';
 
 var path = require('path');
+var FileWatcher = require('../../FileWatcher');
 var DependencyGraph = require('./DependencyGraph');
-var replacePatterns = require('./replacePatterns');
 var ModuleDescriptor = require('../ModuleDescriptor');
-var declareOpts = require('../../lib/declareOpts');
 
-var DEFINE_MODULE_CODE = [
-  '__d(',
-  '\'_moduleName_\',',
-  '_deps_,',
-  'function(global, require, requireDynamic, requireLazy, module, exports) {',
-  '  _code_',
-  '}',
-  ');',
-].join('');
+var DEFINE_MODULE_CODE =
+  '__d(' +
+    '\'_moduleName_\',' +
+    '_deps_,' +
+    'function(global, require, requireDynamic, requireLazy, module, exports) {'+
+    '  _code_' +
+    '}' +
+  ');';
 
 var DEFINE_MODULE_REPLACE_RE = /_moduleName_|_code_|_deps_/g;
 
-var validateOpts = declareOpts({
-  projectRoots: {
-    type: 'array',
-    required: true,
-  },
-  blacklistRE: {
-    type: 'object', // typeof regex is object
-  },
-  polyfillModuleNames: {
-    type: 'array',
-    default: [],
-  },
-  nonPersistent: {
-    type: 'boolean',
-    default: false,
-  },
-  moduleFormat: {
-    type: 'string',
-    default: 'haste',
-  },
-  assetRoots: {
-    type: 'array',
-    default: [],
-  },
-  fileWatcher: {
-    type: 'object',
-    required: true,
-  },
-});
+var REL_REQUIRE_STMT = /require\(['"]([\.\/0-9A-Z_$\-]*)['"]\)/gi;
 
-function HasteDependencyResolver(options) {
-  var opts = validateOpts(options);
+function HasteDependencyResolver(config) {
+  this._fileWatcher = config.nonPersistent
+    ? FileWatcher.createDummyWatcher()
+    : new FileWatcher(config.projectRoots);
 
   this._depGraph = new DependencyGraph({
-    roots: opts.projectRoots,
-    assetRoots_DEPRECATED: opts.assetRoots,
+    roots: config.projectRoots,
     ignoreFilePath: function(filepath) {
       return filepath.indexOf('__tests__') !== -1 ||
-        (opts.blacklistRE && opts.blacklistRE.test(filepath));
+        (config.blacklistRE && config.blacklistRE.test(filepath));
     },
-    fileWatcher: opts.fileWatcher,
+    fileWatcher: this._fileWatcher
   });
 
-
-  this._polyfillModuleNames = opts.polyfillModuleNames || [];
+  this._polyfillModuleNames = [
+    config.dev
+      ? path.join(__dirname, 'polyfills/prelude_dev.js')
+      : path.join(__dirname, 'polyfills/prelude.js'),
+    path.join(__dirname, 'polyfills/require.js'),
+    path.join(__dirname, 'polyfills/polyfills.js'),
+    path.join(__dirname, 'polyfills/console.js'),
+    path.join(__dirname, 'polyfills/error-guard.js'),
+  ].concat(
+    config.polyfillModuleNames || []
+  );
 }
 
-var getDependenciesValidateOpts = declareOpts({
-  dev: {
-    type: 'boolean',
-    default: true,
-  },
-});
-
-HasteDependencyResolver.prototype.getDependencies = function(main, options) {
-  var opts = getDependenciesValidateOpts(options);
-
+HasteDependencyResolver.prototype.getDependencies = function(main) {
   var depGraph = this._depGraph;
   var self = this;
 
@@ -91,7 +54,7 @@ HasteDependencyResolver.prototype.getDependencies = function(main, options) {
       var dependencies = depGraph.getOrderedDependencies(main);
       var mainModuleId = dependencies[0].id;
 
-      self._prependPolyfillDependencies(dependencies, opts.dev);
+      self._prependPolyfillDependencies(dependencies);
 
       return {
         mainModuleId: mainModuleId,
@@ -101,31 +64,22 @@ HasteDependencyResolver.prototype.getDependencies = function(main, options) {
 };
 
 HasteDependencyResolver.prototype._prependPolyfillDependencies = function(
-  dependencies,
-  isDev
+  dependencies
 ) {
-  var polyfillModuleNames = [
-   isDev
-      ? path.join(__dirname, 'polyfills/prelude_dev.js')
-      : path.join(__dirname, 'polyfills/prelude.js'),
-    path.join(__dirname, 'polyfills/require.js'),
-    path.join(__dirname, 'polyfills/polyfills.js'),
-    path.join(__dirname, 'polyfills/console.js'),
-    path.join(__dirname, 'polyfills/error-guard.js'),
-    path.join(__dirname, 'polyfills/String.prototype.es6.js'),
-  ].concat(this._polyfillModuleNames);
-
-  var polyfillModules = polyfillModuleNames.map(
-    function(polyfillModuleName, idx) {
-      return new ModuleDescriptor({
-        path: polyfillModuleName,
-        id: polyfillModuleName,
-        dependencies: polyfillModuleNames.slice(0, idx),
-        isPolyfill: true
-      });
-    }
-  );
-  dependencies.unshift.apply(dependencies, polyfillModules);
+  var polyfillModuleNames = this._polyfillModuleNames;
+  if (polyfillModuleNames.length > 0) {
+    var polyfillModules = polyfillModuleNames.map(
+      function(polyfillModuleName, idx) {
+        return new ModuleDescriptor({
+          path: polyfillModuleName,
+          id: polyfillModuleName,
+          dependencies: polyfillModuleNames.slice(0, idx),
+          isPolyfill: true
+        });
+      }
+    );
+    dependencies.unshift.apply(dependencies, polyfillModules);
+  }
 };
 
 HasteDependencyResolver.prototype.wrapModule = function(module, code) {
@@ -133,6 +87,7 @@ HasteDependencyResolver.prototype.wrapModule = function(module, code) {
     return code;
   }
 
+  var depGraph = this._depGraph;
   var resolvedDeps = Object.create(null);
   var resolvedDepsArr = [];
 
@@ -145,23 +100,27 @@ HasteDependencyResolver.prototype.wrapModule = function(module, code) {
     }
   }
 
-  var relativizeCode = function(codeMatch, pre, quot, depName, post) {
-    var depId = resolvedDeps[depName];
-    if (depId) {
-      return pre + quot + depId + post;
-    } else {
-      return codeMatch;
-    }
-  };
+  var relativizedCode =
+    code.replace(REL_REQUIRE_STMT, function(codeMatch, depName) {
+      var dep = resolvedDeps[depName];
+      if (dep != null) {
+        return 'require(\'' + dep + '\')';
+      } else {
+        return codeMatch;
+      }
+    });
 
   return DEFINE_MODULE_CODE.replace(DEFINE_MODULE_REPLACE_RE, function(key) {
     return {
       '_moduleName_': module.id,
-      '_code_': code.replace(replacePatterns.IMPORT_RE, relativizeCode)
-                    .replace(replacePatterns.REQUIRE_RE, relativizeCode),
+      '_code_': relativizedCode,
       '_deps_': JSON.stringify(resolvedDepsArr),
     }[key];
   });
+};
+
+HasteDependencyResolver.prototype.end = function() {
+  return this._fileWatcher.end();
 };
 
 HasteDependencyResolver.prototype.getDebugInfo = function() {

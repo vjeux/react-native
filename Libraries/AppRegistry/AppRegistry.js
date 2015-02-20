@@ -1,13 +1,7 @@
 /**
- * Copyright (c) 2015-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * Copyright 2004-present Facebook. All Rights Reserved.
  *
  * @providesModule AppRegistry
- * @flow
  */
 'use strict';
 
@@ -22,12 +16,6 @@ if (__DEV__) {
 
 var runnables = {};
 
-type AppConfig = {
-  appKey: string;
-  component: ReactClass<any, any, any>;
-  run?: Function;
-};
-
 /**
  * `AppRegistry` is the JS entry point to running all React Native apps.  App
  * root components should register themselves with
@@ -40,18 +28,17 @@ type AppConfig = {
  * `require`d.
  */
 var AppRegistry = {
-  registerConfig: function(config: Array<AppConfig>) {
+  registerConfig: function(config) {
     for (var i = 0; i < config.length; ++i) {
-      var appConfig = config[i];
-      if (appConfig.run) {
-        AppRegistry.registerRunnable(appConfig.appKey, appConfig.run);
+      if (config[i].run) {
+        AppRegistry.registerRunnable(config[i].appKey, config[i].run);
       } else {
-        AppRegistry.registerComponent(appConfig.appKey, appConfig.component);
+        AppRegistry.registerComponent(config[i].appKey, config[i].component);
       }
     }
   },
 
-  registerComponent: function(appKey: string, getComponentFunc: Function): string {
+  registerComponent: function(appKey, getComponentFunc) {
     runnables[appKey] = {
       run: (appParameters) =>
         renderApplication(getComponentFunc(), appParameters.initialProps, appParameters.rootTag)
@@ -59,19 +46,17 @@ var AppRegistry = {
     return appKey;
   },
 
-  registerRunnable: function(appKey: string, func: Function): string {
+  registerRunnable: function(appKey, func) {
     runnables[appKey] = {run: func};
     return appKey;
   },
 
-  runApplication: function(appKey: string, appParameters: any): void {
+  runApplication: function(appKey, appParameters) {
     console.log(
-      'Running application "' + appKey + '" with appParams: ' +
-      JSON.stringify(appParameters) + '. ' +
-      '__DEV__ === ' + __DEV__ +
-      ', development-level warning are ' + (__DEV__ ? 'ON' : 'OFF') +
-      ', performance optimizations are ' + (__DEV__ ? 'OFF' : 'ON')
+      'Running application "' + appKey + '" with appParams: ',
+      appParameters
     );
+
     invariant(
       runnables[appKey] && runnables[appKey].run,
       'Application ' + appKey + ' has not been registered.'

@@ -1,17 +1,7 @@
 /**
- * The examples provided by Facebook are for non-commercial testing and
- * evaluation purposes only.
+ * Copyright 2004-present Facebook. All Rights Reserved.
  *
- * Facebook reserves all rights not expressly granted.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
- * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NON INFRINGEMENT. IN NO EVENT SHALL
- * FACEBOOK BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
- * AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
- * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- *
- * @flow
+ * @providesModule TextInputExample
  */
 'use strict';
 
@@ -55,7 +45,7 @@ var TextEventsExample = React.createClass({
     return (
       <View>
         <TextInput
-          autoCapitalize="none"
+          autoCapitalize={TextInput.autoCapitalizeMode.none}
           placeholder="Enter text to see events"
           autoCorrect={false}
           onFocus={() => this.updateText('onFocus')}
@@ -133,25 +123,25 @@ exports.examples = [
         <View>
           <WithLabel label="none">
             <TextInput
-              autoCapitalize="none"
+              autoCapitalize={TextInput.autoCapitalizeMode.none}
               style={styles.default}
             />
           </WithLabel>
           <WithLabel label="sentences">
             <TextInput
-              autoCapitalize="sentences"
+              autoCapitalize={TextInput.autoCapitalizeMode.sentences}
               style={styles.default}
             />
           </WithLabel>
           <WithLabel label="words">
             <TextInput
-              autoCapitalize="words"
+              autoCapitalize={TextInput.autoCapitalizeMode.words}
               style={styles.default}
             />
           </WithLabel>
           <WithLabel label="characters">
             <TextInput
-              autoCapitalize="characters"
+              autoCapitalize={TextInput.autoCapitalizeMode.characters}
               style={styles.default}
             />
           </WithLabel>
@@ -175,91 +165,8 @@ exports.examples = [
     }
   },
   {
-    title: 'Keyboard types',
-    render: function() {
-      var keyboardTypes = [
-        'default',
-        'ascii-capable',
-        'numbers-and-punctuation',
-        'url',
-        'number-pad',
-        'phone-pad',
-        'name-phone-pad',
-        'email-address',
-        'decimal-pad',
-        'twitter',
-        'web-search',
-        'numeric',
-      ];
-      var examples = keyboardTypes.map((type) => {
-        return (
-          <WithLabel key={type} label={type}>
-            <TextInput
-              keyboardType={type}
-              style={styles.default}
-            />
-          </WithLabel>
-        );
-      });
-      return <View>{examples}</View>;
-    }
-  },
-  {
-    title: 'Return key types',
-    render: function() {
-      var returnKeyTypes = [
-        'default',
-        'go',
-        'google',
-        'join',
-        'next',
-        'route',
-        'search',
-        'send',
-        'yahoo',
-        'done',
-        'emergency-call',
-      ];
-      var examples = returnKeyTypes.map((type) => {
-        return (
-          <WithLabel key={type} label={type}>
-            <TextInput
-              returnKeyType={type}
-              style={styles.default}
-            />
-          </WithLabel>
-        );
-      });
-      return <View>{examples}</View>;
-    }
-  },
-  {
-    title: 'Enable return key automatically',
-    render: function() {
-      return (
-        <View>
-          <WithLabel label="true">
-            <TextInput enablesReturnKeyAutomatically={true} style={styles.default} />
-          </WithLabel>
-        </View>
-      );
-    }
-  },
-  {
-    title: 'Secure text entry',
-    render: function() {
-      return (
-        <View>
-          <WithLabel label="true">
-            <TextInput password={true} style={styles.default} value="abc" />
-          </WithLabel>
-        </View>
-      );
-    }
-  },
-  {
     title: 'Event handling',
-    render: function(): ReactElement { return <TextEventsExample /> },
+    render: () => <TextEventsExample />,
   },
   {
     title: 'Colored input text',
@@ -274,39 +181,6 @@ exports.examples = [
             style={[styles.default, {color: 'green'}]}
             value="Green"
           />
-        </View>
-      );
-    }
-  },
-  {
-    title: 'Clear button mode',
-    render: function () {
-      return (
-        <View>
-          <WithLabel label="never">
-            <TextInput
-              style={styles.default}
-              clearButtonMode="never"
-            />
-          </WithLabel>
-          <WithLabel label="while editing">
-            <TextInput
-              style={styles.default}
-              clearButtonMode="while-editing"
-            />
-          </WithLabel>
-          <WithLabel label="unless editing">
-            <TextInput
-              style={styles.default}
-              clearButtonMode="unless-editing"
-            />
-          </WithLabel>
-          <WithLabel label="always">
-            <TextInput
-              style={styles.default}
-              clearButtonMode="always"
-            />
-          </WithLabel>
         </View>
       );
     }

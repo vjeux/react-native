@@ -1,13 +1,7 @@
 /**
- * Copyright (c) 2015-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * Copyright 2004-present Facebook. All Rights Reserved.
  *
  * @providesModule ReactIOSViewAttributes
- * @flow
  */
 
 "use strict";
@@ -23,10 +17,10 @@ ReactIOSViewAttributes.UIView = {
   testID: true,
 };
 
-ReactIOSViewAttributes.RCTView = merge(
+ReactIOSViewAttributes.RKView = merge(
   ReactIOSViewAttributes.UIView, {
 
-  // This is a special performance property exposed by RCTView and useful for
+  // This is a special performance property exposed by RKView and useful for
   // scrolling content when there are many subviews, most of which are offscreen.
   // For this property to be effective, it must be applied to a view that contains
   // many subviews that extend outside its bound. The subviews must also have

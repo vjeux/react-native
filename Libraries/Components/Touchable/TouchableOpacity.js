@@ -1,22 +1,14 @@
 /**
- * Copyright (c) 2015-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * Copyright 2004-present Facebook. All Rights Reserved.
  *
  * @providesModule TouchableOpacity
  */
 'use strict';
 
-// Note (avik): add @flow when Flow supports spread properties in propTypes
-
 var NativeMethodsMixin = require('NativeMethodsMixin');
 var POPAnimationMixin = require('POPAnimationMixin');
 var React = require('React');
 var Touchable = require('Touchable');
-var TouchableWithoutFeedback = require('TouchableWithoutFeedback');
 
 var cloneWithProps = require('cloneWithProps');
 var ensureComponentIsNative = require('ensureComponentIsNative');
@@ -24,32 +16,36 @@ var keyOf = require('keyOf');
 var onlyChild = require('onlyChild');
 
 /**
- * A wrapper for making views respond properly to touches.
+ * TouchableOpacity - A wrapper for making views respond properly to touches.
  * On press down, the opacity of the wrapped view is decreased, dimming it.
  * This is done without actually changing the view hierarchy, and in general is
- * easy to add to an app without weird side-effects.
+ * easy to add to an app without weird side-effects.  Example:
  *
- * Example:
+ *   renderButton: function() {
+ *     return (
+ *       <TouchableOpacity onPress={this._onPressButton}>
+ *         <Image
+ *           style={styles.button}
+ *           source={ix('myButton')}
+ *         />
+ *       </View>
+ *     );
+ *   },
  *
- * ```
- * renderButton: function() {
- *   return (
- *     <TouchableOpacity onPress={this._onPressButton}>
- *       <Image
- *         style={styles.button}
- *         source={require('image!myButton')}
- *       />
- *     </TouchableOpacity>
- *   );
- * },
- * ```
+ * More example code in TouchableExample.js, and more in-depth discussion in
+ * Touchable.js.  See also TouchableHighlight.js and
+ * TouchableWithoutFeedback.js.
  */
 
 var TouchableOpacity = React.createClass({
   mixins: [Touchable.Mixin, NativeMethodsMixin, POPAnimationMixin],
 
   propTypes: {
-    ...TouchableWithoutFeedback.propTypes,
+    /**
+     * Called when the touch is released, but not if cancelled (e.g. by
+     * a scroll that steals the responder lock).
+     */
+    onPress: React.PropTypes.func,
     /**
      * Determines what the opacity of the wrapped view should be when touch is
      * active.
@@ -59,7 +55,7 @@ var TouchableOpacity = React.createClass({
 
   getDefaultProps: function() {
     return {
-      activeOpacity: 0.2,
+      activeOpacity: 0.5,
     };
   },
 
@@ -101,21 +97,15 @@ var TouchableOpacity = React.createClass({
     this.refs[CHILD_REF].setNativeProps({
       opacity: this.props.activeOpacity
     });
-    this.props.onPressIn && this.props.onPressIn();
   },
 
   touchableHandleActivePressOut: function() {
     this.setOpacityTo(1.0);
-    this.props.onPressOut && this.props.onPressOut();
   },
 
   touchableHandlePress: function() {
     this.setOpacityTo(1.0);
     this.props.onPress && this.props.onPress();
-  },
-
-  touchableHandleLongPress: function() {
-    this.props.onLongPress && this.props.onLongPress();
   },
 
   touchableGetPressRectOffset: function() {

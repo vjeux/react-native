@@ -1,17 +1,7 @@
 /**
- * The examples provided by Facebook are for non-commercial testing and
- * evaluation purposes only.
+ * Copyright 2004-present Facebook. All Rights Reserved.
  *
- * Facebook reserves all rights not expressly granted.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
- * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NON INFRINGEMENT. IN NO EVENT SHALL
- * FACEBOOK BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
- * AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
- * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- *
- * @flow
+ * @providesModule TouchableExample
  */
 'use strict';
 
@@ -22,7 +12,6 @@ var {
   StyleSheet,
   Text,
   TouchableHighlight,
-  TouchableOpacity,
   View,
 } = React;
 
@@ -65,15 +54,8 @@ exports.examples = [
   },
 }, {
   title: '<Text onPress={fn}> with highlight',
-  render: function(): ReactElement {
+  render: function() {
     return <TextOnPressBox />;
-  },
-}, {
-  title: 'Touchable feedback events',
-  description: '<Touchable*> components accept onPress, onPressIn, ' +
-    'onPressOut, and onLongPress as props.',
-  render: function(): ReactElement {
-    return <TouchableFeedbackEvents />;
   },
 }];
 
@@ -113,46 +95,11 @@ var TextOnPressBox = React.createClass({
   }
 });
 
-var TouchableFeedbackEvents = React.createClass({
-  getInitialState: function() {
-    return {
-      eventLog: [],
-    };
-  },
-  render: function() {
-    return (
-      <View>
-        <View style={[styles.row, {justifyContent: 'center'}]}>
-        <TouchableOpacity
-          style={styles.wrapper}
-          onPress={() => this._appendEvent('press')}
-          onPressIn={() => this._appendEvent('pressIn')}
-          onPressOut={() => this._appendEvent('pressOut')}
-          onLongPress={() => this._appendEvent('longPress')}>
-          <Text style={styles.button}>
-            Press Me
-          </Text>
-        </TouchableOpacity>
-      </View>
-        <View style={styles.eventLogBox}>
-          {this.state.eventLog.map((e, ii) => <Text key={ii}>{e}</Text>)}
-        </View>
-      </View>
-    );
-  },
-  _appendEvent: function(eventName) {
-    var limit = 6;
-    var eventLog = this.state.eventLog.slice(0, limit - 1);
-    eventLog.unshift(eventName);
-    this.setState({eventLog});
-  },
-});
-
 var heartImage = {uri: 'https://pbs.twimg.com/media/BlXBfT3CQAA6cVZ.png:small'};
 
 var styles = StyleSheet.create({
   row: {
-    justifyContent: 'center',
+    alignItems: 'center',
     flexDirection: 'row',
   },
   icon: {
@@ -165,9 +112,6 @@ var styles = StyleSheet.create({
   },
   text: {
     fontSize: 16,
-  },
-  button: {
-    color: '#007AFF',
   },
   wrapper: {
     borderRadius: 8,
@@ -183,16 +127,8 @@ var styles = StyleSheet.create({
     borderColor: '#f0f0f0',
     backgroundColor: '#f9f9f9',
   },
-  eventLogBox: {
-    padding: 10,
-    margin: 10,
-    height: 120,
-    borderWidth: 1 / PixelRatio.get(),
-    borderColor: '#f0f0f0',
-    backgroundColor: '#f9f9f9',
-  },
   textBlock: {
-    fontWeight: '500',
+    fontWeight: 'bold',
     color: 'blue',
   },
 });

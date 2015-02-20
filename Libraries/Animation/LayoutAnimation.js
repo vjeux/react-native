@@ -1,36 +1,28 @@
 /**
- * Copyright (c) 2015-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * Copyright 2004-present Facebook. All Rights Reserved.
  *
  * @providesModule LayoutAnimation
- * @flow
  */
 'use strict';
 
 var PropTypes = require('ReactPropTypes');
-var RCTUIManager = require('NativeModules').UIManager;
+var RKUIManager = require('NativeModules').RKUIManager;
 
 var createStrictShapeTypeChecker = require('createStrictShapeTypeChecker');
 var keyMirror = require('keyMirror');
 
-var TypesEnum = {
+var Types = keyMirror({
   spring: true,
   linear: true,
   easeInEaseOut: true,
   easeIn: true,
   easeOut: true,
-};
-var Types = keyMirror(TypesEnum);
+});
 
-var PropertiesEnum = {
+var Properties = keyMirror({
   opacity: true,
   scaleXY: true,
-};
-var Properties = keyMirror(PropertiesEnum);
+});
 
 var animChecker = createStrictShapeTypeChecker({
   duration: PropTypes.number,
@@ -45,15 +37,6 @@ var animChecker = createStrictShapeTypeChecker({
   ),
 });
 
-type Anim = {
-  duration?: number;
-  delay?: number;
-  springDamping?: number;
-  initialVelocity?: number;
-  type?: $Enum<typeof TypesEnum>;
-  property?: $Enum<typeof PropertiesEnum>;
-}
-
 var configChecker = createStrictShapeTypeChecker({
   duration: PropTypes.number.isRequired,
   create: animChecker,
@@ -61,56 +44,46 @@ var configChecker = createStrictShapeTypeChecker({
   delete: animChecker,
 });
 
-type Config = {
-  duration: number;
-  create?: Anim;
-  update?: Anim;
-  delete?: Anim;
-}
-
-function configureNext(config: Config, onAnimationDidEnd?: Function, onError?: Function) {
-  configChecker({config}, 'config', 'LayoutAnimation.configureNext');
-  RCTUIManager.configureNextLayoutAnimation(config, onAnimationDidEnd, onError);
-}
-
-function create(duration: number, type, creationProp): Config {
-  return {
-    duration,
-    create: {
-      type,
-      property: creationProp,
-    },
-    update: {
-      type,
-    },
-  };
-}
-
 var LayoutAnimation = {
-  configureNext,
-  create,
-  Types,
-  Properties,
-  configChecker: configChecker,
-  Presets: {
-    easeInEaseOut: create(
-      300, Types.easeInEaseOut, Properties.opacity
-    ),
-    linear: create(
-      500, Types.linear, Properties.opacity
-    ),
-    spring: {
-      duration: 700,
+  configureNext(config, onAnimationDidEnd, onError) {
+    configChecker({config}, 'config', 'LayoutAnimation.configureNext');
+    RKUIManager.configureNextLayoutAnimation(config, onAnimationDidEnd, onError);
+  },
+  create(duration, type, creationProp) {
+    return {
+      duration,
       create: {
-        type: Types.linear,
-        property: Properties.opacity,
+        type,
+        property: creationProp,
       },
       update: {
-        type: Types.spring,
-        springDamping: 0.4,
+        type,
       },
+    };
+  },
+  Types: Types,
+  Properties: Properties,
+  configChecker: configChecker,
+};
+
+LayoutAnimation.Presets = {
+  easeInEaseOut: LayoutAnimation.create(
+    0.3, Types.easeInEaseOut, Properties.opacity
+  ),
+  linear: LayoutAnimation.create(
+    0.5, Types.linear, Properties.opacity
+  ),
+  spring: {
+    duration: 0.7,
+    create: {
+      type: Types.linear,
+      property: Properties.opacity,
     },
-  }
+    update: {
+      type: Types.spring,
+      springDamping: 0.4,
+    },
+  },
 };
 
 module.exports = LayoutAnimation;

@@ -1,13 +1,7 @@
 /**
- * Copyright (c) 2015-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * Copyright 2004-present Facebook. All Rights Reserved.
  *
  * @providesModule MessageQueue
- * @flow
  */
 'use strict';
 var ErrorUtils = require('ErrorUtils');
@@ -18,18 +12,6 @@ var warning = require('warning');
 var JSTimersExecution = require('JSTimersExecution');
 
 var INTERNAL_ERROR = 'Error in MessageQueue implementation';
-
-type ModulesConfig = {
-  [key:string]: {
-    moduleID: number;
-    methods: {[key:string]: {
-      methodID: number;
-    }};
-  }
-}
-
-type NameToID = {[key:string]: number}
-type IDToName = {[key:number]: string}
 
 /**
  * So as not to confuse static build system.
@@ -58,11 +40,7 @@ var jsCall = function(module, methodName, params) {
  * efficient numeric IDs.
  * @class MessageQueue
  */
-var MessageQueue = function(
-  remoteModulesConfig: ModulesConfig,
-  localModulesConfig: ModulesConfig,
-  customRequire: (id: string) => any
-) {
+var MessageQueue = function(remoteModulesConfig, localModulesConfig, customRequire) {
   this._requireFunc = customRequire || requireFunc;
   this._initBookeeping();
   this._initNamingMap(remoteModulesConfig, localModulesConfig);
@@ -145,10 +123,7 @@ var MessageQueueMixin = {
    * @param {object} remoteModulesConfig Configuration of modules and their
    * methods.
    */
-  _initNamingMap: function(
-    remoteModulesConfig: ModulesConfig,
-    localModulesConfig: ModulesConfig
-  ) {
+  _initNamingMap: function(remoteModulesConfig, localModulesConfig) {
     this._remoteModuleNameToModuleID = {};
     this._remoteModuleIDToModuleName = {};         // Reverse
 
@@ -162,11 +137,11 @@ var MessageQueueMixin = {
     this._localModuleNameToMethodIDToName = {};   // Reverse
 
     function fillMappings(
-      modulesConfig: ModulesConfig,
-      moduleNameToModuleID: NameToID,
-      moduleIDToModuleName: IDToName,
-      moduleNameToMethodNameToID: {[key:string]: NameToID},
-      moduleNameToMethodIDToName: {[key:string]: IDToName}
+      modulesConfig,
+      moduleNameToModuleID,
+      moduleIDToModuleName,
+      moduleNameToMethodNameToID,
+      moduleNameToMethodIDToName
     ) {
       for (var moduleName in modulesConfig) {
         var moduleConfig = modulesConfig[moduleName];
@@ -440,6 +415,28 @@ var MessageQueueMixin = {
     return ret;
   },
 
+  callDeprecated: function(moduleName, methodName, params, cb, scope) {
+    invariant(
+      !cb || typeof cb === 'function',
+      'Last argument (callback) must be function'
+    );
+    // Store callback _before_ sending the request, just in case the MailBox
+    // returns the response in a blocking manner
+    if (cb) {
+      this._storeCallbacksInCurrentThread(null, cb, scope, this._POOLED_CBIDS);
+      params.push(this._POOLED_CBIDS.successCallbackID);
+    }
+    var moduleID = this._remoteModuleNameToModuleID[moduleName];
+    if (moduleID === undefined || moduleID === null) {
+      throw new Error('Unrecognized module name:' + moduleName);
+    }
+    var methodID = this._remoteModuleNameToMethodNameToID[moduleName][methodName];
+    if (methodID === undefined || moduleID === null) {
+      throw new Error('Unrecognized method name:' + methodName);
+    }
+    this._pushRequestToOutgoingItems(moduleID, methodID, params);
+  },
+
   call: function(moduleName, methodName, params, onFail, onSucc, scope) {
     invariant(
       (!onFail || typeof onFail === 'function') &&
@@ -448,9 +445,9 @@ var MessageQueueMixin = {
     );
     // Store callback _before_ sending the request, just in case the MailBox
     // returns the response in a blocking manner.
-    if (onSucc) {
+    if (onFail || onSucc) {
       this._storeCallbacksInCurrentThread(onFail, onSucc, scope, this._POOLED_CBIDS);
-      onFail && params.push(this._POOLED_CBIDS.errorCallbackID);
+      params.push(this._POOLED_CBIDS.errorCallbackID);
       params.push(this._POOLED_CBIDS.successCallbackID);
     }
     var moduleID = this._remoteModuleNameToModuleID[moduleName];
