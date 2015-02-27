@@ -7,26 +7,24 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		58B511A71A9E6C1300147676 /* libRCTText.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 58B5119B1A9E6C1200147676 /* libRCTText.a */; };
-		58B511CE1A9E6C5C00147676 /* RCTRawTextManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 58B511C71A9E6C5C00147676 /* RCTRawTextManager.m */; };
-		58B511CF1A9E6C5C00147676 /* RCTShadowRawText.m in Sources */ = {isa = PBXBuildFile; fileRef = 58B511C91A9E6C5C00147676 /* RCTShadowRawText.m */; };
-		58B511D01A9E6C5C00147676 /* RCTShadowText.m in Sources */ = {isa = PBXBuildFile; fileRef = 58B511CB1A9E6C5C00147676 /* RCTShadowText.m */; };
-		58B511D11A9E6C5C00147676 /* RCTTextManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 58B511CD1A9E6C5C00147676 /* RCTTextManager.m */; };
-		58B512161A9E6EFF00147676 /* RCTText.m in Sources */ = {isa = PBXBuildFile; fileRef = 58B512141A9E6EFF00147676 /* RCTText.m */; };
+		58B511691A9E6B3D00147676 /* libRCTNetworkImage.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 58B5115D1A9E6B3D00147676 /* libRCTNetworkImage.a */; };
+		58B5118F1A9E6BD600147676 /* RCTImageDownloader.m in Sources */ = {isa = PBXBuildFile; fileRef = 58B5118A1A9E6BD600147676 /* RCTImageDownloader.m */; };
+		58B511901A9E6BD600147676 /* RCTNetworkImageView.m in Sources */ = {isa = PBXBuildFile; fileRef = 58B5118C1A9E6BD600147676 /* RCTNetworkImageView.m */; };
+		58B511911A9E6BD600147676 /* RCTNetworkImageViewManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 58B5118E1A9E6BD600147676 /* RCTNetworkImageViewManager.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		58B511A81A9E6C1300147676 /* PBXContainerItemProxy */ = {
+		58B5116A1A9E6B3D00147676 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 58B511931A9E6C1200147676 /* Project object */;
+			containerPortal = 58B511551A9E6B3D00147676 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 58B5119A1A9E6C1200147676;
-			remoteInfo = RCTText;
+			remoteGlobalIDString = 58B5115C1A9E6B3D00147676;
+			remoteInfo = RCTNetworkImage;
 		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		58B511991A9E6C1200147676 /* CopyFiles */ = {
+		58B5115B1A9E6B3D00147676 /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "include/$(PRODUCT_NAME)";
@@ -38,61 +36,53 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		58B5119B1A9E6C1200147676 /* libRCTText.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libRCTText.a; sourceTree = BUILT_PRODUCTS_DIR; };
-		58B511A61A9E6C1300147676 /* RCTTextTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RCTTextTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		58B511C61A9E6C5C00147676 /* RCTRawTextManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RCTRawTextManager.h; sourceTree = "<group>"; };
-		58B511C71A9E6C5C00147676 /* RCTRawTextManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RCTRawTextManager.m; sourceTree = "<group>"; };
-		58B511C81A9E6C5C00147676 /* RCTShadowRawText.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RCTShadowRawText.h; sourceTree = "<group>"; };
-		58B511C91A9E6C5C00147676 /* RCTShadowRawText.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RCTShadowRawText.m; sourceTree = "<group>"; };
-		58B511CA1A9E6C5C00147676 /* RCTShadowText.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RCTShadowText.h; sourceTree = "<group>"; };
-		58B511CB1A9E6C5C00147676 /* RCTShadowText.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RCTShadowText.m; sourceTree = "<group>"; };
-		58B511CC1A9E6C5C00147676 /* RCTTextManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RCTTextManager.h; sourceTree = "<group>"; };
-		58B511CD1A9E6C5C00147676 /* RCTTextManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RCTTextManager.m; sourceTree = "<group>"; };
-		58B512141A9E6EFF00147676 /* RCTText.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RCTText.m; sourceTree = "<group>"; };
-		58B512151A9E6EFF00147676 /* RCTText.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RCTText.h; sourceTree = "<group>"; };
+		58B5115D1A9E6B3D00147676 /* libRCTNetworkImage.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libRCTNetworkImage.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		58B511681A9E6B3D00147676 /* RCTNetworkImageTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RCTNetworkImageTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		58B511891A9E6BD600147676 /* RCTImageDownloader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RCTImageDownloader.h; sourceTree = "<group>"; };
+		58B5118A1A9E6BD600147676 /* RCTImageDownloader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RCTImageDownloader.m; sourceTree = "<group>"; };
+		58B5118B1A9E6BD600147676 /* RCTNetworkImageView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RCTNetworkImageView.h; sourceTree = "<group>"; };
+		58B5118C1A9E6BD600147676 /* RCTNetworkImageView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RCTNetworkImageView.m; sourceTree = "<group>"; };
+		58B5118D1A9E6BD600147676 /* RCTNetworkImageViewManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RCTNetworkImageViewManager.h; sourceTree = "<group>"; };
+		58B5118E1A9E6BD600147676 /* RCTNetworkImageViewManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RCTNetworkImageViewManager.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		58B511981A9E6C1200147676 /* Frameworks */ = {
+		58B5115A1A9E6B3D00147676 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		58B511A31A9E6C1300147676 /* Frameworks */ = {
+		58B511651A9E6B3D00147676 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				58B511A71A9E6C1300147676 /* libRCTText.a in Frameworks */,
+				58B511691A9E6B3D00147676 /* libRCTNetworkImage.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		58B511921A9E6C1200147676 = {
+		58B511541A9E6B3D00147676 = {
 			isa = PBXGroup;
 			children = (
-				58B511C61A9E6C5C00147676 /* RCTRawTextManager.h */,
-				58B511C71A9E6C5C00147676 /* RCTRawTextManager.m */,
-				58B511C81A9E6C5C00147676 /* RCTShadowRawText.h */,
-				58B511C91A9E6C5C00147676 /* RCTShadowRawText.m */,
-				58B511CA1A9E6C5C00147676 /* RCTShadowText.h */,
-				58B511CB1A9E6C5C00147676 /* RCTShadowText.m */,
-				58B512151A9E6EFF00147676 /* RCTText.h */,
-				58B512141A9E6EFF00147676 /* RCTText.m */,
-				58B511CC1A9E6C5C00147676 /* RCTTextManager.h */,
-				58B511CD1A9E6C5C00147676 /* RCTTextManager.m */,
-				58B5119C1A9E6C1200147676 /* Products */,
+				58B511891A9E6BD600147676 /* RCTImageDownloader.h */,
+				58B5118A1A9E6BD600147676 /* RCTImageDownloader.m */,
+				58B5118B1A9E6BD600147676 /* RCTNetworkImageView.h */,
+				58B5118C1A9E6BD600147676 /* RCTNetworkImageView.m */,
+				58B5118D1A9E6BD600147676 /* RCTNetworkImageViewManager.h */,
+				58B5118E1A9E6BD600147676 /* RCTNetworkImageViewManager.m */,
+				58B5115E1A9E6B3D00147676 /* Products */,
 			);
 			sourceTree = "<group>";
 		};
-		58B5119C1A9E6C1200147676 /* Products */ = {
+		58B5115E1A9E6B3D00147676 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				58B5119B1A9E6C1200147676 /* libRCTText.a */,
-				58B511A61A9E6C1300147676 /* RCTTextTests.xctest */,
+				58B5115D1A9E6B3D00147676 /* libRCTNetworkImage.a */,
+				58B511681A9E6B3D00147676 /* RCTNetworkImageTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -100,78 +90,78 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		58B5119A1A9E6C1200147676 /* RCTText */ = {
+		58B5115C1A9E6B3D00147676 /* RCTNetworkImage */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 58B511AF1A9E6C1300147676 /* Build configuration list for PBXNativeTarget "RCTText" */;
+			buildConfigurationList = 58B511711A9E6B3D00147676 /* Build configuration list for PBXNativeTarget "RCTNetworkImage" */;
 			buildPhases = (
-				58B511971A9E6C1200147676 /* Sources */,
-				58B511981A9E6C1200147676 /* Frameworks */,
-				58B511991A9E6C1200147676 /* CopyFiles */,
+				58B511591A9E6B3D00147676 /* Sources */,
+				58B5115A1A9E6B3D00147676 /* Frameworks */,
+				58B5115B1A9E6B3D00147676 /* CopyFiles */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
-			name = RCTText;
-			productName = RCTText;
-			productReference = 58B5119B1A9E6C1200147676 /* libRCTText.a */;
+			name = RCTNetworkImage;
+			productName = RCTNetworkImage;
+			productReference = 58B5115D1A9E6B3D00147676 /* libRCTNetworkImage.a */;
 			productType = "com.apple.product-type.library.static";
 		};
-		58B511A51A9E6C1300147676 /* RCTTextTests */ = {
+		58B511671A9E6B3D00147676 /* RCTNetworkImageTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 58B511B21A9E6C1300147676 /* Build configuration list for PBXNativeTarget "RCTTextTests" */;
+			buildConfigurationList = 58B511741A9E6B3D00147676 /* Build configuration list for PBXNativeTarget "RCTNetworkImageTests" */;
 			buildPhases = (
-				58B511A21A9E6C1300147676 /* Sources */,
-				58B511A31A9E6C1300147676 /* Frameworks */,
-				58B511A41A9E6C1300147676 /* Resources */,
+				58B511641A9E6B3D00147676 /* Sources */,
+				58B511651A9E6B3D00147676 /* Frameworks */,
+				58B511661A9E6B3D00147676 /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				58B511A91A9E6C1300147676 /* PBXTargetDependency */,
+				58B5116B1A9E6B3D00147676 /* PBXTargetDependency */,
 			);
-			name = RCTTextTests;
-			productName = RCTTextTests;
-			productReference = 58B511A61A9E6C1300147676 /* RCTTextTests.xctest */;
+			name = RCTNetworkImageTests;
+			productName = RCTNetworkImageTests;
+			productReference = 58B511681A9E6B3D00147676 /* RCTNetworkImageTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		58B511931A9E6C1200147676 /* Project object */ = {
+		58B511551A9E6B3D00147676 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
 				LastUpgradeCheck = 0610;
 				ORGANIZATIONNAME = Facebook;
 				TargetAttributes = {
-					58B5119A1A9E6C1200147676 = {
+					58B5115C1A9E6B3D00147676 = {
 						CreatedOnToolsVersion = 6.1.1;
 					};
-					58B511A51A9E6C1300147676 = {
+					58B511671A9E6B3D00147676 = {
 						CreatedOnToolsVersion = 6.1.1;
 					};
 				};
 			};
-			buildConfigurationList = 58B511961A9E6C1200147676 /* Build configuration list for PBXProject "RCTText" */;
+			buildConfigurationList = 58B511581A9E6B3D00147676 /* Build configuration list for PBXProject "RCTNetworkImage" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
 			);
-			mainGroup = 58B511921A9E6C1200147676;
-			productRefGroup = 58B5119C1A9E6C1200147676 /* Products */;
+			mainGroup = 58B511541A9E6B3D00147676;
+			productRefGroup = 58B5115E1A9E6B3D00147676 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				58B5119A1A9E6C1200147676 /* RCTText */,
-				58B511A51A9E6C1300147676 /* RCTTextTests */,
+				58B5115C1A9E6B3D00147676 /* RCTNetworkImage */,
+				58B511671A9E6B3D00147676 /* RCTNetworkImageTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		58B511A41A9E6C1300147676 /* Resources */ = {
+		58B511661A9E6B3D00147676 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -181,19 +171,17 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		58B511971A9E6C1200147676 /* Sources */ = {
+		58B511591A9E6B3D00147676 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				58B511D11A9E6C5C00147676 /* RCTTextManager.m in Sources */,
-				58B511CE1A9E6C5C00147676 /* RCTRawTextManager.m in Sources */,
-				58B512161A9E6EFF00147676 /* RCTText.m in Sources */,
-				58B511CF1A9E6C5C00147676 /* RCTShadowRawText.m in Sources */,
-				58B511D01A9E6C5C00147676 /* RCTShadowText.m in Sources */,
+				58B5118F1A9E6BD600147676 /* RCTImageDownloader.m in Sources */,
+				58B511911A9E6BD600147676 /* RCTNetworkImageViewManager.m in Sources */,
+				58B511901A9E6BD600147676 /* RCTNetworkImageView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		58B511A21A9E6C1300147676 /* Sources */ = {
+		58B511641A9E6B3D00147676 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -203,15 +191,15 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		58B511A91A9E6C1300147676 /* PBXTargetDependency */ = {
+		58B5116B1A9E6B3D00147676 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 58B5119A1A9E6C1200147676 /* RCTText */;
-			targetProxy = 58B511A81A9E6C1300147676 /* PBXContainerItemProxy */;
+			target = 58B5115C1A9E6B3D00147676 /* RCTNetworkImage */;
+			targetProxy = 58B5116A1A9E6B3D00147676 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
-		58B511AD1A9E6C1300147676 /* Debug */ = {
+		58B5116F1A9E6B3D00147676 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -251,7 +239,7 @@
 			};
 			name = Debug;
 		};
-		58B511AE1A9E6C1300147676 /* Release */ = {
+		58B511701A9E6B3D00147676 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -285,7 +273,7 @@
 			};
 			name = Release;
 		};
-		58B511B01A9E6C1300147676 /* Debug */ = {
+		58B511721A9E6B3D00147676 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				HEADER_SEARCH_PATHS = (
@@ -299,7 +287,7 @@
 			};
 			name = Debug;
 		};
-		58B511B11A9E6C1300147676 /* Release */ = {
+		58B511731A9E6B3D00147676 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				HEADER_SEARCH_PATHS = (
@@ -313,7 +301,7 @@
 			};
 			name = Release;
 		};
-		58B511B31A9E6C1300147676 /* Debug */ = {
+		58B511751A9E6B3D00147676 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				FRAMEWORK_SEARCH_PATHS = (
@@ -324,20 +312,20 @@
 					"DEBUG=1",
 					"$(inherited)",
 				);
-				INFOPLIST_FILE = RCTTextTests/Info.plist;
+				INFOPLIST_FILE = RCTNetworkImageTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
 		};
-		58B511B41A9E6C1300147676 /* Release */ = {
+		58B511761A9E6B3D00147676 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(SDKROOT)/Developer/Library/Frameworks",
 					"$(inherited)",
 				);
-				INFOPLIST_FILE = RCTTextTests/Info.plist;
+				INFOPLIST_FILE = RCTNetworkImageTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -346,34 +334,34 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		58B511961A9E6C1200147676 /* Build configuration list for PBXProject "RCTText" */ = {
+		58B511581A9E6B3D00147676 /* Build configuration list for PBXProject "RCTNetworkImage" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				58B511AD1A9E6C1300147676 /* Debug */,
-				58B511AE1A9E6C1300147676 /* Release */,
+				58B5116F1A9E6B3D00147676 /* Debug */,
+				58B511701A9E6B3D00147676 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		58B511AF1A9E6C1300147676 /* Build configuration list for PBXNativeTarget "RCTText" */ = {
+		58B511711A9E6B3D00147676 /* Build configuration list for PBXNativeTarget "RCTNetworkImage" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				58B511B01A9E6C1300147676 /* Debug */,
-				58B511B11A9E6C1300147676 /* Release */,
+				58B511721A9E6B3D00147676 /* Debug */,
+				58B511731A9E6B3D00147676 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		58B511B21A9E6C1300147676 /* Build configuration list for PBXNativeTarget "RCTTextTests" */ = {
+		58B511741A9E6B3D00147676 /* Build configuration list for PBXNativeTarget "RCTNetworkImageTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				58B511B31A9E6C1300147676 /* Debug */,
-				58B511B41A9E6C1300147676 /* Release */,
+				58B511751A9E6B3D00147676 /* Debug */,
+				58B511761A9E6B3D00147676 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
-	rootObject = 58B511931A9E6C1200147676 /* Project object */;
+	rootObject = 58B511551A9E6B3D00147676 /* Project object */;
 }

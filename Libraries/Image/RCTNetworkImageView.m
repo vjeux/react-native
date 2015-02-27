@@ -1,18 +1,10 @@
-/**
- * Copyright (c) 2015-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- */
+// Copyright 2004-present Facebook. All Rights Reserved.
 
 #import "RCTNetworkImageView.h"
 
-#import "RCTConvert.h"
-#import "RCTGIFImage.h"
 #import "RCTImageDownloader.h"
 #import "RCTUtils.h"
+#import "RCTConvert.h"
 
 @implementation RCTNetworkImageView
 {
@@ -33,6 +25,11 @@
     self.userInteractionEnabled = NO;
   }
   return self;
+}
+
+- (instancetype)initWithFrame:(CGRect)frame
+{
+  RCT_NOT_DESIGNATED_INITIALIZER();
 }
 
 - (NSURL *)imageURL
@@ -61,24 +58,22 @@
     if ([imageURL.pathExtension caseInsensitiveCompare:@"gif"] == NSOrderedSame) {
       _downloadToken = [_imageDownloader downloadDataForURL:imageURL block:^(NSData *data, NSError *error) {
         if (data) {
-          dispatch_async(dispatch_get_main_queue(), ^{
-            CAKeyframeAnimation *animation = RCTGIFImageWithData(data);
-            self.layer.contentsScale = 1.0;
-            self.layer.minificationFilter = kCAFilterLinear;
-            self.layer.magnificationFilter = kCAFilterLinear;
-            [self.layer addAnimation:animation forKey:@"contents"];
-          });
+          CAKeyframeAnimation *animation = [RCTConvert GIF:data];
+          CGImageRef firstFrame = (__bridge CGImageRef)animation.values.firstObject;
+          self.layer.bounds = CGRectMake(0, 0, CGImageGetWidth(firstFrame), CGImageGetHeight(firstFrame));
+          self.layer.contentsScale = 1.0;
+          self.layer.contentsGravity = kCAGravityResizeAspect;
+          self.layer.minificationFilter = kCAFilterLinear;
+          self.layer.magnificationFilter = kCAFilterLinear;
+          [self.layer addAnimation:animation forKey:@"contents"];
         }
         // TODO: handle errors
       }];
     } else {
       _downloadToken = [_imageDownloader downloadImageForURL:imageURL size:self.bounds.size scale:RCTScreenScale() block:^(UIImage *image, NSError *error) {
         if (image) {
-          dispatch_async(dispatch_get_main_queue(), ^{
-            [self.layer removeAnimationForKey:@"contents"];
-            self.layer.contentsScale = image.scale;
-            self.layer.contents = (__bridge id)image.CGImage;
-          });
+          self.layer.contentsScale = image.scale;
+          self.layer.contents = (__bridge id)image.CGImage;
         }
         // TODO: handle errors
       }];

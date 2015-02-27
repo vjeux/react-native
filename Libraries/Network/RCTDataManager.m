@@ -1,80 +1,72 @@
-/**
- * Copyright (c) 2015-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- */
+// Copyright 2004-present Facebook. All Rights Reserved.
 
 #import "RCTDataManager.h"
 
 #import "RCTAssert.h"
-#import "RCTConvert.h"
 #import "RCTLog.h"
 #import "RCTUtils.h"
 
 @implementation RCTDataManager
 
-RCT_EXPORT_MODULE()
-
 /**
  * Executes a network request.
  * The responseSender block won't be called on same thread as called.
  */
-RCT_EXPORT_METHOD(queryData:(NSString *)queryType
-                  withQuery:(NSDictionary *)query
-                  queryHash:(__unused NSString *)queryHash
-                  responseSender:(RCTResponseSenderBlock)responseSender)
+- (void)executeQuery:(NSString *)queryType
+               query:(id)query
+           queryHash:(__unused NSString *)queryHash
+      responseSender:(RCTResponseSenderBlock)responseSender
 {
+  RCT_EXPORT(queryData);
+    
   if ([queryType isEqualToString:@"http"]) {
-
+    
+    // Parse query
+    NSDictionary *queryDict = query;
+    if ([query isKindOfClass:[NSString class]]) {
+      // TODO: it would be more efficient just to send a dictionary
+      queryDict = RCTJSONParse(query, NULL);
+    }
+    
     // Build request
-    NSURL *URL = [RCTConvert NSURL:query[@"url"]];
-    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:URL];
-    request.HTTPMethod = [RCTConvert NSString:query[@"method"]] ?: @"GET";
-    request.allHTTPHeaderFields = [RCTConvert NSDictionary:query[@"headers"]];
-    request.HTTPBody = [RCTConvert NSData:query[@"data"]];
+    NSURL *url = [NSURL URLWithString:queryDict[@"url"]];
+    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
+    request.HTTPMethod = queryDict[@"method"] ?: @"GET";
+    request.allHTTPHeaderFields = queryDict[@"headers"];
+    if ([queryDict[@"data"] isKindOfClass:[NSString class]]) {
+      request.HTTPBody = [queryDict[@"data"] dataUsingEncoding:NSUTF8StringEncoding];
+    }
 
     // Build data task
     NSURLSessionDataTask *task = [[NSURLSession sharedSession] dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *connectionError) {
-
+      
       // Build response
       NSDictionary *responseJSON;
       if (connectionError == nil) {
-        NSStringEncoding encoding = NSUTF8StringEncoding;
+        NSStringEncoding encoding;
         if (response.textEncodingName) {
           CFStringEncoding cfEncoding = CFStringConvertIANACharSetNameToEncoding((CFStringRef)response.textEncodingName);
           encoding = CFStringConvertEncodingToNSStringEncoding(cfEncoding);
+        } else {
+          encoding = NSUTF8StringEncoding;
         }
-        NSHTTPURLResponse *httpResponse = nil;
-        if ([response isKindOfClass:[NSHTTPURLResponse class]]) {
-          // Might be a local file request
-          httpResponse = (NSHTTPURLResponse *)response;
-        }
-        responseJSON = @{
-          @"status": @([httpResponse statusCode] ?: 200),
-          @"responseHeaders": [httpResponse allHeaderFields] ?: @{},
-          @"responseText": [[NSString alloc] initWithData:data encoding:encoding] ?: @""
-        };
+        NSString *returnData = [[NSString alloc] initWithData:data encoding:encoding];
+        responseJSON = @{@"status": @200, @"responseText": returnData};
       } else {
-        responseJSON = @{
-          @"status": @0,
-          @"responseHeaders": @{},
-          @"responseText": [connectionError localizedDescription]
-        };
+        responseJSON = @{@"status": @0, @"responseText": [connectionError localizedDescription]};
       }
-
+      
       // Send response (won't be sent on same thread as caller)
       responseSender(@[RCTJSONStringify(responseJSON, NULL)]);
-
+      
     }];
-
+    
     [task resume];
 
   } else {
-
-    RCTLogError(@"unsupported query type %@", queryType);
+    
+    RCTLogMustFix(@"unsupported query type %@", queryType);
+    return;
   }
 }
 

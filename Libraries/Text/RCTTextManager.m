@@ -1,11 +1,4 @@
-/**
- * Copyright (c) 2015-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- */
+// Copyright 2004-present Facebook. All Rights Reserved.
 
 #import "RCTTextManager.h"
 
@@ -16,11 +9,9 @@
 #import "RCTShadowText.h"
 #import "RCTSparseArray.h"
 #import "RCTText.h"
-#import "UIView+React.h"
+#import "UIView+ReactKit.h"
 
 @implementation RCTTextManager
-
-RCT_EXPORT_MODULE()
 
 - (UIView *)view
 {
@@ -32,54 +23,78 @@ RCT_EXPORT_MODULE()
   return [[RCTShadowText alloc] init];
 }
 
-#pragma mark - View properties
+RCT_REMAP_VIEW_PROPERTY(containerBackgroundColor, backgroundColor)
 
-RCT_REMAP_VIEW_PROPERTY(containerBackgroundColor, backgroundColor, UIColor)
-
-#pragma mark - Shadow properties
-
-RCT_EXPORT_SHADOW_PROPERTY(writingDirection, NSWritingDirection)
-RCT_EXPORT_SHADOW_PROPERTY(color, UIColor)
-RCT_EXPORT_SHADOW_PROPERTY(fontFamily, NSString)
-RCT_EXPORT_SHADOW_PROPERTY(fontSize, CGFloat)
-RCT_EXPORT_SHADOW_PROPERTY(fontWeight, NSString)
-RCT_EXPORT_SHADOW_PROPERTY(fontStyle, NSString)
-RCT_EXPORT_SHADOW_PROPERTY(isHighlighted, BOOL)
-RCT_EXPORT_SHADOW_PROPERTY(lineHeight, CGFloat)
-RCT_EXPORT_SHADOW_PROPERTY(maxNumberOfLines, NSInteger)
-RCT_EXPORT_SHADOW_PROPERTY(shadowOffset, CGSize)
-RCT_EXPORT_SHADOW_PROPERTY(textAlign, NSTextAlignment)
-RCT_REMAP_SHADOW_PROPERTY(backgroundColor, textBackgroundColor, UIColor)
-RCT_CUSTOM_SHADOW_PROPERTY(containerBackgroundColor, UIColor, RCTShadowText)
+- (void)set_textAlign:(id)json
+        forShadowView:(RCTShadowText *)shadowView
+      withDefaultView:(RCTShadowText *)defaultView
 {
-  view.backgroundColor = json ? [RCTConvert UIColor:json] : defaultView.backgroundColor;
-  view.isBGColorExplicitlySet = json ? YES : defaultView.isBGColorExplicitlySet;
+  shadowView.textAlign = json ? [RCTConvert NSTextAlignment:json] : defaultView.textAlign;
 }
-RCT_CUSTOM_SHADOW_PROPERTY(numberOfLines, NSInteger, RCTShadowText)
+
+- (void)set_numberOfLines:(id)json
+                  forView:(RCTText *)view
+          withDefaultView:(RCTText *)defaultView
 {
   NSLineBreakMode truncationMode = NSLineBreakByClipping;
-  view.maximumNumberOfLines = json ? [RCTConvert NSInteger:json] : defaultView.maximumNumberOfLines;
-  if (view.maximumNumberOfLines > 0) {
+  view.numberOfLines = json ? [RCTConvert NSInteger:json] : defaultView.numberOfLines;
+  if (view.numberOfLines > 0) {
     truncationMode = NSLineBreakByTruncatingTail;
   }
-  view.truncationMode = truncationMode;
+  view.lineBreakMode = truncationMode;
 }
 
+- (void)set_numberOfLines:(id)json
+            forShadowView:(RCTShadowText *)shadowView
+          withDefaultView:(RCTShadowText *)defaultView
+{
+  NSLineBreakMode truncationMode = NSLineBreakByClipping;
+  shadowView.maxNumberOfLines = json ? [RCTConvert NSInteger:json] : defaultView.maxNumberOfLines;
+  if (shadowView.maxNumberOfLines > 0) {
+    truncationMode = NSLineBreakByTruncatingTail;
+  }
+  shadowView.truncationMode = truncationMode;
+}
+
+- (void)set_backgroundColor:(id)json
+              forShadowView:(RCTShadowText *)shadowView
+            withDefaultView:(RCTShadowText *)defaultView
+{
+  shadowView.textBackgroundColor = json ? [RCTConvert UIColor:json] : defaultView.textBackgroundColor;
+}
+
+- (void)set_containerBackgroundColor:(id)json
+                       forShadowView:(RCTShadowText *)shadowView
+                     withDefaultView:(RCTShadowText *)defaultView
+{
+  shadowView.backgroundColor = json ? [RCTConvert UIColor:json] : defaultView.backgroundColor;
+  shadowView.isBGColorExplicitlySet = json ? YES : defaultView.isBGColorExplicitlySet;
+}
+
+// TODO: the purpose of this block is effectively just to copy properties from the shadow views
+// to their equivalent UIViews. In this case, the property being copied is the attributed text,
+// but the same principle could be used to copy any property. The implementation is really ugly tho
+// because the RCTViewManager doesn't retain a reference to the views that it manages, so it basically
+// has to search the entire view hierarchy for relevant views. Not awesome. This seems like something
+// where we could introduce a generic solution - perhaps a method on RCTShadowView that is called after
+// layout to copy its properties across?
 - (RCTViewManagerUIBlock)uiBlockToAmendWithShadowViewRegistry:(RCTSparseArray *)shadowViewRegistry
 {
   NSMutableArray *uiBlocks = [NSMutableArray new];
 
+  // TODO: are modules global, or specific to a given rootView?
   for (RCTShadowView *rootView in shadowViewRegistry.allObjects) {
     if (![rootView isReactRootView]) {
       // This isn't a root view
       continue;
     }
-
+    
     if (![rootView isTextDirty]) {
       // No text processing to be done
       continue;
     }
 
+    // TODO: this is a slightly weird way to do this - a recursive approach would be cleaner
     RCTSparseArray *reactTaggedAttributedStrings = [[RCTSparseArray alloc] init];
     NSMutableArray *queue = [NSMutableArray arrayWithObject:rootView];
     for (NSInteger i = 0; i < [queue count]; i++) {
@@ -114,19 +129,6 @@ RCT_CUSTOM_SHADOW_PROPERTY(numberOfLines, NSInteger, RCTShadowText)
     for (RCTViewManagerUIBlock shadowBlock in uiBlocks) {
       shadowBlock(uiManager, viewRegistry);
     }
-  };
-}
-
-- (RCTViewManagerUIBlock)uiBlockToAmendWithShadowView:(RCTShadowText *)shadowView
-{
-  NSNumber *reactTag = shadowView.reactTag;
-  UIEdgeInsets padding = shadowView.paddingAsInsets;
-
-  return ^(RCTUIManager *uiManager, RCTSparseArray *viewRegistry) {
-    RCTText *text = (RCTText *)viewRegistry[reactTag];
-    text.contentInset = padding;
-    text.layoutManager = shadowView.layoutManager;
-    text.textContainer = shadowView.textContainer;
   };
 }
 

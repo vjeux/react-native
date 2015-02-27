@@ -1,13 +1,8 @@
 /**
- * Copyright (c) 2015-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * Copyright 2004-present Facebook. All Rights Reserved.
  *
  * @providesModule Text
- * @flow
+ * @typechecks static-only
  */
 'use strict';
 
@@ -33,41 +28,45 @@ var viewConfig = {
 };
 
 /**
- * A react component for displaying text which supports nesting,
+ * <Text> - A react component for displaying text which supports nesting,
  * styling, and touch handling.  In the following example, the nested title and
  * body text will inherit the `fontFamily` from `styles.baseText`, but the title
  * provides its own additional styles.  The title and body will stack on top of
  * each other on account of the literal newlines:
  *
- * ```
- * renderText: function() {
- *   return (
- *     <Text style={styles.baseText}>
- *       <Text style={styles.titleText} onPress={this.onPressTitle}>
- *         {this.state.titleText + '\n\n'}
+ *   renderText: function() {
+ *     return (
+ *       <Text style={styles.baseText}>
+ *         <Text style={styles.titleText} onPress={this._onPressTitle}>
+ *           {this.state.titleText + '\n\n'}
+ *         </Text>
+ *         <Text numberOfLines={5}>
+ *           {this.state.bodyText}
+ *         </Text>
  *       </Text>
- *       <Text numberOfLines={5}>
- *         {this.state.bodyText}
- *       </Text>
- *     </Text>
- *   );
- * },
- * ...
- * var styles = StyleSheet.create({
- *   baseText: {
- *     fontFamily: 'Cochin',
+ *     );
  *   },
- *   titleText: {
- *     fontSize: 20,
- *     fontWeight: 'bold',
- *   },
- * };
- * ```
+ *   ...
+ *   var styles = StyleSheet.create({
+ *     baseText: {
+ *       fontFamily: 'Cochin',
+ *     },
+ *     titleText: {
+ *       fontSize: 20,
+ *       fontWeight: 'bold',
+ *     },
+ *   };
+ *
+ * More example code in `TextExample.ios.js`
  */
 
 var Text = React.createClass({
 
   mixins: [Touchable.Mixin, NativeMethodsMixin],
+
+  statics: {
+    stylePropType: stylePropType,
+  },
 
   propTypes: {
     /**
@@ -88,10 +87,6 @@ var Text = React.createClass({
      */
     suppressHighlighting: React.PropTypes.bool,
     style: stylePropType,
-    /**
-     * Used to locate this view in end-to-end tests.
-     */
-    testID: React.PropTypes.string,
   },
 
   viewConfig: viewConfig,
@@ -102,7 +97,7 @@ var Text = React.createClass({
     });
   },
 
-  onStartShouldSetResponder: function(): bool {
+  onStartShouldSetResponder: function() {
     var shouldSetFromProps = this.props.onStartShouldSetResponder &&
       this.props.onStartShouldSetResponder();
     return shouldSetFromProps || !!this.props.onPress;
@@ -111,7 +106,7 @@ var Text = React.createClass({
   /*
    * Returns true to allow responder termination
    */
-  handleResponderTerminationRequest: function(): bool {
+  handleResponderTerminationRequest: function() {
     // Allow touchable or props.onResponderTerminationRequest to deny
     // the request
     var allowTermination = this.touchableHandleResponderTerminationRequest();
@@ -121,25 +116,25 @@ var Text = React.createClass({
     return allowTermination;
   },
 
-  handleResponderGrant: function(e: SyntheticEvent, dispatchID: string) {
+  handleResponderGrant: function(e, dispatchID) {
     this.touchableHandleResponderGrant(e, dispatchID);
     this.props.onResponderGrant &&
       this.props.onResponderGrant.apply(this, arguments);
   },
 
-  handleResponderMove: function(e: SyntheticEvent) {
+  handleResponderMove: function(e) {
     this.touchableHandleResponderMove(e);
     this.props.onResponderMove &&
       this.props.onResponderMove.apply(this, arguments);
   },
 
-  handleResponderRelease: function(e: SyntheticEvent) {
+  handleResponderRelease: function(e) {
     this.touchableHandleResponderRelease(e);
     this.props.onResponderRelease &&
       this.props.onResponderRelease.apply(this, arguments);
   },
 
-  handleResponderTerminate: function(e: SyntheticEvent) {
+  handleResponderTerminate: function(e) {
     this.touchableHandleResponderTerminate(e);
     this.props.onResponderTerminate &&
       this.props.onResponderTerminate.apply(this, arguments);
@@ -167,7 +162,7 @@ var Text = React.createClass({
     this.props.onPress && this.props.onPress();
   },
 
-  touchableGetPressRectOffset: function(): RectOffset {
+  touchableGetPressRectOffset: function() {
     return PRESS_RECT_OFFSET;
   },
 
@@ -189,19 +184,12 @@ var Text = React.createClass({
     props.onResponderMove = this.handleResponderMove;
     props.onResponderRelease = this.handleResponderRelease;
     props.onResponderTerminate = this.handleResponderTerminate;
-    return <RCTText {...props} />;
+    return <RKText {...props} />;
   },
 });
 
-type RectOffset = {
-  top: number;
-  left: number;
-  right: number;
-  bottom: number;
-}
-
 var PRESS_RECT_OFFSET = {top: 20, left: 20, right: 20, bottom: 30};
 
-var RCTText = createReactIOSNativeComponentClass(viewConfig);
+var RKText = createReactIOSNativeComponentClass(viewConfig);
 
 module.exports = Text;

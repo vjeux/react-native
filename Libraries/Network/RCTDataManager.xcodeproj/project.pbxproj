@@ -7,26 +7,22 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		58B511A71A9E6C1300147676 /* libRCTText.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 58B5119B1A9E6C1200147676 /* libRCTText.a */; };
-		58B511CE1A9E6C5C00147676 /* RCTRawTextManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 58B511C71A9E6C5C00147676 /* RCTRawTextManager.m */; };
-		58B511CF1A9E6C5C00147676 /* RCTShadowRawText.m in Sources */ = {isa = PBXBuildFile; fileRef = 58B511C91A9E6C5C00147676 /* RCTShadowRawText.m */; };
-		58B511D01A9E6C5C00147676 /* RCTShadowText.m in Sources */ = {isa = PBXBuildFile; fileRef = 58B511CB1A9E6C5C00147676 /* RCTShadowText.m */; };
-		58B511D11A9E6C5C00147676 /* RCTTextManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 58B511CD1A9E6C5C00147676 /* RCTTextManager.m */; };
-		58B512161A9E6EFF00147676 /* RCTText.m in Sources */ = {isa = PBXBuildFile; fileRef = 58B512141A9E6EFF00147676 /* RCTText.m */; };
+		58B511E71A9E6C8500147676 /* libRCTDataManager.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 58B511DB1A9E6C8500147676 /* libRCTDataManager.a */; };
+		58B512081A9E6CE300147676 /* RCTDataManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 58B512071A9E6CE300147676 /* RCTDataManager.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		58B511A81A9E6C1300147676 /* PBXContainerItemProxy */ = {
+		58B511E81A9E6C8500147676 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 58B511931A9E6C1200147676 /* Project object */;
+			containerPortal = 58B511D31A9E6C8500147676 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 58B5119A1A9E6C1200147676;
-			remoteInfo = RCTText;
+			remoteGlobalIDString = 58B511DA1A9E6C8500147676;
+			remoteInfo = RCTDataManager;
 		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		58B511991A9E6C1200147676 /* CopyFiles */ = {
+		58B511D91A9E6C8500147676 /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "include/$(PRODUCT_NAME)";
@@ -38,61 +34,45 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		58B5119B1A9E6C1200147676 /* libRCTText.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libRCTText.a; sourceTree = BUILT_PRODUCTS_DIR; };
-		58B511A61A9E6C1300147676 /* RCTTextTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RCTTextTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		58B511C61A9E6C5C00147676 /* RCTRawTextManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RCTRawTextManager.h; sourceTree = "<group>"; };
-		58B511C71A9E6C5C00147676 /* RCTRawTextManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RCTRawTextManager.m; sourceTree = "<group>"; };
-		58B511C81A9E6C5C00147676 /* RCTShadowRawText.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RCTShadowRawText.h; sourceTree = "<group>"; };
-		58B511C91A9E6C5C00147676 /* RCTShadowRawText.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RCTShadowRawText.m; sourceTree = "<group>"; };
-		58B511CA1A9E6C5C00147676 /* RCTShadowText.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RCTShadowText.h; sourceTree = "<group>"; };
-		58B511CB1A9E6C5C00147676 /* RCTShadowText.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RCTShadowText.m; sourceTree = "<group>"; };
-		58B511CC1A9E6C5C00147676 /* RCTTextManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RCTTextManager.h; sourceTree = "<group>"; };
-		58B511CD1A9E6C5C00147676 /* RCTTextManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RCTTextManager.m; sourceTree = "<group>"; };
-		58B512141A9E6EFF00147676 /* RCTText.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RCTText.m; sourceTree = "<group>"; };
-		58B512151A9E6EFF00147676 /* RCTText.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RCTText.h; sourceTree = "<group>"; };
+		58B511DB1A9E6C8500147676 /* libRCTDataManager.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libRCTDataManager.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		58B511E61A9E6C8500147676 /* RCTDataManagerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RCTDataManagerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		58B512061A9E6CE300147676 /* RCTDataManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RCTDataManager.h; sourceTree = "<group>"; };
+		58B512071A9E6CE300147676 /* RCTDataManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RCTDataManager.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		58B511981A9E6C1200147676 /* Frameworks */ = {
+		58B511D81A9E6C8500147676 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		58B511A31A9E6C1300147676 /* Frameworks */ = {
+		58B511E31A9E6C8500147676 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				58B511A71A9E6C1300147676 /* libRCTText.a in Frameworks */,
+				58B511E71A9E6C8500147676 /* libRCTDataManager.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		58B511921A9E6C1200147676 = {
+		58B511D21A9E6C8500147676 = {
 			isa = PBXGroup;
 			children = (
-				58B511C61A9E6C5C00147676 /* RCTRawTextManager.h */,
-				58B511C71A9E6C5C00147676 /* RCTRawTextManager.m */,
-				58B511C81A9E6C5C00147676 /* RCTShadowRawText.h */,
-				58B511C91A9E6C5C00147676 /* RCTShadowRawText.m */,
-				58B511CA1A9E6C5C00147676 /* RCTShadowText.h */,
-				58B511CB1A9E6C5C00147676 /* RCTShadowText.m */,
-				58B512151A9E6EFF00147676 /* RCTText.h */,
-				58B512141A9E6EFF00147676 /* RCTText.m */,
-				58B511CC1A9E6C5C00147676 /* RCTTextManager.h */,
-				58B511CD1A9E6C5C00147676 /* RCTTextManager.m */,
-				58B5119C1A9E6C1200147676 /* Products */,
+				58B512061A9E6CE300147676 /* RCTDataManager.h */,
+				58B512071A9E6CE300147676 /* RCTDataManager.m */,
+				58B511DC1A9E6C8500147676 /* Products */,
 			);
 			sourceTree = "<group>";
 		};
-		58B5119C1A9E6C1200147676 /* Products */ = {
+		58B511DC1A9E6C8500147676 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				58B5119B1A9E6C1200147676 /* libRCTText.a */,
-				58B511A61A9E6C1300147676 /* RCTTextTests.xctest */,
+				58B511DB1A9E6C8500147676 /* libRCTDataManager.a */,
+				58B511E61A9E6C8500147676 /* RCTDataManagerTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -100,78 +80,78 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		58B5119A1A9E6C1200147676 /* RCTText */ = {
+		58B511DA1A9E6C8500147676 /* RCTDataManager */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 58B511AF1A9E6C1300147676 /* Build configuration list for PBXNativeTarget "RCTText" */;
+			buildConfigurationList = 58B511EF1A9E6C8500147676 /* Build configuration list for PBXNativeTarget "RCTDataManager" */;
 			buildPhases = (
-				58B511971A9E6C1200147676 /* Sources */,
-				58B511981A9E6C1200147676 /* Frameworks */,
-				58B511991A9E6C1200147676 /* CopyFiles */,
+				58B511D71A9E6C8500147676 /* Sources */,
+				58B511D81A9E6C8500147676 /* Frameworks */,
+				58B511D91A9E6C8500147676 /* CopyFiles */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
-			name = RCTText;
-			productName = RCTText;
-			productReference = 58B5119B1A9E6C1200147676 /* libRCTText.a */;
+			name = RCTDataManager;
+			productName = RCTDataManager;
+			productReference = 58B511DB1A9E6C8500147676 /* libRCTDataManager.a */;
 			productType = "com.apple.product-type.library.static";
 		};
-		58B511A51A9E6C1300147676 /* RCTTextTests */ = {
+		58B511E51A9E6C8500147676 /* RCTDataManagerTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 58B511B21A9E6C1300147676 /* Build configuration list for PBXNativeTarget "RCTTextTests" */;
+			buildConfigurationList = 58B511F21A9E6C8500147676 /* Build configuration list for PBXNativeTarget "RCTDataManagerTests" */;
 			buildPhases = (
-				58B511A21A9E6C1300147676 /* Sources */,
-				58B511A31A9E6C1300147676 /* Frameworks */,
-				58B511A41A9E6C1300147676 /* Resources */,
+				58B511E21A9E6C8500147676 /* Sources */,
+				58B511E31A9E6C8500147676 /* Frameworks */,
+				58B511E41A9E6C8500147676 /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				58B511A91A9E6C1300147676 /* PBXTargetDependency */,
+				58B511E91A9E6C8500147676 /* PBXTargetDependency */,
 			);
-			name = RCTTextTests;
-			productName = RCTTextTests;
-			productReference = 58B511A61A9E6C1300147676 /* RCTTextTests.xctest */;
+			name = RCTDataManagerTests;
+			productName = RCTDataManagerTests;
+			productReference = 58B511E61A9E6C8500147676 /* RCTDataManagerTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		58B511931A9E6C1200147676 /* Project object */ = {
+		58B511D31A9E6C8500147676 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
 				LastUpgradeCheck = 0610;
 				ORGANIZATIONNAME = Facebook;
 				TargetAttributes = {
-					58B5119A1A9E6C1200147676 = {
+					58B511DA1A9E6C8500147676 = {
 						CreatedOnToolsVersion = 6.1.1;
 					};
-					58B511A51A9E6C1300147676 = {
+					58B511E51A9E6C8500147676 = {
 						CreatedOnToolsVersion = 6.1.1;
 					};
 				};
 			};
-			buildConfigurationList = 58B511961A9E6C1200147676 /* Build configuration list for PBXProject "RCTText" */;
+			buildConfigurationList = 58B511D61A9E6C8500147676 /* Build configuration list for PBXProject "RCTDataManager" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
 			);
-			mainGroup = 58B511921A9E6C1200147676;
-			productRefGroup = 58B5119C1A9E6C1200147676 /* Products */;
+			mainGroup = 58B511D21A9E6C8500147676;
+			productRefGroup = 58B511DC1A9E6C8500147676 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				58B5119A1A9E6C1200147676 /* RCTText */,
-				58B511A51A9E6C1300147676 /* RCTTextTests */,
+				58B511DA1A9E6C8500147676 /* RCTDataManager */,
+				58B511E51A9E6C8500147676 /* RCTDataManagerTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		58B511A41A9E6C1300147676 /* Resources */ = {
+		58B511E41A9E6C8500147676 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -181,19 +161,15 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		58B511971A9E6C1200147676 /* Sources */ = {
+		58B511D71A9E6C8500147676 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				58B511D11A9E6C5C00147676 /* RCTTextManager.m in Sources */,
-				58B511CE1A9E6C5C00147676 /* RCTRawTextManager.m in Sources */,
-				58B512161A9E6EFF00147676 /* RCTText.m in Sources */,
-				58B511CF1A9E6C5C00147676 /* RCTShadowRawText.m in Sources */,
-				58B511D01A9E6C5C00147676 /* RCTShadowText.m in Sources */,
+				58B512081A9E6CE300147676 /* RCTDataManager.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		58B511A21A9E6C1300147676 /* Sources */ = {
+		58B511E21A9E6C8500147676 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -203,15 +179,15 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		58B511A91A9E6C1300147676 /* PBXTargetDependency */ = {
+		58B511E91A9E6C8500147676 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 58B5119A1A9E6C1200147676 /* RCTText */;
-			targetProxy = 58B511A81A9E6C1300147676 /* PBXContainerItemProxy */;
+			target = 58B511DA1A9E6C8500147676 /* RCTDataManager */;
+			targetProxy = 58B511E81A9E6C8500147676 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
-		58B511AD1A9E6C1300147676 /* Debug */ = {
+		58B511ED1A9E6C8500147676 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -251,7 +227,7 @@
 			};
 			name = Debug;
 		};
-		58B511AE1A9E6C1300147676 /* Release */ = {
+		58B511EE1A9E6C8500147676 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -285,7 +261,7 @@
 			};
 			name = Release;
 		};
-		58B511B01A9E6C1300147676 /* Debug */ = {
+		58B511F01A9E6C8500147676 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				HEADER_SEARCH_PATHS = (
@@ -299,7 +275,7 @@
 			};
 			name = Debug;
 		};
-		58B511B11A9E6C1300147676 /* Release */ = {
+		58B511F11A9E6C8500147676 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				HEADER_SEARCH_PATHS = (
@@ -313,7 +289,7 @@
 			};
 			name = Release;
 		};
-		58B511B31A9E6C1300147676 /* Debug */ = {
+		58B511F31A9E6C8500147676 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				FRAMEWORK_SEARCH_PATHS = (
@@ -324,20 +300,20 @@
 					"DEBUG=1",
 					"$(inherited)",
 				);
-				INFOPLIST_FILE = RCTTextTests/Info.plist;
+				INFOPLIST_FILE = RCTDataManagerTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
 		};
-		58B511B41A9E6C1300147676 /* Release */ = {
+		58B511F41A9E6C8500147676 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(SDKROOT)/Developer/Library/Frameworks",
 					"$(inherited)",
 				);
-				INFOPLIST_FILE = RCTTextTests/Info.plist;
+				INFOPLIST_FILE = RCTDataManagerTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -346,34 +322,34 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		58B511961A9E6C1200147676 /* Build configuration list for PBXProject "RCTText" */ = {
+		58B511D61A9E6C8500147676 /* Build configuration list for PBXProject "RCTDataManager" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				58B511AD1A9E6C1300147676 /* Debug */,
-				58B511AE1A9E6C1300147676 /* Release */,
+				58B511ED1A9E6C8500147676 /* Debug */,
+				58B511EE1A9E6C8500147676 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		58B511AF1A9E6C1300147676 /* Build configuration list for PBXNativeTarget "RCTText" */ = {
+		58B511EF1A9E6C8500147676 /* Build configuration list for PBXNativeTarget "RCTDataManager" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				58B511B01A9E6C1300147676 /* Debug */,
-				58B511B11A9E6C1300147676 /* Release */,
+				58B511F01A9E6C8500147676 /* Debug */,
+				58B511F11A9E6C8500147676 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		58B511B21A9E6C1300147676 /* Build configuration list for PBXNativeTarget "RCTTextTests" */ = {
+		58B511F21A9E6C8500147676 /* Build configuration list for PBXNativeTarget "RCTDataManagerTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				58B511B31A9E6C1300147676 /* Debug */,
-				58B511B41A9E6C1300147676 /* Release */,
+				58B511F31A9E6C8500147676 /* Debug */,
+				58B511F41A9E6C8500147676 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
-	rootObject = 58B511931A9E6C1200147676 /* Project object */;
+	rootObject = 58B511D31A9E6C8500147676 /* Project object */;
 }

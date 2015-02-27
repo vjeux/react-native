@@ -1,16 +1,10 @@
-/**
- * Copyright (c) 2015-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- */
+// Copyright 2004-present Facebook. All Rights Reserved.
 
 #import "RCTShadowText.h"
 
 #import "RCTConvert.h"
 #import "RCTLog.h"
+
 #import "RCTShadowRawText.h"
 #import "RCTUtils.h"
 
@@ -20,27 +14,16 @@ NSString *const RCTReactTagAttributeName = @"ReactTagAttributeName";
 static css_dim_t RCTMeasure(void *context, float width)
 {
   RCTShadowText *shadowText = (__bridge RCTShadowText *)context;
-
-  NSTextStorage *textStorage = [[NSTextStorage alloc] initWithAttributedString:[shadowText attributedString]];
-  [textStorage addLayoutManager:shadowText.layoutManager];
-
-  shadowText.textContainer.size = CGSizeMake(isnan(width) ? CGFLOAT_MAX : width, CGFLOAT_MAX);
-  shadowText.layoutManager.textStorage = textStorage;
-  [shadowText.layoutManager ensureLayoutForTextContainer:shadowText.textContainer];
-
-  CGSize computedSize = [shadowText.layoutManager usedRectForTextContainer:shadowText.textContainer].size;
-
-  [textStorage removeLayoutManager:shadowText.layoutManager];
-
+  CGSize computedSize = [[shadowText attributedString] boundingRectWithSize:(CGSize){isnan(width) ? CGFLOAT_MAX : width, CGFLOAT_MAX} options:NSStringDrawingUsesLineFragmentOrigin context:nil].size;
+  
   css_dim_t result;
   result.dimensions[CSS_WIDTH] = RCTCeilPixelValue(computedSize.width);
   result.dimensions[CSS_HEIGHT] = RCTCeilPixelValue(computedSize.height);
   return result;
 }
 
-@implementation RCTShadowText {
-  NSLayoutManager *_layoutManager;
-  NSTextContainer *_textContainer;
+@implementation RCTShadowText
+{
   NSAttributedString *_cachedAttributedString;
   UIFont *_font;
 }
@@ -50,15 +33,7 @@ static css_dim_t RCTMeasure(void *context, float width)
   if ((self = [super init])) {
     _fontSize = NAN;
     _isHighlighted = NO;
-
-    _textContainer = [[NSTextContainer alloc] init];
-    _textContainer.lineBreakMode = NSLineBreakByTruncatingTail;
-    _textContainer.lineFragmentPadding = 0.0;
-
-    _layoutManager = [[NSLayoutManager alloc] init];
-    [_layoutManager addTextContainer:_textContainer];
   }
-
   return self;
 }
 
@@ -66,14 +41,12 @@ static css_dim_t RCTMeasure(void *context, float width)
 {
   return [self _attributedStringWithFontFamily:nil
                                       fontSize:0
-                                    fontWeight:nil
-                                     fontStyle:nil];
+                                    fontWeight:nil];
 }
 
 - (NSAttributedString *)_attributedStringWithFontFamily:(NSString *)fontFamily
                                                fontSize:(CGFloat)fontSize
                                              fontWeight:(NSString *)fontWeight
-                                              fontStyle:(NSString *)fontStyle
 {
   if (![self isTextDirty] && _cachedAttributedString) {
     return _cachedAttributedString;
@@ -85,9 +58,6 @@ static css_dim_t RCTMeasure(void *context, float width)
   if (_fontWeight) {
     fontWeight = _fontWeight;
   }
-  if (_fontStyle) {
-    fontStyle = _fontStyle;
-  }
   if (_fontFamily) {
     fontFamily = _fontFamily;
   }
@@ -96,7 +66,7 @@ static css_dim_t RCTMeasure(void *context, float width)
   for (RCTShadowView *child in [self reactSubviews]) {
     if ([child isKindOfClass:[RCTShadowText class]]) {
       RCTShadowText *shadowText = (RCTShadowText *)child;
-      [attributedString appendAttributedString:[shadowText _attributedStringWithFontFamily:fontFamily fontSize:fontSize fontWeight:fontWeight fontStyle:fontStyle]];
+      [attributedString appendAttributedString:[shadowText _attributedStringWithFontFamily:fontFamily fontSize:fontSize fontWeight:fontWeight]];
     } else if ([child isKindOfClass:[RCTShadowRawText class]]) {
       RCTShadowRawText *shadowRawText = (RCTShadowRawText *)child;
       [attributedString appendAttributedString:[[NSAttributedString alloc] initWithString:[shadowRawText text] ?: @""]];
@@ -117,7 +87,7 @@ static css_dim_t RCTMeasure(void *context, float width)
     [self _addAttribute:NSBackgroundColorAttributeName withValue:self.textBackgroundColor toAttributedString:attributedString];
   }
 
-  _font = [RCTConvert UIFont:nil withFamily:fontFamily size:@(fontSize) weight:fontWeight style:fontStyle];
+  _font = [RCTConvert UIFont:nil withFamily:fontFamily size:@(fontSize) weight:fontWeight];
   [self _addAttribute:NSFontAttributeName withValue:_font toAttributedString:attributedString];
   [self _addAttribute:RCTReactTagAttributeName withValue:self.reactTag toAttributedString:attributedString];
   [self _setParagraphStyleOnAttributedString:attributedString];
@@ -131,7 +101,7 @@ static css_dim_t RCTMeasure(void *context, float width)
 
 - (UIFont *)font
 {
-  return _font ?: [RCTConvert UIFont:nil withFamily:_fontFamily size:@(_fontSize) weight:_fontWeight style:_fontStyle];
+  return _font ?: [RCTConvert UIFont:nil withFamily:_fontFamily size:@(_fontSize) weight:_fontWeight];
 }
 
 - (void)_addAttribute:(NSString *)attribute withValue:(id)attributeValue toAttributedString:(NSMutableAttributedString *)attributedString
@@ -170,6 +140,7 @@ static css_dim_t RCTMeasure(void *context, float width)
     }
   }];
 
+  // TODO: umm, these can'e be null, so we're mapping left to natural - is that right?
   self.textAlign = _textAlign ?: NSTextAlignmentNatural;
   self.writingDirection = _writingDirection ?: NSWritingDirectionNatural;
 
@@ -218,31 +189,11 @@ RCT_TEXT_PROPERTY(FontFamily, _fontFamily, NSString *);
 RCT_TEXT_PROPERTY(FontSize, _fontSize, CGFloat);
 RCT_TEXT_PROPERTY(FontWeight, _fontWeight, NSString *);
 RCT_TEXT_PROPERTY(LineHeight, _lineHeight, CGFloat);
+RCT_TEXT_PROPERTY(MaxNumberOfLines, _maxNumberOfLines, NSInteger);
 RCT_TEXT_PROPERTY(ShadowOffset, _shadowOffset, CGSize);
 RCT_TEXT_PROPERTY(TextAlign, _textAlign, NSTextAlignment);
+RCT_TEXT_PROPERTY(TruncationMode, _truncationMode, NSLineBreakMode);
 RCT_TEXT_PROPERTY(IsHighlighted, _isHighlighted, BOOL);
 RCT_TEXT_PROPERTY(Font, _font, UIFont *);
-
-- (NSLineBreakMode)truncationMode
-{
-  return _textContainer.lineBreakMode;
-}
-
-- (void)setTruncationMode:(NSLineBreakMode)truncationMode
-{
-  _textContainer.lineBreakMode = truncationMode;
-  [self dirtyText];
-}
-
-- (NSUInteger)maximumNumberOfLines
-{
-  return _textContainer.maximumNumberOfLines;
-}
-
-- (void)setMaximumNumberOfLines:(NSUInteger)maximumNumberOfLines
-{
-  _textContainer.maximumNumberOfLines = maximumNumberOfLines;
-  [self dirtyText];
-}
 
 @end
