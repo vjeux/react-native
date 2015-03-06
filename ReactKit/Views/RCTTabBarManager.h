@@ -2,6 +2,6 @@
 
 #import "RCTViewManager.h"
 
-@interface RCTStaticImageManager : RCTViewManager
+@interface RCTTabBarManager : RCTViewManager
 
 @end
