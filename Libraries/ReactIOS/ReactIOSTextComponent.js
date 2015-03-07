@@ -1,10 +1,5 @@
 /**
- * Copyright (c) 2015-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * Copyright 2004-present Facebook. All Rights Reserved.
  *
  * @providesModule ReactIOSTextComponent
  */
@@ -12,7 +7,7 @@
 'use strict';
 
 var ReactIOSTagHandles = require('ReactIOSTagHandles');
-var RCTUIManager = require('NativeModules').UIManager;
+var RKUIManager = require('NativeModulesDeprecated').RKUIManager;
 
 var assign = require('Object.assign');
 
@@ -32,7 +27,7 @@ assign(ReactIOSTextComponent.prototype, {
   mountComponent: function(rootID, transaction, context) {
     this._rootNodeID = rootID;
     var tag = ReactIOSTagHandles.allocateTag();
-    RCTUIManager.createView(tag, 'RCTRawText', {text: this._stringText});
+    RKUIManager.createView(tag, 'RCTRawText', {text: this._stringText});
     return {
       rootNodeID: rootID,
       tag: tag,
@@ -45,7 +40,7 @@ assign(ReactIOSTextComponent.prototype, {
       var nextStringText = '' + nextText;
       if (nextStringText !== this._stringText) {
         this._stringText = nextStringText;
-        RCTUIManager.updateView(
+        RKUIManager.updateView(
           ReactIOSTagHandles.mostRecentMountedNodeHandleForRootNodeID(
             this._rootNodeID
           ),
