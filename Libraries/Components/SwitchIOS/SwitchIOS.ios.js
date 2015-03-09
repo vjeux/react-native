@@ -1,15 +1,9 @@
 /**
- * Copyright (c) 2015-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * Copyright 2004-present Facebook. All Rights Reserved.
  *
  * @providesModule SwitchIOS
- * @flow
  *
- * This is a controlled component version of RCTSwitch.
+ * This is a controlled component version of RKSwitch.
  */
 'use strict';
 
@@ -23,13 +17,6 @@ var createReactIOSNativeComponentClass = require('createReactIOSNativeComponentC
 var merge = require('merge');
 
 var SWITCH = 'switch';
-
-type DefaultProps = {
-  value: boolean;
-  disabled: boolean;
-};
-
-type Event = Object;
 
 /**
  * Use `SwitchIOS` to render a boolean input on iOS.  This is
@@ -75,14 +62,14 @@ var SwitchIOS = React.createClass({
     tintColor: PropTypes.string,
   },
 
-  getDefaultProps: function(): DefaultProps {
+  getDefaultProps: function() {
     return {
       value: false,
       disabled: false,
     };
   },
 
-  _onChange: function(event: Event) {
+  _onChange: function(event) {
     this.props.onChange && this.props.onChange(event);
     this.props.onValueChange && this.props.onValueChange(event.nativeEvent.value);
 
@@ -93,7 +80,7 @@ var SwitchIOS = React.createClass({
 
   render: function() {
     return (
-      <RCTSwitch
+      <RKSwitch
         ref={SWITCH}
         style={[styles.rkSwitch, this.props.style]}
         enabled={!this.props.disabled}
@@ -122,7 +109,7 @@ var rkSwitchAttributes = merge(ReactIOSViewAttributes.UIView, {
   enabled: true,
 });
 
-var RCTSwitch = createReactIOSNativeComponentClass({
+var RKSwitch = createReactIOSNativeComponentClass({
   validAttributes: rkSwitchAttributes,
   uiViewClassName: 'RCTSwitch',
 });
