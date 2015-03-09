@@ -1,37 +1,31 @@
 /**
- * Copyright (c) 2015-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * Copyright 2004-present Facebook. All Rights Reserved.
  *
  * @providesModule ScrollView
- * @flow
  */
 'use strict';
 
-var EdgeInsetsPropType = require('EdgeInsetsPropType');
+var ArrayOfPropType = require('ArrayOfPropType');
 var Platform = require('Platform');
-var PointPropType = require('PointPropType');
-var RCTScrollView = require('NativeModules').UIManager.RCTScrollView;
+var RCTScrollView = require('NativeModules').RKUIManager.RCTScrollView;
 var RCTScrollViewConsts = RCTScrollView.Constants;
 var React = require('React');
 var ReactIOSTagHandles = require('ReactIOSTagHandles');
 var ReactIOSViewAttributes = require('ReactIOSViewAttributes');
-var RCTUIManager = require('NativeModules').UIManager;
+var RKUIManager = require('NativeModulesDeprecated').RKUIManager;
 var ScrollResponder = require('ScrollResponder');
+var ScrollViewPropTypes = require('ScrollViewPropTypes');
 var StyleSheet = require('StyleSheet');
 var StyleSheetPropType = require('StyleSheetPropType');
 var View = require('View');
 var ViewStylePropTypes = require('ViewStylePropTypes');
 
 var createReactIOSNativeComponentClass = require('createReactIOSNativeComponentClass');
-var deepDiffer = require('deepDiffer');
 var flattenStyle = require('flattenStyle');
-var insetsDiffer = require('insetsDiffer');
 var invariant = require('invariant');
-var pointsDiffer = require('pointsDiffer');
+var merge = require('merge');
+var nativePropType = require('nativePropType');
+var validAttributesFromPropTypes = require('validAttributesFromPropTypes');
 
 var PropTypes = React.PropTypes;
 
@@ -53,45 +47,39 @@ var keyboardDismissModeConstants = {
  */
 
 var ScrollView = React.createClass({
-  propTypes: {
-    automaticallyAdjustContentInsets: PropTypes.bool, // true
-    contentInset: EdgeInsetsPropType, // zeros
-    contentOffset: PointPropType, // zeros
-    onScroll: PropTypes.func,
-    onScrollAnimationEnd: PropTypes.func,
-    scrollEnabled: PropTypes.bool, // true
-    scrollIndicatorInsets: EdgeInsetsPropType, // zeros
-    showsHorizontalScrollIndicator: PropTypes.bool,
-    showsVerticalScrollIndicator: PropTypes.bool,
-    style: StyleSheetPropType(ViewStylePropTypes),
-    scrollEventThrottle: PropTypes.number, // null
 
-    /**
-     * When true, the scroll view bounces when it reaches the end of the
-     * content if the content is larger then the scroll view along the axis of
-     * the scroll direction. When false, it disables all bouncing even if
-     * the `alwaysBounce*` props are true. The default value is true.
-     */
-    bounces: PropTypes.bool,
+  // Only for compatibility with Android which is not yet up to date,
+  // DO NOT ADD NEW CALL SITES!
+  statics: {
+    keyboardDismissMode: {
+      None: 'none',
+      Interactive: 'interactive',
+      OnDrag: 'onDrag',
+    },
+  },
+
+  propTypes: {
+    ...ScrollViewPropTypes,
+
     /**
      * When true, the scroll view bounces horizontally when it reaches the end
      * even if the content is smaller than the scroll view itself. The default
      * value is true when `horizontal={true}` and false otherwise.
      */
-    alwaysBounceHorizontal: PropTypes.bool,
+    alwaysBounceHorizontal: nativePropType(PropTypes.bool),
     /**
      * When true, the scroll view bounces vertically when it reaches the end
      * even if the content is smaller than the scroll view itself. The default
      * value is false when `horizontal={true}` and true otherwise.
      */
-    alwaysBounceVertical: PropTypes.bool,
+    alwaysBounceVertical: nativePropType(PropTypes.bool),
     /**
      * When true, the scroll view automatically centers the content when the
      * content is smaller than the scroll view bounds; when the content is
      * larger than the scroll view, this property has no effect. The default
      * value is false.
      */
-    centerContent: PropTypes.bool,
+    centerContent: nativePropType(PropTypes.bool),
     /**
      * These styles will be applied to the scroll view content container which
      * wraps all of the child views. Example:
@@ -114,7 +102,7 @@ var ScrollView = React.createClass({
      *   - Normal: 0.998 (the default)
      *   - Fast: 0.9
      */
-    decelerationRate: PropTypes.number,
+    decelerationRate: nativePropType(PropTypes.number),
     /**
      * When true, the scroll view's children are arranged horizontally in a row
      * instead of vertically in a column. The default value is false.
@@ -139,26 +127,26 @@ var ScrollView = React.createClass({
      * taps, and the keyboard will not dismiss automatically. The default value
      * is false.
      */
-    keyboardShouldPersistTaps: PropTypes.bool,
+    keyboardShouldPersistTaps: nativePropType(PropTypes.bool),
     /**
      * The maximum allowed zoom scale. The default value is 1.0.
      */
-    maximumZoomScale: PropTypes.number,
+    maximumZoomScale: nativePropType(PropTypes.number),
     /**
      * The minimum allowed zoom scale. The default value is 1.0.
      */
-    minimumZoomScale: PropTypes.number,
+    minimumZoomScale: nativePropType(PropTypes.number),
     /**
      * When true, the scroll view stops on multiples of the scroll view's size
      * when scrolling. This can be used for horizontal pagination. The default
      * value is false.
      */
-    pagingEnabled: PropTypes.bool,
+    pagingEnabled: nativePropType(PropTypes.bool),
     /**
      * When true, the scroll view scrolls to top when the status bar is tapped.
      * The default value is true.
      */
-    scrollsToTop: PropTypes.bool,
+    scrollsToTop: nativePropType(PropTypes.bool),
     /**
      * An array of child indices determining which children get docked to the
      * top of the screen when scrolling. For example, passing
@@ -166,7 +154,7 @@ var ScrollView = React.createClass({
      * top of the scroll view. This property is not supported in conjunction
      * with `horizontal={true}`.
      */
-    stickyHeaderIndices: PropTypes.arrayOf(PropTypes.number),
+    stickyHeaderIndices: nativePropType(ArrayOfPropType(PropTypes.number)),
     /**
      * Experimental: When true, offscreen child views (whose `overflow` value is
      * `hidden`) are removed from their native backing superview when offscreen.
@@ -177,7 +165,7 @@ var ScrollView = React.createClass({
     /**
      * The current scale of the scroll view content. The default value is 1.0.
      */
-    zoomScale: PropTypes.number,
+    zoomScale: nativePropType(PropTypes.number),
   },
 
   mixins: [ScrollResponder.Mixin],
@@ -186,25 +174,17 @@ var ScrollView = React.createClass({
     return this.scrollResponderMixinGetInitialState();
   },
 
-  setNativeProps: function(props: Object) {
+  setNativeProps: function(props) {
     this.refs[SCROLLVIEW].setNativeProps(props);
   },
 
-  getInnerViewNode: function(): any {
+  getInnerViewNode: function() {
     return this.refs[INNERVIEW].getNodeHandle();
   },
 
-  scrollTo: function(destY?: number, destX?: number) {
-    RCTUIManager.scrollTo(
-      this.getNodeHandle(),
-      destX || 0,
-      destY || 0
-    );
-  },
-
-  scrollWithoutAnimationTo: function(destY?: number, destX?: number) {
-    RCTUIManager.scrollWithoutAnimationTo(
-      this.getNodeHandle(),
+  scrollTo: function(destY, destX) {
+    RKUIManager.scrollTo(
+      ReactIOSTagHandles.rootNodeIDToTag[this._rootNodeID],
       destX || 0,
       destY || 0
     );
@@ -218,7 +198,7 @@ var ScrollView = React.createClass({
     if (__DEV__ && this.props.style) {
       var style = flattenStyle(this.props.style);
       var childLayoutProps = ['alignItems', 'justifyContent']
-        .filter((prop) => style && style[prop] !== undefined);
+        .filter((prop) => style[prop] !== undefined);
       invariant(
         childLayoutProps.length === 0,
         'ScrollView child layout (' + JSON.stringify(childLayoutProps) +
@@ -226,12 +206,12 @@ var ScrollView = React.createClass({
       );
     }
     if (__DEV__) {
-      if (this.props.onScroll && !this.props.scrollEventThrottle) {
+      if (this.props.onScroll && !this.props.throttleScrollCallbackMS) {
         var onScroll = this.props.onScroll;
         this.props.onScroll = function() {
           console.log(
             'You specified `onScroll` on a <ScrollView> but not ' +
-            '`scrollEventThrottle`. You will only receive one event. ' +
+            '`throttleScrollCallbackMS`. You will only receive one event. ' +
             'Using `16` you get all the events but be aware that it may ' +
             'cause frame drops, use a bigger number if you don\'t need as ' +
             'much precision.'
@@ -259,31 +239,32 @@ var ScrollView = React.createClass({
         this.props.alwaysBounceVertical :
         !this.props.horizontal;
 
-    var props = {
-      ...this.props,
-      alwaysBounceHorizontal,
-      alwaysBounceVertical,
-      keyboardDismissMode: this.props.keyboardDismissMode ?
-        keyboardDismissModeConstants[this.props.keyboardDismissMode] :
-        undefined,
-      style: ([styles.base, this.props.style]: ?Array<any>),
-      onTouchStart: this.scrollResponderHandleTouchStart,
-      onTouchMove: this.scrollResponderHandleTouchMove,
-      onTouchEnd: this.scrollResponderHandleTouchEnd,
-      onScrollBeginDrag: this.scrollResponderHandleScrollBeginDrag,
-      onScrollEndDrag: this.scrollResponderHandleScrollEndDrag,
-      onMomentumScrollBegin: this.scrollResponderHandleMomentumScrollBegin,
-      onMomentumScrollEnd: this.scrollResponderHandleMomentumScrollEnd,
-      onStartShouldSetResponder: this.scrollResponderHandleStartShouldSetResponder,
-      onStartShouldSetResponderCapture: this.scrollResponderHandleStartShouldSetResponderCapture,
-      onScrollShouldSetResponder: this.scrollResponderHandleScrollShouldSetResponder,
-      onScroll: this.scrollResponderHandleScroll,
-      onResponderGrant: this.scrollResponderHandleResponderGrant,
-      onResponderTerminationRequest: this.scrollResponderHandleTerminationRequest,
-      onResponderTerminate: this.scrollResponderHandleTerminate,
-      onResponderRelease: this.scrollResponderHandleResponderRelease,
-      onResponderReject: this.scrollResponderHandleResponderReject,
-    };
+    var props = merge(
+      this.props, {
+        alwaysBounceHorizontal,
+        alwaysBounceVertical,
+        keyboardDismissMode: this.props.keyboardDismissMode ?
+          keyboardDismissModeConstants[this.props.keyboardDismissMode] :
+          undefined,
+        style: [styles.base, this.props.style],
+        onTouchStart: this.scrollResponderHandleTouchStart,
+        onTouchMove: this.scrollResponderHandleTouchMove,
+        onTouchEnd: this.scrollResponderHandleTouchEnd,
+        onScrollBeginDrag: this.scrollResponderHandleScrollBeginDrag,
+        onScrollEndDrag: this.scrollResponderHandleScrollEndDrag,
+        onMomentumScrollBegin: this.scrollResponderHandleMomentumScrollBegin,
+        onMomentumScrollEnd: this.scrollResponderHandleMomentumScrollEnd,
+        onStartShouldSetResponder: this.scrollResponderHandleStartShouldSetResponder,
+        onStartShouldSetResponderCapture: this.scrollResponderHandleStartShouldSetResponderCapture,
+        onScrollShouldSetResponder: this.scrollResponderHandleScrollShouldSetResponder,
+        onScroll: this.scrollResponderHandleScroll,
+        onResponderGrant: this.scrollResponderHandleResponderGrant,
+        onResponderTerminationRequest: this.scrollResponderHandleTerminationRequest,
+        onResponderTerminate: this.scrollResponderHandleTerminate,
+        onResponderRelease: this.scrollResponderHandleResponderRelease,
+        onResponderReject: this.scrollResponderHandleResponderReject,
+      }
+    );
 
     var ScrollViewClass;
     if (Platform.OS === 'ios') {
@@ -295,10 +276,6 @@ var ScrollView = React.createClass({
         ScrollViewClass = AndroidScrollView;
       }
     }
-    invariant(
-      ScrollViewClass !== undefined,
-      'ScrollViewClass must not be undefined'
-    );
 
     return (
       <ScrollViewClass {...props} ref={SCROLLVIEW}>
@@ -318,45 +295,28 @@ var styles = StyleSheet.create({
   },
 });
 
-var validAttributes = {
-  ...ReactIOSViewAttributes.UIView,
-  alwaysBounceHorizontal: true,
-  alwaysBounceVertical: true,
-  automaticallyAdjustContentInsets: true,
-  bounces: true,
-  centerContent: true,
-  contentInset: {diff: insetsDiffer},
-  contentOffset: {diff: pointsDiffer},
-  decelerationRate: true,
-  horizontal: true,
-  keyboardDismissMode: true,
-  keyboardShouldPersistTaps: true,
-  maximumZoomScale: true,
-  minimumZoomScale: true,
-  pagingEnabled: true,
-  removeClippedSubviews: true,
-  scrollEnabled: true,
-  scrollIndicatorInsets: {diff: insetsDiffer},
-  scrollsToTop: true,
-  showsHorizontalScrollIndicator: true,
-  showsVerticalScrollIndicator: true,
-  stickyHeaderIndices: {diff: deepDiffer},
-  scrollEventThrottle: true,
-  zoomScale: true,
-};
-
 if (Platform.OS === 'android') {
   var AndroidScrollView = createReactIOSNativeComponentClass({
-    validAttributes: validAttributes,
+    validAttributes: merge(
+      ReactIOSViewAttributes.UIView,
+      validAttributesFromPropTypes(ScrollView.propTypes)
+    ),
     uiViewClassName: 'AndroidScrollView',
   });
+
   var AndroidHorizontalScrollView = createReactIOSNativeComponentClass({
-    validAttributes: validAttributes,
+    validAttributes: merge(
+      ReactIOSViewAttributes.UIView,
+      validAttributesFromPropTypes(ScrollView.propTypes)
+    ),
     uiViewClassName: 'AndroidHorizontalScrollView',
   });
 } else if (Platform.OS === 'ios') {
   var RCTScrollView = createReactIOSNativeComponentClass({
-    validAttributes: validAttributes,
+    validAttributes: merge(
+      ReactIOSViewAttributes.UIView,
+      validAttributesFromPropTypes(ScrollView.propTypes)
+    ),
     uiViewClassName: 'RCTScrollView',
   });
 }
