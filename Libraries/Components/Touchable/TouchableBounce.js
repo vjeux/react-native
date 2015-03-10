@@ -1,29 +1,19 @@
 /**
- * Copyright (c) 2015-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * Copyright 2004-present Facebook. All Rights Reserved.
  *
  * @providesModule TouchableBounce
- * @flow
  */
 'use strict';
 
 var NativeMethodsMixin = require('NativeMethodsMixin');
 var React = require('React');
 var POPAnimation = require('POPAnimation');
-var AnimationExperimental = require('AnimationExperimental');
+var Animation = require('Animation');
 var Touchable = require('Touchable');
 
 var merge = require('merge');
 var copyProperties = require('copyProperties');
 var onlyChild = require('onlyChild');
-
-type State = {
-  animationID: ?number;
-};
 
 /**
  * When the scroll view is disabled, this defines how far your touch may move
@@ -52,17 +42,11 @@ var TouchableBounce = React.createClass({
     onPressAnimationComplete: React.PropTypes.func,
   },
 
-  getInitialState: function(): State {
+  getInitialState: function() {
     return merge(this.touchableGetInitialState(), {animationID: null});
   },
 
-  bounceTo: function(
-    value: number,
-    velocity: number,
-    bounciness: number,
-    fromValue?: ?number,
-    callback?: ?Function
-  ) {
+  bounceTo: function(value, velocity, bounciness, fromValue, callback) {
     if (POPAnimation) {
       this.state.animationID && this.removeAnimation(this.state.animationID);
       var anim = {
@@ -71,21 +55,20 @@ var TouchableBounce = React.createClass({
         toValue: [value, value],
         velocity: [velocity, velocity],
         springBounciness: bounciness,
-        fromValue: fromValue ? [fromValue, fromValue] : undefined,
       };
+      if (fromValue) {
+        anim.fromValue = [fromValue, fromValue];
+      }
       this.state.animationID = POPAnimation.createSpringAnimation(anim);
       this.addAnimation(this.state.animationID, callback);
     } else {
-      AnimationExperimental.startAnimation(
-        {
-          node: this,
-          duration: 300,
-          easing: 'easeOutBack',
-          property: 'scaleXY',
-          toValue: { x: value, y: value},
-        },
-        callback
-      );
+      Animation.startAnimation(this, 300, 0, 'easeOutBack', {scaleXY: [value, value]});
+      if (fromValue && typeof fromValue === 'function') {
+        callback = fromValue;
+      }
+      if (callback) {
+        setTimeout(callback, 300);
+      }
     }
   },
 
@@ -102,9 +85,8 @@ var TouchableBounce = React.createClass({
   },
 
   touchableHandlePress: function() {
-    var onPressWithCompletion = this.props.onPressWithCompletion;
-    if (onPressWithCompletion) {
-      onPressWithCompletion(
+    if (this.props.onPressWithCompletion) {
+      this.props.onPressWithCompletion(
         this.bounceTo.bind(this, 1, 10, 10, 0.93, this.props.onPressAnimationComplete)
       );
       return;
@@ -114,11 +96,11 @@ var TouchableBounce = React.createClass({
     this.props.onPress && this.props.onPress();
   },
 
-  touchableGetPressRectOffset: function(): typeof PRESS_RECT_OFFSET {
+  touchableGetPressRectOffset: function() {
     return PRESS_RECT_OFFSET;   // Always make sure to predeclare a constant!
   },
 
-  touchableGetHighlightDelayMS: function(): number {
+  touchableGetHighlightDelayMS: function() {
     return 0;
   },
 

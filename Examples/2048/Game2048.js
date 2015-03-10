@@ -1,15 +1,5 @@
 /**
- * The examples provided by Facebook are for non-commercial testing and
- * evaluation purposes only.
- *
- * Facebook reserves all rights not expressly granted.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
- * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NON INFRINGEMENT. IN NO EVENT SHALL
- * FACEBOOK BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
- * AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
- * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ * Copyright 2004-present Facebook. All Rights Reserved.
  *
  * @providesModule Game2048
  * @flow
@@ -18,27 +8,27 @@
 
 var React = require('react-native');
 var {
+  Animation,
   AppRegistry,
   StyleSheet,
   Text,
   View,
 } = React;
 
-var AnimationExperimental = require('AnimationExperimental');
-var GameBoard = require('GameBoard');
+var GameBoard = require('./GameBoard');
 var TouchableBounce = require('TouchableBounce');
 
 var BOARD_PADDING = 3;
 var CELL_MARGIN = 4;
 var CELL_SIZE = 60;
 
-class Cell extends React.Component {
-  render() {
+var Cell = React.createClass({
+  render: function() {
     return <View style={styles.cell} />;
   }
-}
+});
 
-class Board extends React.Component {
+var Board = React.createClass({
   render() {
     return (
       <View style={styles.board}>
@@ -50,10 +40,12 @@ class Board extends React.Component {
       </View>
     );
   }
-}
+});
 
-class Tile extends React.Component {
-  calculateOffset(): {top: number; left: number; opacity: number} {
+var Tile = React.createClass({
+  mixins: [Animation.Mixin],
+
+  calculateOffset() {
     var tile = this.props.tile;
 
     var pos = (i) => {
@@ -67,36 +59,27 @@ class Tile extends React.Component {
     var offset = {
       top: pos(tile.toRow()),
       left: pos(tile.toColumn()),
-      opacity: 1,
     };
 
     if (tile.isNew()) {
       offset.opacity = 0;
     } else {
-      var point = {
-        x: animationPosition(tile.toColumn()),
-        y: animationPosition(tile.toRow()),
-      };
-      AnimationExperimental.startAnimation({
-        node: this.refs['this'],
-        duration: 100,
-        easing: 'easeInOutQuad',
-        property: 'position',
-        toValue: point,
-      });
+      var point = [
+        animationPosition(tile.toColumn()),
+        animationPosition(tile.toRow()),
+      ];
+      this.startAnimation('this', 100, 0, 'easeInOutQuad', {position: point});
     }
+
     return offset;
-  }
+  },
 
   componentDidMount() {
-    AnimationExperimental.startAnimation({
-      node: this.refs['this'],
-      duration: 100,
-      easing: 'easeInOutQuad',
-      property: 'opacity',
-      toValue: 1,
-    });
-  }
+    setTimeout(() => {
+      this.startAnimation('this', 300, 0, 'easeInOutQuad', {scaleXY: [1, 1]});
+      this.startAnimation('this', 100, 0, 'easeInOutQuad', {opacity: 1});
+    }, 0);
+  },
 
   render() {
     var tile = this.props.tile;
@@ -120,9 +103,9 @@ class Tile extends React.Component {
       </View>
     );
   }
-}
+});
 
-class GameEndOverlay extends React.Component {
+var GameEndOverlay = React.createClass({
   render() {
     var board = this.props.board;
 
@@ -144,35 +127,27 @@ class GameEndOverlay extends React.Component {
       </View>
     );
   }
-}
+});
 
-class Game2048 extends React.Component {
-  startX: number;
-  startY: number;
-
-  constructor(props) {
-    super(props);
-    this.state = {
-      board: new GameBoard(),
-    };
-    this.startX = 0;
-    this.startY = 0;
-  }
+var Game2048 = React.createClass({
+  getInitialState() {
+    return { board: new GameBoard() };
+  },
 
   restartGame() {
-    this.setState({board: new GameBoard()});
-  }
+    this.setState(this.getInitialState());
+  },
 
-  handleTouchStart(event: Object) {
+  handleTouchStart(event) {
     if (this.state.board.hasWon()) {
       return;
     }
 
     this.startX = event.nativeEvent.pageX;
     this.startY = event.nativeEvent.pageY;
-  }
+  },
 
-  handleTouchEnd(event: Object) {
+  handleTouchEnd(event) {
     if (this.state.board.hasWon()) {
       return;
     }
@@ -190,7 +165,7 @@ class Game2048 extends React.Component {
     if (direction !== -1) {
       this.setState({board: this.state.board.move(direction)});
     }
-  }
+  },
 
   render() {
     var tiles = this.state.board.tiles
@@ -200,16 +175,16 @@ class Game2048 extends React.Component {
     return (
       <View
         style={styles.container}
-        onTouchStart={(event) => this.handleTouchStart(event)}
-        onTouchEnd={(event) => this.handleTouchEnd(event)}>
+        onTouchStart={this.handleTouchStart}
+        onTouchEnd={this.handleTouchEnd}>
         <Board>
           {tiles}
         </Board>
-        <GameEndOverlay board={this.state.board} onRestart={() => this.restartGame()} />
+        <GameEndOverlay board={this.state.board} onRestart={this.restartGame} />
       </View>
     );
   }
-}
+});
 
 var styles = StyleSheet.create({
   container: {
@@ -246,7 +221,7 @@ var styles = StyleSheet.create({
   tryAgainText: {
     color: '#ffffff',
     fontSize: 20,
-    fontWeight: '500',
+    fontWeight: 'bold',
   },
   cell: {
     width: CELL_SIZE,
@@ -272,7 +247,7 @@ var styles = StyleSheet.create({
     fontSize: 24,
     color: '#776666',
     fontFamily: 'Verdana',
-    fontWeight: '500',
+    fontWeight: 'bold',
   },
   tile2: {
     backgroundColor: '#eeeeee',
