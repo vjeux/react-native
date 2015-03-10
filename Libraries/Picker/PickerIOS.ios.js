@@ -1,14 +1,9 @@
 /**
- * Copyright (c) 2015-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * Copyright 2004-present Facebook. All Rights Reserved.
  *
  * @providesModule PickerIOS
  *
- * This is a controlled component version of RCTPickerIOS
+ * This is a controlled component version of RKPickerIOS
  */
 'use strict';
 
@@ -16,7 +11,7 @@ var NativeMethodsMixin = require('NativeMethodsMixin');
 var React = require('React');
 var ReactChildren = require('ReactChildren');
 var ReactIOSViewAttributes = require('ReactIOSViewAttributes');
-var RCTPickerIOSConsts = require('NativeModules').UIManager.RCTPicker.Constants;
+var RKPickerIOSConsts = require('NativeModules').RKUIManager.RCTPicker.Constants;
 var StyleSheet = require('StyleSheet');
 var View = require('View');
 
@@ -42,7 +37,7 @@ var PickerIOS = React.createClass({
     this.setState(this._stateFromProps(nextProps));
   },
 
-  // Translate PickerIOS prop and children into stuff that RCTPickerIOS understands.
+  // Translate PickerIOS prop and children into stuff that RKPickerIOS understands.
   _stateFromProps: function(props) {
     var selectedIndex = 0;
     var items = [];
@@ -58,7 +53,7 @@ var PickerIOS = React.createClass({
   render: function() {
     return (
       <View style={this.props.style}>
-        <RCTPickerIOS
+        <RKPickerIOS
           ref={PICKER}
           style={styles.rkPickerIOS}
           items={this.state.items}
@@ -108,7 +103,7 @@ var styles = StyleSheet.create({
     // The picker will conform to whatever width is given, but we do
     // have to set the component's height explicitly on the
     // surrounding view to ensure it gets rendered.
-    height: RCTPickerIOSConsts.ComponentHeight,
+    height: RKPickerIOSConsts.ComponentHeight,
   },
 });
 
@@ -117,7 +112,7 @@ var rkPickerIOSAttributes = merge(ReactIOSViewAttributes.UIView, {
   selectedIndex: true,
 });
 
-var RCTPickerIOS = createReactIOSNativeComponentClass({
+var RKPickerIOS = createReactIOSNativeComponentClass({
   validAttributes: rkPickerIOSAttributes,
   uiViewClassName: 'RCTPicker',
 });
