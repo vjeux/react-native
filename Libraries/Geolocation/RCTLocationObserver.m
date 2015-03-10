@@ -1,11 +1,4 @@
-/**
- * Copyright (c) 2015-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- */
+// Copyright 2004-present Facebook. All Rights Reserved.
 
 #import "RCTLocationObserver.h"
 
@@ -99,8 +92,6 @@ static NSDictionary *RCTPositionError(RCTPositionErrorCode code, NSString *msg /
   RCTLocationOptions _observerOptions;
 }
 
-RCT_EXPORT_MODULE()
-
 @synthesize bridge = _bridge;
 
 #pragma mark - Lifecycle
@@ -153,9 +144,9 @@ RCT_EXPORT_MODULE()
 
 #pragma mark - Public API
 
-RCT_EXPORT_METHOD(startObserving:(NSDictionary *)optionsJSON)
+- (void)startObserving:(NSDictionary *)optionsJSON
 {
-  [self checkLocationConfig];
+  RCT_EXPORT();
 
   dispatch_async(dispatch_get_main_queue(), ^{
 
@@ -172,8 +163,10 @@ RCT_EXPORT_METHOD(startObserving:(NSDictionary *)optionsJSON)
   });
 }
 
-RCT_EXPORT_METHOD(stopObserving)
+- (void)stopObserving
 {
+  RCT_EXPORT();
+
   dispatch_async(dispatch_get_main_queue(), ^{
 
     // Stop observing
@@ -187,11 +180,11 @@ RCT_EXPORT_METHOD(stopObserving)
   });
 }
 
-RCT_EXPORT_METHOD(getCurrentPosition:(NSDictionary *)optionsJSON
-                  withSuccessCallback:(RCTResponseSenderBlock)successBlock
-                  errorCallback:(RCTResponseSenderBlock)errorBlock)
+- (void)getCurrentPosition:(RCTResponseSenderBlock)successBlock
+         withErrorCallback:(RCTResponseSenderBlock)errorBlock
+                   options:(NSDictionary *)optionsJSON
 {
-  [self checkLocationConfig];
+  RCT_EXPORT();
 
   if (!successBlock) {
     RCTLogError(@"%@.getCurrentPosition called with nil success parameter.", [self class]);
@@ -209,7 +202,7 @@ RCT_EXPORT_METHOD(getCurrentPosition:(NSDictionary *)optionsJSON
       }
     }
 
-    if ([CLLocationManager authorizationStatus] == kCLAuthorizationStatusDenied) {
+    if (![CLLocationManager authorizationStatus] == kCLAuthorizationStatusDenied) {
       if (errorBlock) {
         errorBlock(@[
           RCTPositionError(RCTPositionErrorDenied, nil)
@@ -321,13 +314,6 @@ RCT_EXPORT_METHOD(getCurrentPosition:(NSDictionary *)optionsJSON
 
   // Reset location accuracy
   _locationManager.desiredAccuracy = RCT_DEFAULT_LOCATION_ACCURACY;
-}
-
-- (void)checkLocationConfig
-{
-  if (![[NSBundle mainBundle] objectForInfoDictionaryKey:@"NSLocationWhenInUseUsageDescription"]) {
-    RCTLogError(@"NSLocationWhenInUseUsageDescription key must be present in Info.plist to use geolocation.");
-  }
 }
 
 @end
