@@ -1,13 +1,7 @@
 /**
- * Copyright (c) 2015-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * Copyright 2004-present Facebook. All Rights Reserved.
  *
  * @providesModule MapView
- * @flow
  */
 'use strict';
 
@@ -21,8 +15,6 @@ var createReactIOSNativeComponentClass = require('createReactIOSNativeComponentC
 var deepDiffer = require('deepDiffer');
 var insetsDiffer = require('insetsDiffer');
 var merge = require('merge');
-
-type Event = Object;
 
 var MapView = React.createClass({
   mixins: [NativeMethodsMixin],
@@ -122,7 +114,7 @@ var MapView = React.createClass({
     onRegionChangeComplete: React.PropTypes.func,
   },
 
-  _onChange: function(event: Event) {
+  _onChange: function(event) {
     if (event.nativeEvent.continuous) {
       this.props.onRegionChange &&
         this.props.onRegionChange(event.nativeEvent.region);
@@ -134,7 +126,7 @@ var MapView = React.createClass({
 
   render: function() {
     return (
-      <RCTMap
+      <RKMap
         style={this.props.style}
         showsUserLocation={this.props.showsUserLocation}
         zoomEnabled={this.props.zoomEnabled}
@@ -147,16 +139,13 @@ var MapView = React.createClass({
         legalLabelInsets={this.props.legalLabelInsets}
         onChange={this._onChange}
         onTouchStart={this.props.onTouchStart}
-        onTouchMove={this.props.onTouchMove}
-        onTouchEnd={this.props.onTouchEnd}
-        onTouchCancel={this.props.onTouchCancel}
       />
     );
   },
 
 });
 
-var RCTMap = createReactIOSNativeComponentClass({
+var RKMap = createReactIOSNativeComponentClass({
   validAttributes: merge(
     ReactIOSViewAttributes.UIView, {
       showsUserLocation: true,
