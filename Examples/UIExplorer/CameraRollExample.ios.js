@@ -1,17 +1,7 @@
 /**
- * The examples provided by Facebook are for non-commercial testing and
- * evaluation purposes only.
+ * Copyright 2004-present Facebook. All Rights Reserved.
  *
- * Facebook reserves all rights not expressly granted.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
- * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NON INFRINGEMENT. IN NO EVENT SHALL
- * FACEBOOK BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
- * AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
- * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- *
- * @flow
+ * @providesModule CameraRollExample
  */
 'use strict';
 
@@ -19,7 +9,7 @@ var React = require('react-native');
 var {
   CameraRoll,
   Image,
-  SliderIOS,
+  Slider,
   StyleSheet,
   SwitchIOS,
   Text,
@@ -47,7 +37,7 @@ var CameraRollExample = React.createClass({
           onValueChange={this._onSwitchChange}
           value={this.state.bigImages} />
         <Text>{(this.state.bigImages ? 'Big' : 'Small') + ' Images'}</Text>
-        <SliderIOS
+        <Slider
           value={this.state.sliderValue}
           onValueChange={this._onSliderChange}
         />
@@ -120,6 +110,6 @@ exports.description = 'Example component that uses CameraRoll to list user\'s ph
 exports.examples = [
   {
     title: 'Photos',
-    render(): ReactElement { return <CameraRollExample />; }
+    render() { return <CameraRollExample />; }
   }
 ];

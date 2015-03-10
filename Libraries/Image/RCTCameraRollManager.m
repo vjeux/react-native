@@ -1,11 +1,4 @@
-/**
- * Copyright (c) 2015-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- */
+// Copyright 2004-present Facebook. All Rights Reserved.
 
 #import "RCTCameraRollManager.h"
 
@@ -14,17 +7,15 @@
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 
-#import "RCTImageLoader.h"
+ #import "RCTImageLoader.h"
 #import "RCTLog.h"
 
 @implementation RCTCameraRollManager
 
-RCT_EXPORT_MODULE()
-
-RCT_EXPORT_METHOD(saveImageWithTag:(NSString *)imageTag
-                  successCallback:(RCTResponseSenderBlock)successCallback
-                  errorCallback:(RCTResponseSenderBlock)errorCallback)
+- (void)saveImageWithTag:(NSString *)imageTag successCallback:(RCTResponseSenderBlock)successCallback errorCallback:(RCTResponseSenderBlock)errorCallback
 {
+  RCT_EXPORT();
+
   [RCTImageLoader loadImageWithTag:imageTag callback:^(NSError *loadError, UIImage *loadedImage) {
     if (loadError) {
       errorCallback(@[[loadError localizedDescription]]);
@@ -61,10 +52,10 @@ RCT_EXPORT_METHOD(saveImageWithTag:(NSString *)imageTag
                }]);
 }
 
-RCT_EXPORT_METHOD(getPhotos:(NSDictionary *)params
-                  callback:(RCTResponseSenderBlock)callback
-                  errorCallback:(RCTResponseSenderBlock)errorCallback)
+- (void)getPhotos:(NSDictionary *)params callback:(RCTResponseSenderBlock)callback errorCallback:(RCTResponseSenderBlock)errorCallback
 {
+  RCT_EXPORT();
+
   NSUInteger first = [params[@"first"] integerValue];
   NSString *afterCursor = params[@"after"];
   NSString *groupTypesStr = params[@"groupTypes"];

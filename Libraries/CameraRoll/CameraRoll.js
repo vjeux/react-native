@@ -1,18 +1,12 @@
 /**
- * Copyright (c) 2015-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * Copyright 2004-present Facebook. All Rights Reserved.
  *
  * @providesModule CameraRoll
- * @flow
  */
 'use strict';
 
 var ReactPropTypes = require('ReactPropTypes');
-var RCTCameraRollManager = require('NativeModules').CameraRollManager;
+var RKCameraRollManager = require('NativeModules').RKCameraRollManager;
 
 var createStrictShapeTypeChecker = require('createStrictShapeTypeChecker');
 var deepFreezeAndThrowOnMutationInDev =
@@ -29,8 +23,7 @@ var GROUP_TYPES_OPTIONS = [
   'SavedPhotos', // default
 ];
 
-// Flow treats Object and Array as disjoint types, currently.
-deepFreezeAndThrowOnMutationInDev((GROUP_TYPES_OPTIONS: any));
+deepFreezeAndThrowOnMutationInDev(GROUP_TYPES_OPTIONS);
 
 /**
  * Shape of the param arg for the `getPhotos` function.
@@ -105,7 +98,7 @@ class CameraRoll {
       typeof tag === 'string',
       'CameraRoll.saveImageWithTag tag must be a valid string.'
     );
-    RCTCameraRollManager.saveImageWithTag(
+    RKCameraRollManager.saveImageWithTag(
       tag,
       (imageTag) => {
         successCallback && successCallback(imageTag);
@@ -147,7 +140,7 @@ class CameraRoll {
         callback(response);
       };
     }
-    RCTCameraRollManager.getPhotos(params, metaCallback, errorCallback);
+    RKCameraRollManager.getPhotos(params, metaCallback, errorCallback);
   }
 }
 

@@ -1,18 +1,7 @@
 /**
- * The examples provided by Facebook are for non-commercial testing and
- * evaluation purposes only.
- *
- * Facebook reserves all rights not expressly granted.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
- * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NON INFRINGEMENT. IN NO EVENT SHALL
- * FACEBOOK BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
- * AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
- * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ * Copyright 2004-present Facebook. All Rights Reserved.
  *
  * @providesModule CameraRollView
- * @flow
  */
 'use strict';
 
@@ -22,6 +11,7 @@ var {
   CameraRoll,
   Image,
   ListView,
+  ListViewDataSource,
   StyleSheet,
   View,
 } = React;
@@ -64,7 +54,7 @@ var propTypes = {
 var CameraRollView = React.createClass({
   propTypes: propTypes,
 
-  getDefaultProps: function(): Object {
+  getDefaultProps: function() {
     return {
       groupTypes: 'SavedPhotos',
       batchSize: 5,
@@ -83,12 +73,12 @@ var CameraRollView = React.createClass({
   },
 
   getInitialState: function() {
-    var ds = new ListView.DataSource({rowHasChanged: this._rowHasChanged});
+    var ds = new ListViewDataSource({rowHasChanged: this._rowHasChanged});
 
     return {
-      assets: ([]: Array<Image>),
+      assets: [],
       groupTypes: this.props.groupTypes,
-      lastCursor: (null : ?string),
+      lastCursor: null,
       noMore: false,
       loadingMore: false,
       dataSource: ds,
@@ -100,7 +90,7 @@ var CameraRollView = React.createClass({
    * component to re-render its assets.
    */
   rendererChanged: function() {
-    var ds = new ListView.DataSource({rowHasChanged: this._rowHasChanged});
+    var ds = new ListViewDataSource({rowHasChanged: this._rowHasChanged});
     this.state.dataSource = ds.cloneWithRows(
       groupByEveryN(this.state.assets, this.props.imagesPerRow)
     );
@@ -110,21 +100,21 @@ var CameraRollView = React.createClass({
     this.fetch();
   },
 
-  componentWillReceiveProps: function(nextProps: {groupTypes?: string}) {
+  componentWillReceiveProps: function(nextProps) {
     if (this.props.groupTypes !== nextProps.groupTypes) {
       this.fetch(true);
     }
   },
 
-  _fetch: function(clear?: boolean) {
+  _fetch: function(clear) {
     if (clear) {
       this.setState(this.getInitialState(), this.fetch);
       return;
     }
 
-    var fetchParams: Object = {
+    var fetchParams = {
       first: this.props.batchSize,
-      groupTypes: this.props.groupTypes
+      groupTypes: this.props.groupTypes,
     };
     if (this.state.lastCursor) {
       fetchParams.after = this.state.lastCursor;
@@ -137,7 +127,7 @@ var CameraRollView = React.createClass({
    * Fetches more images from the camera roll. If clear is set to true, it will
    * set the component to its initial state and re-fetch the images.
    */
-  fetch: function(clear?: boolean) {
+  fetch: function(clear) {
     if (!this.state.loadingMore) {
       this.setState({loadingMore: true}, () => { this._fetch(clear); });
     }
@@ -155,7 +145,7 @@ var CameraRollView = React.createClass({
     );
   },
 
-  _rowHasChanged: function(r1: Array<Image>, r2: Array<Image>): boolean {
+  _rowHasChanged: function(r1, r2) {
     if (r1.length !== r2.length) {
       return true;
     }
@@ -177,7 +167,7 @@ var CameraRollView = React.createClass({
   },
 
   // rowData is an array of images
-  _renderRow: function(rowData: Array<Image>, sectionID: string, rowID: string)  {
+  _renderRow: function(rowData, sectionID, rowID)  {
     var images = rowData.map((image) => {
       if (image === null) {
         return null;
@@ -192,9 +182,9 @@ var CameraRollView = React.createClass({
     );
   },
 
-  _appendAssets: function(data: Object) {
+  _appendAssets: function(data) {
     var assets = data.edges;
-    var newState: Object = { loadingMore: false };
+    var newState = { loadingMore: false };
 
     if (!data.page_info.has_next_page) {
       newState.noMore = true;
