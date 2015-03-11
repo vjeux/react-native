@@ -1,17 +1,5 @@
 /**
- * The examples provided by Facebook are for non-commercial testing and
- * evaluation purposes only.
- *
- * Facebook reserves all rights not expressly granted.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
- * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NON INFRINGEMENT. IN NO EVENT SHALL
- * FACEBOOK BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
- * AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
- * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- *
- * @flow
+ * Copyright 2004-present Facebook. All Rights Reserved.
  */
 'use strict';
 
@@ -29,17 +17,16 @@ var COLORS = ['red', 'orange', 'yellow', 'green', 'blue'];
 
 var BasicStorageExample = React.createClass({
   componentDidMount() {
-    AsyncStorage.getItem(STORAGE_KEY)
-      .then((value) => {
-        if (value !== null){
-          this.setState({selectedValue: value});
-          this._appendMessage('Recovered selection from disk: ' + value);
-        } else {
-          this._appendMessage('Initialized with no selection on disk.');
-        }
-      })
-      .catch((error) => this._appendMessage('AsyncStorage error: ' + error.message))
-      .done();
+    AsyncStorage.getItem(STORAGE_KEY, (error, value) => {
+      if (error) {
+        this._appendMessage('AsyncStorage error: ' + error.message);
+      } else if (value !== null) {
+        this.setState({selectedValue: value});
+        this._appendMessage('Recovered selection from disk: ' + value);
+      } else {
+        this._appendMessage('Initialized with no selection on disk.');
+      }
+    });
   },
   getInitialState() {
     return {
@@ -82,17 +69,23 @@ var BasicStorageExample = React.createClass({
 
   _onValueChange(selectedValue) {
     this.setState({selectedValue});
-    AsyncStorage.setItem(STORAGE_KEY, selectedValue)
-      .then(() => this._appendMessage('Saved selection to disk: ' + selectedValue))
-      .catch((error) => this._appendMessage('AsyncStorage error: ' + error.message))
-      .done();
+    AsyncStorage.setItem(STORAGE_KEY, selectedValue, (error) => {
+      if (error) {
+        this._appendMessage('AsyncStorage error: ' + error.message);
+      } else {
+        this._appendMessage('Saved selection to disk: ' + selectedValue);
+      }
+    });
   },
 
   _removeStorage() {
-    AsyncStorage.removeItem(STORAGE_KEY)
-      .then(() => this._appendMessage('Selection removed from disk.'))
-      .catch((error) => { this._appendMessage('AsyncStorage error: ' + error.message) })
-      .done();
+    AsyncStorage.removeItem(STORAGE_KEY, (error) => {
+      if (error) {
+        this._appendMessage('AsyncStorage error: ' + error.message);
+      } else {
+        this._appendMessage('Selection removed from disk.');
+      }
+    });
   },
 
   _appendMessage(message) {
@@ -105,6 +98,6 @@ exports.description = 'Asynchronous local disk storage.';
 exports.examples = [
   {
     title: 'Basics - getItem, setItem, removeItem',
-    render(): ReactElement { return <BasicStorageExample />; }
+    render() { return <BasicStorageExample />; }
   },
 ];
