@@ -1,18 +1,6 @@
 /**
- * The examples provided by Facebook are for non-commercial testing and
- * evaluation purposes only.
- *
- * Facebook reserves all rights not expressly granted.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
- * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NON INFRINGEMENT. IN NO EVENT SHALL
- * FACEBOOK BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
- * AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
- * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- *
- * @flow
- */
+*  * Copyright 2004-present Facebook. All Rights Reserved.
+*   */
 'use strict';
 
 var React = require('react-native');
@@ -106,7 +94,7 @@ var ShareActionSheetExample = React.createClass({
 var style = StyleSheet.create({
   button: {
     marginBottom: 10,
-    fontWeight: '500',
+    fontWeight: 'bold',
   }
 });
 
@@ -115,10 +103,10 @@ exports.description = 'Interface to show iOS\' action sheets';
 exports.examples = [
   {
     title: 'Show Action Sheet',
-    render(): ReactElement { return <ActionSheetExample />; }
+    render() { return <ActionSheetExample />; }
   },
   {
     title: 'Show Share Action Sheet',
-    render(): ReactElement { return <ShareActionSheetExample />; }
+    render() { return <ShareActionSheetExample />; }
   }
 ];

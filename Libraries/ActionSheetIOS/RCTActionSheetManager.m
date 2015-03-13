@@ -1,26 +1,16 @@
-/**
- * Copyright (c) 2015-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- */
+// Copyright 2004-present Facebook. All Rights Reserved.
 
 #import "RCTActionSheetManager.h"
 
 #import "RCTLog.h"
 
-@interface RCTActionSheetManager () <UIActionSheetDelegate>
+@interface RCTActionSheetManager() <UIActionSheetDelegate>
 
 @end
 
-@implementation RCTActionSheetManager
-{
+@implementation RCTActionSheetManager {
   NSMutableDictionary *_callbacks;
 }
-
-RCT_EXPORT_MODULE()
 
 - (instancetype)init
 {
@@ -30,10 +20,12 @@ RCT_EXPORT_MODULE()
   return self;
 }
 
-RCT_EXPORT_METHOD(showActionSheetWithOptions:(NSDictionary *)options
-                  failureCallback:(RCTResponseSenderBlock)failureCallback
-                  successCallback:(RCTResponseSenderBlock)successCallback)
+- (void)showActionSheetWithOptions:(NSDictionary *)options
+                          failureCallback:(RCTResponseSenderBlock)failureCallback
+                          successCallback:(RCTResponseSenderBlock)successCallback
 {
+  RCT_EXPORT();
+
   dispatch_async(dispatch_get_main_queue(), ^{
     UIActionSheet *actionSheet = [[UIActionSheet alloc] init];
 
@@ -63,10 +55,12 @@ RCT_EXPORT_METHOD(showActionSheetWithOptions:(NSDictionary *)options
   });
 }
 
-RCT_EXPORT_METHOD(showShareActionSheetWithOptions:(NSDictionary *)options
-                  failureCallback:(RCTResponseSenderBlock)failureCallback
-                  successCallback:(RCTResponseSenderBlock)successCallback)
+- (void)showShareActionSheetWithOptions:(NSDictionary *)options
+                        failureCallback:(RCTResponseSenderBlock)failureCallback
+                        successCallback:(RCTResponseSenderBlock)successCallback
 {
+  RCT_EXPORT();
+
   dispatch_async(dispatch_get_main_queue(), ^{
     NSMutableArray *items = [NSMutableArray array];
     id message = options[@"message"];
@@ -92,24 +86,9 @@ RCT_EXPORT_METHOD(showShareActionSheetWithOptions:(NSDictionary *)options
         }
       };
     } else {
-
-#if __IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_8_0
-
-      if (![UIActivityViewController instancesRespondToSelector:@selector(completionWithItemsHandler)]) {
-        // Legacy iOS 7 implementation
-        share.completionHandler = ^(NSString *activityType, BOOL completed) {
-          successCallback(@[@(completed), (activityType ?: [NSNull null])]);
-        };
-      } else
-
-#endif
-
-      {
-        // iOS 8 version
-        share.completionWithItemsHandler = ^(NSString *activityType, BOOL completed, NSArray *returnedItems, NSError *activityError) {
-          successCallback(@[@(completed), (activityType ?: [NSNull null])]);
-        };
-      }
+      share.completionHandler = ^(NSString *activityType, BOOL completed) {
+        successCallback(@[@(completed), (activityType ?: [NSNull null])]);
+      };
     }
     [ctrl presentViewController:share animated:YES completion:nil];
   });
@@ -133,7 +112,7 @@ RCT_EXPORT_METHOD(showShareActionSheetWithOptions:(NSDictionary *)options
 
 #pragma mark Private
 
-NS_INLINE NSString *keyForInstance(id instance)
+static NSString *keyForInstance(id instance)
 {
   return [NSString stringWithFormat:@"%p", instance];
 }
