@@ -1,17 +1,14 @@
 /**
- * Copyright (c) 2015-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * Copyright 2004-present Facebook. All Rights Reserved.
  *
  * @providesModule AlertIOS
  * @flow
  */
 'use strict';
 
-var RCTAlertManager = require('NativeModules').AlertManager;
+var NativeModules = require('NativeModulesDeprecated');
+
+var RCTAlertManager = NativeModules.RCTAlertManager;
 
 var DEFAULT_BUTTON_TEXT = 'OK';
 var DEFAULT_BUTTON = {
@@ -20,32 +17,36 @@ var DEFAULT_BUTTON = {
 };
 
 /**
- * Launches an alert dialog with the specified title and message.
- *
- * Optionally provide a list of buttons. Tapping any button will fire the
- * respective onPress callback and dismiss the alert. By default, the only
- * button will be an 'OK' button
- *
- * The last button in the list will be considered the 'Primary' button and
- * it will appear bold.
- *
- * ```
- * AlertIOS.alert(
- *   'Foo Title',
- *   'My Alert Msg',
- *   [
- *     {text: 'Foo', onPress: () => console.log('Foo Pressed!')},
- *     {text: 'Bar', onPress: () => console.log('Bar Pressed!')},
- *   ]
- * )}
- * ```
+ * AlertIOS manages native iOS alerts, option sheets, and share dialogs
  */
 
 class AlertIOS {
+
+  /**
+   * Launches an alert dialog with the specified title and message.
+   *
+   * Optionally provide a list of buttons. Tapping any button will fire the
+   * respective onPress callback and dismiss the alert. By default, the only
+   * button will be an 'OK' button
+   *
+   * The last button in the list will be considered the 'Primary' button and
+   * it will appear bold.
+   *
+   * ```
+   * AlertIOS.alert(
+   *   'Foo Title',
+   *   'My Alert Msg',
+   *   [
+   *     {text: 'Foo', onPress: () => console.log('Foo Pressed!')},
+   *     {text: 'Bar', onPress: () => console.log('Bar Pressed!')},
+   *   ]
+   * )}
+   * ```
+   */
   static alert(
     title: ?string,
-    message?: ?string,
-    buttons?: Array<{
+    message: ?string,
+    buttons: ?Array<{
       text: ?string;
       onPress: ?Function;
     }>
