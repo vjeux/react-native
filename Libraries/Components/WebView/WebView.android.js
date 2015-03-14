@@ -1,10 +1,5 @@
 /**
- * Copyright (c) 2015-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * Copyright 2004-present Facebook. All Rights Reserved.
  *
  * @providesModule WebView
  */
@@ -21,9 +16,9 @@ var keyMirror = require('keyMirror');
 var merge = require('merge');
 
 var PropTypes = React.PropTypes;
-var RCTUIManager = require('NativeModules').UIManager;
+var RKUIManager = require('NativeModules').RKUIManager;
 
-var RCT_WEBVIEW_REF = 'webview';
+var RK_WEBVIEW_REF = 'webview';
 
 var WebViewState = keyMirror({
   IDLE: null,
@@ -34,8 +29,8 @@ var WebViewState = keyMirror({
 var WebView = React.createClass({
 
   propTypes: {
-    renderError: PropTypes.func, // view to show if there's an error
-    renderLoading: PropTypes.func, // loading indicator to show
+    renderErrorView: PropTypes.func.isRequired, // view to show if there's an error
+    renderLoadingView: PropTypes.func.isRequired, // loading indicator to show
     url: PropTypes.string.isRequired,
     automaticallyAdjustContentInsets: PropTypes.bool,
     contentInset: EdgeInsetsPropType,
@@ -66,10 +61,10 @@ var WebView = React.createClass({
     var otherView = null;
 
    if (this.state.viewState === WebViewState.LOADING) {
-      otherView = this.props.renderLoading && this.props.renderLoading();
+      otherView = this.props.renderLoadingView();
     } else if (this.state.viewState === WebViewState.ERROR) {
       var errorEvent = this.state.lastErrorEvent;
-      otherView = this.props.renderError && this.props.renderError(
+      otherView = this.props.renderErrorView(
         errorEvent.domain,
         errorEvent.code,
         errorEvent.description);
@@ -86,7 +81,7 @@ var WebView = React.createClass({
 
     var webView =
       <RCTWebView
-        ref={RCT_WEBVIEW_REF}
+        ref={RK_WEBVIEW_REF}
         key="webViewKey"
         style={webViewStyles}
         url={this.props.url}
@@ -107,15 +102,15 @@ var WebView = React.createClass({
   },
 
   goForward: function() {
-    RCTUIManager.webViewGoForward(this.getWebWiewHandle());
+    RKUIManager.webViewGoForward(this.getWebWiewHandle());
   },
 
   goBack: function() {
-    RCTUIManager.webViewGoBack(this.getWebWiewHandle());
+    RKUIManager.webViewGoBack(this.getWebWiewHandle());
   },
 
   reload: function() {
-    RCTUIManager.webViewReload(this.getWebWiewHandle());
+    RKUIManager.webViewReload(this.getWebWiewHandle());
   },
 
   /**
@@ -129,7 +124,7 @@ var WebView = React.createClass({
   },
 
   getWebWiewHandle: function() {
-    return this.refs[RCT_WEBVIEW_REF].getNodeHandle();
+    return this.refs[RK_WEBVIEW_REF].getNodeHandle();
   },
 
   onLoadingStart: function(event) {

@@ -1,23 +1,12 @@
 /**
- * The examples provided by Facebook are for non-commercial testing and
- * evaluation purposes only.
- *
- * Facebook reserves all rights not expressly granted.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
- * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NON INFRINGEMENT. IN NO EVENT SHALL
- * FACEBOOK BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
- * AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
- * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- *
- * @flow
+ * Copyright 2004-present Facebook. All Rights Reserved.
  */
 'use strict';
 
 var React = require('react-native');
 var StyleSheet = require('StyleSheet');
 var {
+  ActivityIndicatorIOS,
   StyleSheet,
   Text,
   TextInput,
@@ -45,8 +34,6 @@ var WebViewExample = React.createClass({
       loading: true,
     };
   },
-
-  inputText: '',
 
   handleTextInputChange: function(event) {
     this.inputText = event.nativeEvent.text;
@@ -94,6 +81,8 @@ var WebViewExample = React.createClass({
           automaticallyAdjustContentInsets={false}
           style={styles.webView}
           url={this.state.url}
+          renderErrorView={this.renderErrorView}
+          renderLoadingView={this.renderLoadingView}
           onNavigationStateChange={this.onNavigationStateChange}
           startInLoadingState={true}
         />
@@ -124,6 +113,33 @@ var WebViewExample = React.createClass({
       status: navState.title,
       loading: navState.loading,
     });
+  },
+
+  renderErrorView: function(errorDomain, errorCode, errorDesc) {
+    return (
+      <View style={styles.errorContainer}>
+        <Text style={styles.errorTextTitle}>
+          Error loading page
+        </Text>
+        <Text style={styles.errorText}>
+          {'Domain: ' + errorDomain}
+        </Text>
+        <Text style={styles.errorText}>
+          {'Error Code: ' + errorCode}
+        </Text>
+        <Text style={styles.errorText}>
+          {'Description: ' + errorDesc}
+        </Text>
+      </View>
+    );
+  },
+
+  renderLoadingView: function() {
+    return (
+      <View style={styles.loadingView}>
+        <ActivityIndicatorIOS />
+      </View>
+    );
   },
 
   onSubmitEditing: function(event) {
@@ -200,6 +216,28 @@ var styles = StyleSheet.create({
     borderRadius: 3,
     alignSelf: 'stretch',
   },
+  loadingView: {
+    backgroundColor: BGWASH,
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: BGWASH,
+  },
+  errorTextTitle: {
+    fontSize: 15,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  errorText: {
+    fontSize: 14,
+    textAlign: 'center',
+    marginBottom: 2,
+  },
   statusBar: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -221,6 +259,6 @@ exports.description = 'Base component to display web content';
 exports.examples = [
   {
     title: 'WebView',
-    render(): ReactElement { return <WebViewExample />; }
+    render() { return <WebViewExample />; }
   }
 ];
