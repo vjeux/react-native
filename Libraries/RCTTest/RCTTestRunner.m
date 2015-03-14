@@ -1,83 +1,48 @@
-/**
- * Copyright (c) 2015-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- */
+// Copyright 2004-present Facebook. All Rights Reserved.
 
 #import "RCTTestRunner.h"
 
-#import "FBSnapshotTestController.h"
 #import "RCTRedBox.h"
 #import "RCTRootView.h"
 #import "RCTTestModule.h"
 #import "RCTUtils.h"
 
-#define TIMEOUT_SECONDS 240
+#define TIMEOUT_SECONDS 30
 
 @implementation RCTTestRunner
-{
-  FBSnapshotTestController *_snapshotController;
-}
 
-- (instancetype)initWithApp:(NSString *)app referenceDir:(NSString *)referenceDir
+- (instancetype)initWithApp:(NSString *)app
 {
-  if ((self = [super init])) {
-    NSString *sanitizedAppName = [app stringByReplacingOccurrencesOfString:@"/" withString:@"-"];
-    sanitizedAppName = [sanitizedAppName stringByReplacingOccurrencesOfString:@"\\" withString:@"-"];
-    _snapshotController = [[FBSnapshotTestController alloc] initWithTestName:sanitizedAppName];
-    _snapshotController.referenceImagesDirectory = referenceDir;
-    _scriptURL = [NSURL URLWithString:[NSString stringWithFormat:@"http://localhost:8081/%@.includeRequire.runModule.bundle?dev=true", app]];
+  if (self = [super init]) {
+    _script = [NSString stringWithFormat:@"http://localhost:8081/%@.includeRequire.runModule.bundle?dev=true", app];
   }
   return self;
 }
 
-- (void)setRecordMode:(BOOL)recordMode
+- (void)runTest:(NSString *)moduleName
 {
-  _snapshotController.recordMode = recordMode;
+  [self runTest:moduleName initialProps:nil expectErrorBlock:nil];
 }
 
-- (BOOL)recordMode
+- (void)runTest:(NSString *)moduleName initialProps:(NSDictionary *)initialProps expectErrorRegex:(NSRegularExpression *)errorRegex
 {
-  return _snapshotController.recordMode;
-}
-
-- (void)runTest:(SEL)test module:(NSString *)moduleName
-{
-  [self runTest:test module:moduleName initialProps:nil expectErrorBlock:nil];
-}
-
-- (void)runTest:(SEL)test module:(NSString *)moduleName initialProps:(NSDictionary *)initialProps expectErrorRegex:(NSString *)errorRegex
-{
-  [self runTest:test module:moduleName initialProps:initialProps expectErrorBlock:^BOOL(NSString *error){
-    return [error rangeOfString:errorRegex options:NSRegularExpressionSearch].location != NSNotFound;
+  [self runTest:moduleName initialProps:initialProps expectErrorBlock:^BOOL(NSString *error){
+    return [errorRegex numberOfMatchesInString:error options:0 range:NSMakeRange(0, [error length])] > 0;
   }];
 }
 
-- (void)runTest:(SEL)test module:(NSString *)moduleName initialProps:(NSDictionary *)initialProps expectErrorBlock:(BOOL(^)(NSString *error))expectErrorBlock
+- (void)runTest:(NSString *)moduleName initialProps:(NSDictionary *)initialProps expectErrorBlock:(BOOL(^)(NSString *error))expectErrorBlock
 {
+  RCTTestModule *testModule = [[RCTTestModule alloc] init];
+  RCTRootView *rootView = [[RCTRootView alloc] init];
   UIViewController *vc = [[[[UIApplication sharedApplication] delegate] window] rootViewController];
-  if ([vc.view isKindOfClass:[RCTRootView class]]) {
-    [(RCTRootView *)vc.view invalidate]; // Make sure the normal app view doesn't interfere
-  }
-  vc.view = [[UIView alloc] init];
-
-  RCTTestModule *testModule = [[RCTTestModule alloc] initWithSnapshotController:_snapshotController view:nil];
-  testModule.testSelector = test;
-  RCTBridge *bridge = [[RCTBridge alloc] initWithBundleURL:_scriptURL
-                                            moduleProvider:^(){
-                                              return @[testModule];
-                                            }
-                                             launchOptions:nil];
-
-  RCTRootView *rootView = [[RCTRootView alloc] initWithBridge:bridge
-                                                   moduleName:moduleName];
-  testModule.view = rootView;
-  [vc.view addSubview:rootView]; // Add as subview so it doesn't get resized
+  vc.view = rootView;
+  rootView.moduleProvider = ^(void){
+    return @[testModule];
+  };
+  rootView.moduleName = moduleName;
   rootView.initialProperties = initialProps;
-  rootView.frame = CGRectMake(0, 0, 320, 2000); // Constant size for testing on multiple devices
+  rootView.scriptURL = [NSURL URLWithString:_script];
 
   NSDate *date = [NSDate dateWithTimeIntervalSinceNow:TIMEOUT_SECONDS];
   NSString *error = [[RCTRedBox sharedInstance] currentErrorMessage];
@@ -86,14 +51,9 @@
     [[NSRunLoop mainRunLoop] runMode:NSRunLoopCommonModes beforeDate:date];
     error = [[RCTRedBox sharedInstance] currentErrorMessage];
   }
-  [rootView removeFromSuperview];
-  [rootView.bridge invalidate];
-  [rootView invalidate];
-  RCTAssert(vc.view.subviews.count == 0, @"There shouldn't be any other views: %@", vc.view);
-  vc.view = nil;
   [[RCTRedBox sharedInstance] dismiss];
   if (expectErrorBlock) {
-    RCTAssert(expectErrorBlock(error), @"Expected an error but nothing matched.");
+    RCTAssert(expectErrorBlock(error), @"Expected an error but got none.");
   } else if (error) {
     RCTAssert(error == nil, @"RedBox error: %@", error);
   } else {
