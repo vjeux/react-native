@@ -1,17 +1,5 @@
 /**
- * The examples provided by Facebook are for non-commercial testing and
- * evaluation purposes only.
- *
- * Facebook reserves all rights not expressly granted.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
- * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NON INFRINGEMENT. IN NO EVENT SHALL
- * FACEBOOK BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
- * AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
- * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- *
- * @flow
+ * Copyright 2004-present Facebook. All Rights Reserved.
  */
 'use strict';
 
@@ -20,10 +8,10 @@ var {
   AlertIOS,
   StyleSheet,
   Text,
+  TimerMixin,
   TouchableHighlight,
   View,
 } = React;
-var TimerMixin = require('react-timer-mixin');
 
 var Button = React.createClass({
   render: function() {
@@ -42,12 +30,6 @@ var Button = React.createClass({
 
 var TimerTester = React.createClass({
   mixins: [TimerMixin],
-
-  _ii: 0,
-  _iters: 0,
-  _start: 0,
-  _timerFn: (null : ?(() => any)),
-  _handle: (null : any),
 
   render: function() {
     var args = 'fn' + (this.props.dt !== undefined ? ', ' + this.props.dt : '');
@@ -89,7 +71,7 @@ var TimerTester = React.createClass({
         'Elapsed time: ' + e + ' ms\n' + (e / this._ii) + ' ms / iter';
       console.log(msg);
       AlertIOS.alert(msg);
-      this._start = 0;
+      this._start = null;
       this.forceUpdate(() => { this._ii = 0; });
       return;
     }
@@ -171,7 +153,7 @@ exports.examples = [
     title: 'this.setInterval(fn, t)',
     description: 'Execute function fn every t milliseconds until cancelled ' +
       'or component is unmounted.',
-    render: function(): ReactElement {
+    render: function() {
       var IntervalExample = React.createClass({
         getInitialState: function() {
           return {
