@@ -1,16 +1,8 @@
-/**
- * Copyright (c) 2015-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- */
+// Copyright 2004-present Facebook. All Rights Reserved.
 
 #import "RCTWebSocketExecutor.h"
 
 #import "RCTLog.h"
-#import "RCTSparseArray.h"
 #import "RCTUtils.h"
 #import "SRWebSocket.h"
 
@@ -19,38 +11,32 @@ typedef void (^WSMessageCallback)(NSError *error, NSDictionary *reply);
 @interface RCTWebSocketExecutor () <SRWebSocketDelegate>
 @end
 
-@implementation RCTWebSocketExecutor
-{
+@implementation RCTWebSocketExecutor {
   SRWebSocket *_socket;
-  dispatch_queue_t _jsQueue;
-  RCTSparseArray *_callbacks;
+  NSOperationQueue *_jsQueue;
+  NSMutableDictionary *_callbacks;
   dispatch_semaphore_t _socketOpenSemaphore;
   NSMutableDictionary *_injectedObjects;
 }
 
 - (instancetype)init
 {
-  return [self initWithURL:[NSURL URLWithString:@"http://localhost:8081/debugger-proxy"]];
+  return [self initWithURL:[NSURL URLWithString:@"http://localhost:8081"]];
 }
 
-- (instancetype)initWithURL:(NSURL *)URL
+- (instancetype)initWithURL:(NSURL *)url
 {
   if (self = [super init]) {
-
-    _jsQueue = dispatch_queue_create("com.facebook.React.WebSocketExecutor", DISPATCH_QUEUE_SERIAL);
-    _socket = [[SRWebSocket alloc] initWithURL:URL];
+    _jsQueue = [[NSOperationQueue alloc] init];
+    _jsQueue.maxConcurrentOperationCount = 1;
+    _socket = [[SRWebSocket alloc] initWithURL:url];
     _socket.delegate = self;
-    _callbacks = [[RCTSparseArray alloc] init];
-    _injectedObjects = [[NSMutableDictionary alloc] init];
-    [_socket setDelegateDispatchQueue:_jsQueue];
-
-    NSURL *startDevToolsURL = [NSURL URLWithString:@"/launch-chrome-devtools" relativeToURL:URL];
-    [NSURLConnection connectionWithRequest:[NSURLRequest requestWithURL:startDevToolsURL] delegate:nil];
+    _callbacks = [NSMutableDictionary dictionary];
+    _injectedObjects = [NSMutableDictionary dictionary];
+    [_socket setDelegateOperationQueue:_jsQueue];
 
     if (![self connectToProxy]) {
-      RCTLogError(@"Connection to %@ timed out. Are you running node proxy? If \
-                  you are running on the device, check if you have the right IP \
-                  address in `RCTWebSocketExecutor.m`.", URL);
+      RCTLogError(@"Connection to %@ timed out. Are you running node proxy?", url);
       [self invalidate];
       return nil;
     }
@@ -94,8 +80,8 @@ typedef void (^WSMessageCallback)(NSError *error, NSDictionary *reply);
 {
   NSError *error = nil;
   NSDictionary *reply = RCTJSONParse(message, &error);
-  NSNumber *messageID = reply[@"replyID"];
-  WSMessageCallback callback = _callbacks[messageID];
+  NSUInteger messageID = [reply[@"replyID"] integerValue];
+  WSMessageCallback callback = [_callbacks objectForKey:@(messageID)];
   if (callback) {
     callback(error, reply);
   }
@@ -111,30 +97,35 @@ typedef void (^WSMessageCallback)(NSError *error, NSDictionary *reply);
   RCTLogError(@"WebSocket connection failed with error %@", error);
 }
 
+- (void)webSocket:(SRWebSocket *)webSocket didCloseWithCode:(NSInteger)code reason:(NSString *)reason wasClean:(BOOL)wasClean
+{
+
+}
+
 - (void)sendMessage:(NSDictionary *)message waitForReply:(WSMessageCallback)callback
 {
   static NSUInteger lastID = 10000;
 
-  dispatch_async(_jsQueue, ^{
+  [_jsQueue addOperationWithBlock:^{
     if (!self.valid) {
-      NSError *error = [NSError errorWithDomain:@"WS" code:1 userInfo:@{
-        NSLocalizedDescriptionKey: @"socket closed"
-      }];
+      NSError *error = [NSError errorWithDomain:@"WS" code:1 userInfo:@{NSLocalizedDescriptionKey:@"socket closed"}];
       callback(error, nil);
       return;
     }
 
-    NSNumber *expectedID = @(lastID++);
-    _callbacks[expectedID] = [callback copy];
+    NSUInteger expectedID = lastID++;
+
+    _callbacks[@(expectedID)] = [callback copy];
+
     NSMutableDictionary *messageWithID = [message mutableCopy];
-    messageWithID[@"id"] = expectedID;
+    messageWithID[@"id"] = @(expectedID);
     [_socket send:RCTJSONStringify(messageWithID, NULL)];
-  });
+  }];
 }
 
-- (void)executeApplicationScript:(NSString *)script sourceURL:(NSURL *)URL onComplete:(RCTJavaScriptCompleteBlock)onComplete
+- (void)executeApplicationScript:(NSString *)script sourceURL:(NSURL *)url onComplete:(RCTJavaScriptCompleteBlock)onComplete
 {
-  NSDictionary *message = @{@"method": NSStringFromSelector(_cmd), @"url": [URL absoluteString], @"inject": _injectedObjects};
+  NSDictionary *message = @{@"method": NSStringFromSelector(_cmd), @"url": [url absoluteString], @"inject": _injectedObjects};
   [self sendMessage:message waitForReply:^(NSError *error, NSDictionary *reply) {
     onComplete(error);
   }];
@@ -143,12 +134,7 @@ typedef void (^WSMessageCallback)(NSError *error, NSDictionary *reply);
 - (void)executeJSCall:(NSString *)name method:(NSString *)method arguments:(NSArray *)arguments callback:(RCTJavaScriptCallback)onComplete
 {
   RCTAssert(onComplete != nil, @"callback was missing for exec JS call");
-  NSDictionary *message = @{
-    @"method": NSStringFromSelector(_cmd),
-    @"moduleName": name,
-    @"moduleMethod": method,
-    @"arguments": arguments
-  };
+  NSDictionary *message = @{@"method": NSStringFromSelector(_cmd), @"moduleName": name, @"moduleMethod": method, @"arguments": arguments};
   [self sendMessage:message waitForReply:^(NSError *socketError, NSDictionary *reply) {
     if (socketError) {
       onComplete(nil, socketError);
@@ -163,10 +149,10 @@ typedef void (^WSMessageCallback)(NSError *error, NSDictionary *reply);
 
 - (void)injectJSONText:(NSString *)script asGlobalObjectNamed:(NSString *)objectName callback:(RCTJavaScriptCompleteBlock)onComplete
 {
-  dispatch_async(_jsQueue, ^{
-    _injectedObjects[objectName] = script;
+  [_jsQueue addOperationWithBlock:^{
+    [_injectedObjects setObject:script forKey:objectName];
     onComplete(nil);
-  });
+  }];
 }
 
 - (void)invalidate
