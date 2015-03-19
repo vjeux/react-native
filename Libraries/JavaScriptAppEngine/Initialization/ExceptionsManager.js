@@ -1,13 +1,7 @@
 /**
- * Copyright (c) 2015-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * Copyright 2004-present Facebook. All Rights Reserved.
  *
  * @providesModule ExceptionsManager
- * @flow
  */
 'use strict';
 
@@ -19,13 +13,7 @@ var parseErrorStack = require('parseErrorStack');
 
 var sourceMapPromise;
 
-type Exception = {
-  sourceURL: string;
-  line: number;
-  message: string;
-}
-
-function handleException(e: Exception) {
+function handleException(e) {
   var stack = parseErrorStack(e);
   console.error(
     'Error: ' +
@@ -36,12 +24,12 @@ function handleException(e: Exception) {
   );
 
   if (RCTExceptionsManager) {
-    RCTExceptionsManager.reportUnhandledException(e.message, stack);
+    RCTExceptionsManager.reportUnhandledException(e.message, format(stack));
     if (__DEV__) {
       (sourceMapPromise = sourceMapPromise || loadSourceMap())
         .then(map => {
           var prettyStack = parseErrorStack(e, map);
-          RCTExceptionsManager.updateExceptionMessage(e.message, prettyStack);
+          RCTExceptionsManager.updateExceptionMessage(e.message, format(prettyStack));
         })
         .then(null, error => {
           console.error('#CLOWNTOWN (error while displaying error): ' + error.message);
@@ -69,6 +57,15 @@ function stackFrameToString(stackFrame, maxLength) {
 
 function fillSpaces(n) {
   return new Array(n + 1).join(' ');
+}
+
+// HACK(frantic) Android currently expects stack trace to be a string #5920439
+function format(stack) {
+  if (Platform.OS === 'android') {
+    return stackToString(stack);
+  } else {
+    return stack;
+  }
 }
 
 module.exports = { handleException };
