@@ -1,26 +1,5 @@
 /**
- * Copyright (c) 2015, Facebook, Inc.  All rights reserved.
- *
- * Facebook, Inc. (“Facebook”) owns all right, title and interest, including
- * all intellectual property and other proprietary rights, in and to the React
- * Native CustomComponents software (the “Software”).  Subject to your
- * compliance with these terms, you are hereby granted a non-exclusive,
- * worldwide, royalty-free copyright license to (1) use and copy the Software;
- * and (2) reproduce and distribute the Software as part of your own software
- * (“Your Software”).  Facebook reserves all rights not expressly granted to
- * you in this license agreement.
- *
- * THE SOFTWARE AND DOCUMENTATION, IF ANY, ARE PROVIDED "AS IS" AND ANY EXPRESS
- * OR IMPLIED WARRANTIES (INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
- * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE) ARE DISCLAIMED.
- * IN NO EVENT SHALL FACEBOOK OR ITS AFFILIATES, OFFICERS, DIRECTORS OR
- * EMPLOYEES BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
- * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
- * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
- * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
- * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
- * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THE SOFTWARE, EVEN IF
- * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * Copyright 2004-present Facebook. All Rights Reserved.
  *
  * @providesModule ListView
  */
@@ -32,7 +11,7 @@ var RCTUIManager = require('NativeModules').UIManager;
 var ScrollView = require('ScrollView');
 var ScrollResponder = require('ScrollResponder');
 var StaticRenderer = require('StaticRenderer');
-var TimerMixin = require('react-timer-mixin');
+var TimerMixin = require('TimerMixin');
 
 var logError = require('logError');
 var merge = require('merge');
@@ -61,7 +40,7 @@ var SCROLLVIEW_REF = 'listviewscroll';
  *
  * ```
  * getInitialState: function() {
- *   var ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
+ *   var ds = new ListViewDataSource({rowHasChanged: (r1, r2) => r1 !== r2});
  *   return {
  *     dataSource: ds.cloneWithRows(['row 1', 'row 2']),
  *   };
@@ -325,8 +304,8 @@ var ListView = React.createClass({
         stickyHeaderIndices: sectionHeaderIndices,
       }
     );
-    if (!props.scrollEventThrottle) {
-      props.scrollEventThrottle = DEFAULT_SCROLL_CALLBACK_THROTTLE;
+    if (!props.throttleScrollCallbackMS) {
+      props.throttleScrollCallbackMS = DEFAULT_SCROLL_CALLBACK_THROTTLE;
     }
 
     return (
