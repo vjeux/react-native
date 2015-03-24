@@ -13,13 +13,12 @@
 #import "RCTEventDispatcher.h"
 
 NSString *const RCTRemoteNotificationReceived = @"RemoteNotificationReceived";
+NSString *const RCTOpenURLNotification = @"RCTOpenURLNotification";
 
 @implementation RCTPushNotificationManager
 {
   NSDictionary *_initialNotification;
 }
-
-RCT_EXPORT_MODULE()
 
 @synthesize bridge = _bridge;
 
@@ -36,6 +35,10 @@ RCT_EXPORT_MODULE()
                                              selector:@selector(handleRemoteNotificationReceived:)
                                                  name:RCTRemoteNotificationReceived
                                                object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(handleOpenURLNotification:)
+                                                 name:RCTOpenURLNotification
+                                               object:nil];
   }
   return self;
 }
@@ -47,9 +50,9 @@ RCT_EXPORT_MODULE()
 
 + (void)application:(UIApplication *)application didRegisterUserNotificationSettings:(UIUserNotificationSettings *)notificationSettings
 {
-  if ([application respondsToSelector:@selector(registerForRemoteNotifications)]) {
-    [application registerForRemoteNotifications];
-  }
+#ifdef __IPHONE_8_0
+  [application registerForRemoteNotifications];
+#endif
 }
 
 + (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)notification
@@ -59,77 +62,86 @@ RCT_EXPORT_MODULE()
                                                     userInfo:notification];
 }
 
++ (BOOL)application:(UIApplication *)application
+            openURL:(NSURL *)url
+  sourceApplication:(NSString *)sourceApplication
+         annotation:(id)annotation
+{
+  NSDictionary *payload = @{@"url": [url absoluteString]};
+  [[NSNotificationCenter defaultCenter] postNotificationName:RCTOpenURLNotification
+                                                      object:self
+                                                    userInfo:payload];
+  return YES;
+}
+
 - (void)handleRemoteNotificationReceived:(NSNotification *)notification
 {
   [_bridge.eventDispatcher sendDeviceEventWithName:@"remoteNotificationReceived"
                                               body:[notification userInfo]];
 }
 
+- (void)handleOpenURLNotification:(NSNotification *)notification
+{
+  [_bridge.eventDispatcher sendDeviceEventWithName:@"openURL"
+                                              body:[notification userInfo]];
+}
+
 /**
  * Update the application icon badge number on the home screen
  */
-RCT_EXPORT_METHOD(setApplicationIconBadgeNumber:(NSInteger)number)
++ (void)setApplicationIconBadgeNumber:(NSInteger)number
 {
+  RCT_EXPORT();
+
+  static dispatch_once_t onceToken;
+  dispatch_once(&onceToken, ^{
+    [self requestPermissions];
+  });
+
   [UIApplication sharedApplication].applicationIconBadgeNumber = number;
 }
 
 /**
  * Get the current application icon badge number on the home screen
  */
-RCT_EXPORT_METHOD(getApplicationIconBadgeNumber:(RCTResponseSenderBlock)callback)
++ (void)getApplicationIconBadgeNumber:(RCTResponseSenderBlock)callback
 {
+  RCT_EXPORT();
+
   callback(@[
     @([UIApplication sharedApplication].applicationIconBadgeNumber)
   ]);
 }
 
-RCT_EXPORT_METHOD(requestPermissions)
++ (void)requestPermissions
 {
-  Class _UIUserNotificationSettings;
-  if ((_UIUserNotificationSettings = NSClassFromString(@"UIUserNotificationSettings"))) {
+  RCT_EXPORT();
+
+#ifdef __IPHONE_8_0
     UIUserNotificationType types = UIUserNotificationTypeSound | UIUserNotificationTypeBadge | UIUserNotificationTypeAlert;
-    UIUserNotificationSettings *notificationSettings = [_UIUserNotificationSettings settingsForTypes:types categories:nil];
+    UIUserNotificationSettings *notificationSettings = [UIUserNotificationSettings settingsForTypes:types categories:nil];
     [[UIApplication sharedApplication] registerUserNotificationSettings:notificationSettings];
-  } else {
-
-#if __IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_8_0
-
-    [[UIApplication sharedApplication] registerForRemoteNotificationTypes:
-     UIUserNotificationTypeBadge | UIUserNotificationTypeSound | UIUserNotificationTypeAlert];
-
+#else
+    [[UIApplication sharedApplication] registerForRemoteNotificationTypes:(UIRemoteNotificationTypeBadge | UIRemoteNotificationTypeSound | UIRemoteNotificationTypeAlert)];
 #endif
-
-  }
 }
 
-RCT_EXPORT_METHOD(checkPermissions:(RCTResponseSenderBlock)callback)
++ (void)checkPermissions:(RCTResponseSenderBlock)callback
 {
-
-#if __IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_8_0
-
-#define UIUserNotificationTypeAlert UIRemoteNotificationTypeAlert
-#define UIUserNotificationTypeBadge UIRemoteNotificationTypeBadge
-#define UIUserNotificationTypeSound UIRemoteNotificationTypeSound
-
-#endif
-
-  NSUInteger types;
-  if ([UIApplication instancesRespondToSelector:@selector(currentUserNotificationSettings)]) {
-    types = [[[UIApplication sharedApplication] currentUserNotificationSettings] types];
-  } else {
-
-#if __IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_8_0
-
-    types = [[UIApplication sharedApplication] enabledRemoteNotificationTypes];
-
-#endif
-
-  }
+  RCT_EXPORT();
 
   NSMutableDictionary *permissions = [[NSMutableDictionary alloc] init];
-  permissions[@"alert"] = @((types & UIUserNotificationTypeAlert) > 0);
-  permissions[@"badge"] = @((types & UIUserNotificationTypeBadge) > 0);
-  permissions[@"sound"] = @((types & UIUserNotificationTypeSound) > 0);
+#ifdef __IPHONE_8_0
+  UIUserNotificationType types = [[[UIApplication sharedApplication] currentUserNotificationSettings] types];
+  permissions[@"alert"] = @((BOOL)(types & UIUserNotificationTypeAlert));
+  permissions[@"badge"] = @((BOOL)(types & UIUserNotificationTypeBadge));
+  permissions[@"sound"] = @((BOOL)(types & UIUserNotificationTypeSound));
+#else
+  UIRemoteNotificationType types = [[UIApplication sharedApplication] enabledRemoteNotificationTypes];
+  permissions[@"alert"] = @((BOOL)(types & UIRemoteNotificationTypeAlert));
+  permissions[@"badge"] = @((BOOL)(types & UIRemoteNotificationTypeBadge));
+  permissions[@"sound"] = @((BOOL)(types & UIRemoteNotificationTypeSound));
+#endif
 
   callback(@[permissions]);
 }

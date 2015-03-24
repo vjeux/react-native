@@ -54,9 +54,7 @@
 				148699CE1ABD045300480536 /* RCTPushNotificationManager.m */,
 				134814211AA4EA7D00B7C361 /* Products */,
 			);
-			indentWidth = 2;
 			sourceTree = "<group>";
-			tabWidth = 2;
 		};
 /* End PBXGroup section */
 
@@ -201,9 +199,12 @@
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
-					"$(SRCROOT)/../../React/**",
+					"$(SRCROOT)/../../ReactKit/**",
 				);
-				LIBRARY_SEARCH_PATHS = "$(inherited)";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"/Users/nicklockwood/fbobjc-hg/Libraries/FBReactKit/js/react-native-github/ReactKit/build/Debug-iphoneos",
+				);
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = RCTPushNotification;
 				SKIP_INSTALL = YES;
@@ -216,9 +217,12 @@
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
-					"$(SRCROOT)/../../React/**",
+					"$(SRCROOT)/../../ReactKit/**",
 				);
-				LIBRARY_SEARCH_PATHS = "$(inherited)";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"/Users/nicklockwood/fbobjc-hg/Libraries/FBReactKit/js/react-native-github/ReactKit/build/Debug-iphoneos",
+				);
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = RCTPushNotification;
 				SKIP_INSTALL = YES;

@@ -9,7 +9,7 @@
 
 #import <UIKit/UIKit.h>
 
-#import "../../React/Base/RCTBridgeModule.h"
+#import "../../ReactKit/Base/RCTBridgeModule.h"
 
 @interface RCTPushNotificationManager : NSObject <RCTBridgeModule>
 
@@ -17,5 +17,6 @@
 
 + (void)application:(UIApplication *)application didRegisterUserNotificationSettings:(UIUserNotificationSettings *)notificationSettings;
 + (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)notification;
++ (BOOL)application:(UIApplication *)application openURL:(NSURL *)url sourceApplication:(NSString *)sourceApplication annotation:(id)annotation;
 
 @end
