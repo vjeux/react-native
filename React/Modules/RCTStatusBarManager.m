@@ -24,11 +24,10 @@ static BOOL RCTViewControllerBasedStatusBarAppearance()
   return value;
 }
 
-RCT_EXPORT_MODULE()
-
-RCT_EXPORT_METHOD(setStyle:(UIStatusBarStyle)statusBarStyle
-                  animated:(BOOL)animated)
+- (void)setStyle:(UIStatusBarStyle)statusBarStyle animated:(BOOL)animated
 {
+  RCT_EXPORT();
+
   dispatch_async(dispatch_get_main_queue(), ^{
 
     if (RCTViewControllerBasedStatusBarAppearance()) {
@@ -41,9 +40,10 @@ RCT_EXPORT_METHOD(setStyle:(UIStatusBarStyle)statusBarStyle
   });
 }
 
-RCT_EXPORT_METHOD(setHidden:(BOOL)hidden
-                  withAnimation:(UIStatusBarAnimation)animation)
+- (void)setHidden:(BOOL)hidden withAnimation:(UIStatusBarAnimation)animation
 {
+  RCT_EXPORT();
+
   dispatch_async(dispatch_get_main_queue(), ^{
 
     if (RCTViewControllerBasedStatusBarAppearance()) {

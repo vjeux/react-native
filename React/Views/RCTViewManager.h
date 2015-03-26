@@ -9,9 +9,9 @@
 
 #import <UIKit/UIKit.h>
 
-#import "../Base/RCTBridgeModule.h"
-#import "../Base/RCTConvert.h"
-#import "../Base/RCTLog.h"
+#import "RCTBridgeModule.h"
+#import "RCTConvert.h"
+#import "RCTLog.h"
 
 @class RCTBridge;
 @class RCTEventDispatcher;
@@ -28,7 +28,15 @@ typedef void (^RCTViewManagerUIBlock)(RCTUIManager *uiManager, RCTSparseArray *v
  * allowing the manager (or the views that it manages) to manipulate the view
  * hierarchy and send events back to the JS context.
  */
-@property (nonatomic, weak) RCTBridge *bridge;
+@property (nonatomic, strong) RCTBridge *bridge;
+
+/**
+ * The module name exposed to React JS. If omitted, this will be inferred
+ * automatically by using the view module's class name. It is better to not
+ * override this, and just follow standard naming conventions for your view
+ * module subclasses.
+ */
++ (NSString *)moduleName;
 
 /**
  * This method instantiates a native view to be managed by the module. Override
@@ -144,20 +152,5 @@ typedef void (^RCTViewManagerUIBlock)(RCTUIManager *uiManager, RCTSparseArray *v
 
 #define RCT_IGNORE_SHADOW_PROPERTY(name) \
 - (void)set_##name:(id)value forShadowView:(id)view withDefaultView:(id)defaultView {}
-
-/**
- * Used for when view property names change. Will log an error when used.
- */
-#define RCT_DEPRECATED_VIEW_PROPERTY(oldName, newName) \
-- (void)set_##oldName:(id)json forView:(id)view withDefaultView:(id)defaultView { \
-  RCTLogError(@"Property '%s' has been replaced by '%s'.", #oldName, #newName); \
-  [self set_##newName:json forView:view withDefaultView:defaultView]; \
-}
-
-#define RCT_DEPRECATED_SHADOW_PROPERTY(oldName, newName) \
-- (void)set_##oldName:(id)json forShadowView:(id)view withDefaultView:(id)defaultView { \
-  RCTLogError(@"Property '%s' has been replaced by '%s'.", #oldName, #newName); \
-  [self set_##newName:json forView:view withDefaultView:defaultView]; \
-}
 
 @end

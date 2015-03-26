@@ -17,8 +17,6 @@
 
 @implementation RCTNavigatorManager
 
-RCT_EXPORT_MODULE()
-
 - (UIView *)view
 {
   return [[RCTNavigator alloc] initWithEventDispatcher:self.bridge.eventDispatcher];
@@ -36,10 +34,12 @@ RCT_EXPORT_VIEW_PROPERTY(requestedTopOfStack, NSInteger)
 }
 
 // TODO: remove error callbacks
-RCT_EXPORT_METHOD(requestSchedulingJavaScriptNavigation:(NSNumber *)reactTag
-                  errorCallback:(RCTResponseSenderBlock)errorCallback
-                  callback:(__unused RCTResponseSenderBlock)callback)
+- (void)requestSchedulingJavaScriptNavigation:(NSNumber *)reactTag
+                                errorCallback:(RCTResponseSenderBlock)errorCallback
+                                     callback:(__unused RCTResponseSenderBlock)callback
 {
+  RCT_EXPORT();
+
   [self.bridge.uiManager addUIBlock:^(RCTUIManager *uiManager, RCTSparseArray *viewRegistry){
     RCTNavigator *navigator = viewRegistry[reactTag];
     if ([navigator isKindOfClass:[RCTNavigator class]]) {

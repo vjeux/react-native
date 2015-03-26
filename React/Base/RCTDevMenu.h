@@ -9,11 +9,11 @@
 
 #import <UIKit/UIKit.h>
 
-@class RCTBridge;
+@class RCTRootView;
 
 @interface RCTDevMenu : NSObject
 
-- (instancetype)initWithBridge:(RCTBridge *)bridge NS_DESIGNATED_INITIALIZER;
+- (instancetype)initWithRootView:(RCTRootView *)rootView;
 - (void)show;
 
 @end

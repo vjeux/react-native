@@ -65,10 +65,7 @@
   if ([self.parentViewController isKindOfClass:[UINavigationController class]])
   {
 
-    [self.navigationController
-      setNavigationBarHidden:_navItem.navigationBarHidden
-      animated:animated];
-
+    [self.navigationController setNavigationBarHidden:!_navItem animated:animated];
     if (!_navItem) {
       return;
     }

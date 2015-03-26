@@ -11,54 +11,46 @@
 
 #import "RCTRedBox.h"
 #import "RCTRootView.h"
-#import "RCTSourceCode.h"
-#import "RCTWebViewExecutor.h"
 
-@interface RCTDevMenu () <UIActionSheetDelegate>
+@interface RCTDevMenu () <UIActionSheetDelegate> {
+  BOOL _liveReload;
+}
+
+@property (nonatomic, weak) RCTRootView *view;
 
 @end
 
 @implementation RCTDevMenu
-{
-  BOOL _liveReload;
-  __weak RCTBridge *_bridge;
-}
 
-- (instancetype)initWithBridge:(RCTBridge *)bridge
+- (instancetype)initWithRootView:(RCTRootView *)rootView
 {
   if (self = [super init]) {
-    _bridge = bridge;
+    self.view = rootView;
   }
   return self;
 }
 
 - (void)show
 {
-  NSString *debugTitleChrome = _bridge.executorClass != Nil && _bridge.executorClass == NSClassFromString(@"RCTWebSocketExecutor") ? @"Disable Chrome Debugging" : @"Enable Chrome Debugging";
-  NSString *debugTitleSafari = _bridge.executorClass == [RCTWebViewExecutor class] ? @"Disable Safari Debugging" : @"Enable Safari Debugging";
+  NSString *debugTitle = self.view.executorClass == nil ? @"Enable Debugging" : @"Disable Debugging";
   NSString *liveReloadTitle = _liveReload ? @"Disable Live Reload" : @"Enable Live Reload";
   UIActionSheet *actionSheet = [[UIActionSheet alloc] initWithTitle:@"React Native: Development"
                                                            delegate:self
                                                   cancelButtonTitle:@"Cancel"
                                              destructiveButtonTitle:nil
-                                                  otherButtonTitles:@"Reload", debugTitleChrome, debugTitleSafari, liveReloadTitle, nil];
+                                                  otherButtonTitles:@"Reload", debugTitle, liveReloadTitle, nil];
   actionSheet.actionSheetStyle = UIBarStyleBlack;
-  [actionSheet showInView:[[[[UIApplication sharedApplication] keyWindow] rootViewController] view]];
+  [actionSheet showInView:self.view];
 }
 
 - (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex
 {
   if (buttonIndex == 0) {
-    [_bridge reload];
+    [self.view reload];
   } else if (buttonIndex == 1) {
-    Class cls = NSClassFromString(@"RCTWebSocketExecutor");
-    _bridge.executorClass = (_bridge.executorClass != cls) ? cls : nil;
-    [_bridge reload];
+    self.view.executorClass = self.view.executorClass == nil ? NSClassFromString(@"RCTWebSocketExecutor") : nil;
+    [self.view reload];
   } else if (buttonIndex == 2) {
-    Class cls = [RCTWebViewExecutor class];
-    _bridge.executorClass = (_bridge.executorClass != cls) ? cls : Nil;
-    [_bridge reload];
-  } else if (buttonIndex == 3) {
     _liveReload = !_liveReload;
     [self _pollAndReload];
   }
@@ -67,8 +59,7 @@
 - (void)_pollAndReload
 {
   if (_liveReload) {
-    RCTSourceCode *sourceCodeModule = _bridge.modules[RCTBridgeModuleNameForClass([RCTSourceCode class])];
-    NSURL *url = sourceCodeModule.scriptURL;
+    NSURL *url = [self.view scriptURL];
     NSURL *longPollURL = [[NSURL alloc] initWithString:@"/onchange" relativeToURL:url];
     [self performSelectorInBackground:@selector(_checkForUpdates:) withObject:longPollURL];
   }
@@ -84,7 +75,7 @@
   dispatch_async(dispatch_get_main_queue(), ^{
     if (_liveReload && response.statusCode == 205) {
       [[RCTRedBox sharedInstance] dismiss];
-      [_bridge reload];
+      [self.view reload];
     }
     [self _pollAndReload];
   });

@@ -24,8 +24,6 @@ RCT_ENUM_CONVERTER(UIActivityIndicatorViewStyle, (@{
 
 @implementation RCTUIActivityIndicatorViewManager
 
-RCT_EXPORT_MODULE(UIActivityIndicatorViewManager)
-
 - (UIView *)view
 {
   return [[UIActivityIndicatorView alloc] init];

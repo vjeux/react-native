@@ -14,11 +14,9 @@
 
 @implementation RCTSourceCode
 
-RCT_EXPORT_MODULE()
-
-RCT_EXPORT_METHOD(getScriptText:(RCTResponseSenderBlock)successCallback
-                  failureCallback:(RCTResponseSenderBlock)failureCallback)
+- (void)getScriptText:(RCTResponseSenderBlock)successCallback failureCallback:(RCTResponseSenderBlock)failureCallback
 {
+  RCT_EXPORT();
   if (self.scriptText && self.scriptURL) {
     successCallback(@[@{@"text": self.scriptText, @"url":[self.scriptURL absoluteString]}]);
   } else {

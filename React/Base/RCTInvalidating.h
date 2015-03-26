@@ -9,8 +9,10 @@
 
 #import <Foundation/Foundation.h>
 
-// TODO (#5906496): This protocol is only used to add method definitions to
-// classes. We should decide if it's actually necessary.
+// TODO (#5906496): is there a reason for this protocol? It seems to be
+// used in a number of places where it isn't really required - only the
+// RCTBridge actually ever calls casts to it - in all other
+// cases it is simply a way of adding some method definitions to classes
 
 @protocol RCTInvalidating <NSObject>
 

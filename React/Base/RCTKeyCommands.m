@@ -76,8 +76,7 @@ static RCTKeyCommands *RKKeyCommandsSharedInstance = nil;
   // lookup seems to return nil sometimes, even if the key is found in the dictionary.
   // To fix this, we use a linear search, since there won't be many keys anyway
 
-  [_commandBindings enumerateKeysAndObjectsUsingBlock:
-   ^(UIKeyCommand *k, void (^block)(UIKeyCommand *), BOOL *stop) {
+  [_commandBindings enumerateKeysAndObjectsUsingBlock:^(UIKeyCommand *k, void (^block)(UIKeyCommand *), BOOL *stop) {
     if ([key.input isEqualToString:k.input] && key.modifierFlags == k.modifierFlags) {
       block(key);
     }
@@ -93,12 +92,10 @@ static RCTKeyCommands *RKKeyCommandsSharedInstance = nil;
   UIKeyCommand *command = [UIKeyCommand keyCommandWithInput:input
                                               modifierFlags:flags
                                                      action:@selector(RCT_handleKeyCommand:)];
-
-  _commandBindings[command] = block ?: ^(UIKeyCommand *cmd) {};
+  _commandBindings[command] = block;
 }
 
-- (void)unregisterKeyCommandWithInput:(NSString *)input
-                        modifierFlags:(UIKeyModifierFlags)flags
+- (void)unregisterKeyCommandWithInput:(NSString *)input modifierFlags:(UIKeyModifierFlags)flags
 {
   RCTAssertMainThread();
 

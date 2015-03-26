@@ -9,54 +9,11 @@
 
 #import "RCTAssert.h"
 
-NSString *const RCTErrorDomain = @"RCTErrorDomain";
+RCTAssertFunction RCTInjectedAssertFunction = nil;
+RCTAssertFunction RCTInjectedCAssertFunction = nil;
 
-RCTAssertFunction RCTCurrentAssertFunction = nil;
-
-void _RCTAssertFormat(
-  BOOL condition,
-  const char *fileName,
-  int lineNumber,
-  const char *function,
-  NSString *format, ...)
+void RCTInjectAssertFunctions(RCTAssertFunction assertFunction, RCTAssertFunction cAssertFunction)
 {
-  if (RCTCurrentAssertFunction) {
-
-    va_list args;
-    va_start(args, format);
-    NSString *message = [[NSString alloc] initWithFormat:format arguments:args];
-    va_end(args);
-
-    RCTCurrentAssertFunction(
-      condition, @(fileName), @(lineNumber), @(function), message
-    );
-  }
-}
-
-void RCTSetAssertFunction(RCTAssertFunction assertFunction)
-{
-  RCTCurrentAssertFunction = assertFunction;
-}
-
-RCTAssertFunction RCTGetAssertFunction(void)
-{
-  return RCTCurrentAssertFunction;
-}
-
-void RCTAddAssertFunction(RCTAssertFunction assertFunction)
-{
-  RCTAssertFunction existing = RCTCurrentAssertFunction;
-  if (existing) {
-    RCTCurrentAssertFunction = ^(BOOL condition,
-                                 NSString *fileName,
-                                 NSNumber *lineNumber,
-                                 NSString *function,
-                                 NSString *message) {
-
-      existing(condition, fileName, lineNumber, function, message);
-      assertFunction(condition, fileName, lineNumber, function, message);
-    };
-  } else {
-    RCTCurrentAssertFunction = assertFunction;
-  }
+  RCTInjectedAssertFunction = assertFunction;
+  RCTInjectedCAssertFunction = cAssertFunction;
 }

@@ -15,8 +15,6 @@
 
 @implementation RCTSliderManager
 
-RCT_EXPORT_MODULE()
-
 - (UIView *)view
 {
   UISlider *slider = [[UISlider alloc] init];

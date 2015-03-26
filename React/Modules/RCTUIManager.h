@@ -9,10 +9,10 @@
 
 #import <UIKit/UIKit.h>
 
-#import "../Base/RCTBridge.h"
-#import "../Base/RCTBridgeModule.h"
-#import "../Base/RCTInvalidating.h"
-#import "../Views/RCTViewManager.h"
+#import "RCTBridge.h"
+#import "RCTBridgeModule.h"
+#import "RCTInvalidating.h"
+#import "RCTViewManager.h"
 
 @protocol RCTScrollableProtocol;
 
@@ -30,7 +30,8 @@
 @property (nonatomic, readwrite, weak) id<UIScrollViewDelegate> nativeMainScrollDelegate;
 
 /**
- * Register a root view with the RCTUIManager.
+ * Register a root view with the RCTUIManager. Theoretically, a single manager
+ * can support multiple root views, however this feature is not currently exposed.
  */
 - (void)registerRootView:(UIView *)rootView;
 

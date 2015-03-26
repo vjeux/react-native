@@ -25,9 +25,14 @@
   return self;
 }
 
-RCT_IMPORT_METHOD(RCTNativeAppEventEmitter, emit);
-RCT_IMPORT_METHOD(RCTDeviceEventEmitter, emit);
-RCT_IMPORT_METHOD(RCTEventEmitter, receiveEvent);
++ (NSArray *)JSMethods
+{
+  return @[
+    @"RCTNativeAppEventEmitter.emit",
+    @"RCTDeviceEventEmitter.emit",
+    @"RCTEventEmitter.receiveEvent",
+  ];
+}
 
 - (void)sendAppEventWithName:(NSString *)name body:(id)body
 {
@@ -96,12 +101,6 @@ RCT_IMPORT_METHOD(RCTEventEmitter, receiveEvent);
     @"contentOffset": @{
       @"x": @(scrollView.contentOffset.x),
       @"y": @(scrollView.contentOffset.y)
-    },
-    @"contentInset": @{
-      @"top": @(scrollView.contentInset.top),
-      @"left": @(scrollView.contentInset.left),
-      @"bottom": @(scrollView.contentInset.bottom),
-      @"right": @(scrollView.contentInset.right)
     },
     @"contentSize": @{
       @"width": @(scrollView.contentSize.width),

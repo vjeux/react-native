@@ -54,8 +54,6 @@
 
 @implementation RCTMapManager
 
-RCT_EXPORT_MODULE()
-
 - (UIView *)view
 {
   RCTMap *map = [[RCTMap alloc] init];

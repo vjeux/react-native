@@ -35,8 +35,6 @@ static NSString *RCTCurrentAppBackgroundState()
 
 @synthesize bridge = _bridge;
 
-RCT_EXPORT_MODULE()
-
 #pragma mark - Lifecycle
 
 - (instancetype)init
@@ -81,9 +79,11 @@ RCT_EXPORT_MODULE()
 /**
  * Get the current background/foreground state of the app
  */
-RCT_EXPORT_METHOD(getCurrentAppState:(RCTResponseSenderBlock)callback
-                  error:(__unused RCTResponseSenderBlock)error)
+- (void)getCurrentAppState:(RCTResponseSenderBlock)callback
+                     error:(__unused RCTResponseSenderBlock)error
 {
+  RCT_EXPORT();
+
   callback(@[@{@"app_state": _lastKnownState}]);
 }
 

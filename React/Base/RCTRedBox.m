@@ -9,7 +9,6 @@
 
 #import "RCTRedBox.h"
 
-#import "RCTBridge.h"
 #import "RCTUtils.h"
 
 @interface RCTRedBoxWindow : UIWindow <UITableViewDelegate, UITableViewDataSource>
@@ -121,7 +120,7 @@
 
 - (void)reload
 {
-  [[NSNotificationCenter defaultCenter] postNotificationName:RCTReloadNotification object:nil userInfo:nil];
+  [[NSNotificationCenter defaultCenter] postNotificationName:@"RCTReloadNotification" object:nil userInfo:nil];
   [self dismiss];
 }
 
@@ -173,7 +172,6 @@
     cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"cell"];
     cell.textLabel.textColor = [[UIColor whiteColor] colorWithAlphaComponent:0.9];
     cell.textLabel.font = [UIFont fontWithName:@"Menlo-Regular" size:14];
-    cell.textLabel.numberOfLines = 2;
     cell.detailTextLabel.textColor = [[UIColor whiteColor] colorWithAlphaComponent:0.7];
     cell.detailTextLabel.font = [UIFont fontWithName:@"Menlo-Regular" size:11];
     cell.detailTextLabel.lineBreakMode = NSLineBreakByTruncatingMiddle;
@@ -198,7 +196,7 @@
     CGRect boundingRect = [_lastErrorMessage boundingRectWithSize:CGSizeMake(tableView.frame.size.width - 30, CGFLOAT_MAX) options:NSStringDrawingUsesLineFragmentOrigin attributes:attributes context:nil];
     return ceil(boundingRect.size.height) + 40;
   } else {
-    return 50;
+    return 44;
   }
 }
 
