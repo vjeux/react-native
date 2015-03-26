@@ -1,26 +1,5 @@
 /**
- * Copyright (c) 2015, Facebook, Inc.  All rights reserved.
- *
- * Facebook, Inc. (“Facebook”) owns all right, title and interest, including
- * all intellectual property and other proprietary rights, in and to the React
- * Native CustomComponents software (the “Software”).  Subject to your
- * compliance with these terms, you are hereby granted a non-exclusive,
- * worldwide, royalty-free copyright license to (1) use and copy the Software;
- * and (2) reproduce and distribute the Software as part of your own software
- * (“Your Software”).  Facebook reserves all rights not expressly granted to
- * you in this license agreement.
- *
- * THE SOFTWARE AND DOCUMENTATION, IF ANY, ARE PROVIDED "AS IS" AND ANY EXPRESS
- * OR IMPLIED WARRANTIES (INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
- * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE) ARE DISCLAIMED.
- * IN NO EVENT SHALL FACEBOOK OR ITS AFFILIATES, OFFICERS, DIRECTORS OR
- * EMPLOYEES BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
- * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
- * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
- * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
- * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
- * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THE SOFTWARE, EVEN IF
- * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * Copyright 2004-present Facebook. All Rights Reserved.
  *
  * @providesModule NavigatorBreadcrumbNavigationBar
  */
@@ -46,12 +25,15 @@ var TITLE_PROPS = Interpolators.map(() => {return {style: {}};});
 var RIGHT_BUTTON_PROPS = Interpolators.map(() => {return {style: {}};});
 
 
+/**
+ * TODO: Rename `observedTopOfStack` to `presentedIndex` in `NavigationStack`.
+ */
 var navStatePresentedIndex = function(navState) {
   if (navState.presentedIndex !== undefined) {
     return navState.presentedIndex;
+  } else {
+    return navState.observedTopOfStack;
   }
-  // TODO: rename `observedTopOfStack` to `presentedIndex` in `NavigatorIOS`
-  return navState.observedTopOfStack;
 };
 
 
@@ -77,17 +59,12 @@ var NavigatorBreadcrumbNavigationBar = React.createClass({
       popToRoute: PropTypes.func,
       popToTop: PropTypes.func,
     }),
-    routeMapper: PropTypes.shape({
+    navigationBarRouteMapper: PropTypes.shape({
       rightContentForRoute: PropTypes.func,
       titleContentForRoute: PropTypes.func,
       iconForRoute: PropTypes.func,
     }),
-    navState: React.PropTypes.shape({
-      routeStack: React.PropTypes.arrayOf(React.PropTypes.object),
-      idStack: React.PropTypes.arrayOf(React.PropTypes.number),
-      presentedIndex: React.PropTypes.number,
-    }),
-    style: View.propTypes.style,
+    navigationBarStyles: PropTypes.number,
   },
 
   statics: {
@@ -144,7 +121,7 @@ var NavigatorBreadcrumbNavigationBar = React.createClass({
     var titles = navState.routeStack.map(this._renderOrReturnTitle);
     var buttons = navState.routeStack.map(this._renderOrReturnRightButton);
     return (
-      <View style={[styles.breadCrumbContainer, this.props.style]}>
+      <View style={[styles.breadCrumbContainer, this.props.navigationBarStyles]}>
         {titles}
         {icons}
         {buttons}
@@ -154,7 +131,7 @@ var NavigatorBreadcrumbNavigationBar = React.createClass({
 
   _renderOrReturnBreadcrumb: function(route, index) {
     var uid = this.props.navState.idStack[index];
-    var navBarRouteMapper = this.props.routeMapper;
+    var navBarRouteMapper = this.props.navigationBarRouteMapper;
     var navOps = this.props.navigator;
     var alreadyRendered = this.refs['crumbContainer' + uid];
     if (alreadyRendered) {
@@ -199,7 +176,7 @@ var NavigatorBreadcrumbNavigationBar = React.createClass({
         />
       );
     }
-    var navBarRouteMapper = this.props.routeMapper;
+    var navBarRouteMapper = this.props.navigationBarRouteMapper;
     var titleContent = navBarRouteMapper.titleContentForRoute(
       navState.routeStack[index],
       this.props.navigator
@@ -219,7 +196,7 @@ var NavigatorBreadcrumbNavigationBar = React.createClass({
 
   _renderOrReturnRightButton: function(route, index) {
     var navState = this.props.navState;
-    var navBarRouteMapper = this.props.routeMapper;
+    var navBarRouteMapper = this.props.navigationBarRouteMapper;
     var uid = navState.idStack[index];
     var alreadyRendered = this.refs['rightContainer' + uid];
     if (alreadyRendered) {
