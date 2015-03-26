@@ -1,217 +1,192 @@
 /**
- * The examples provided by Facebook are for non-commercial testing and
- * evaluation purposes only.
+ * Copyright 2004-present Facebook. All Rights Reserved.
  *
- * Facebook reserves all rights not expressly granted.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
- * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NON INFRINGEMENT. IN NO EVENT SHALL
- * FACEBOOK BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
- * AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
- * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-*/
+ * @providesModule JumpingNavSample
+ */
 'use strict';
 
-var React = require('react-native');
-var {
-  Navigator,
-  PixelRatio,
-  StyleSheet,
-  ScrollView,
-  TabBarIOS,
-  Text,
-  TouchableHighlight,
-  View,
-} = React;
+var Navigator = require('Navigator');
+var React = require('React');
+var StyleSheet = require('StyleSheet');
+var ScrollView = require('ScrollView');
+var Text = require('Text');
+var TouchableBounce = require('TouchableBounce');
+var View = require('View');
 
 var _getRandomRoute = function() {
   return {
-    randNumber: Math.ceil(Math.random() * 1000),
+    randNumber: Math.random(),
   };
 };
 
-class NavButton extends React.Component {
-  render() {
-    return (
-      <TouchableHighlight
-        style={styles.button}
-        underlayColor="#B5B5B5"
-        onPress={this.props.onPress}>
-        <Text style={styles.buttonText}>{this.props.text}</Text>
-      </TouchableHighlight>
-    );
-  }
-}
-
+var INIT_ROUTE = _getRandomRoute();
 var ROUTE_STACK = [
   _getRandomRoute(),
   _getRandomRoute(),
+  INIT_ROUTE,
+  _getRandomRoute(),
   _getRandomRoute(),
 ];
-var INIT_ROUTE_INDEX = 1;
+var renderScene = function(route, navigator) {
+  return (
+    <ScrollView style={styles.scene}>
+      <View style={styles.scroll}>
+      <Text>{route.randNumber}</Text>
+      <TouchableBounce
+        onPress={() => {
+          navigator.jumpBack();
+        }}>
+        <View style={styles.button}>
+          <Text style={styles.buttonText}>jumpBack</Text>
+        </View>
+      </TouchableBounce>
+      <TouchableBounce
+        onPress={() => {
+          navigator.jumpForward();
+        }}>
+        <View style={styles.button}>
+          <Text style={styles.buttonText}>jumpForward</Text>
+        </View>
+      </TouchableBounce>
+      <TouchableBounce
+        onPress={() => {
+          navigator.jumpTo(INIT_ROUTE);
+        }}>
+        <View style={styles.button}>
+          <Text style={styles.buttonText}>jumpTo initial route</Text>
+        </View>
+      </TouchableBounce>
+      <TouchableBounce
+        onPress={() => {
+          navigator.push(_getRandomRoute());
+        }}>
+        <View style={styles.button}>
+          <Text style={styles.buttonText}>destructive: push</Text>
+        </View>
+      </TouchableBounce>
+      <TouchableBounce
+        onPress={() => {
+          navigator.replace(_getRandomRoute());
+        }}>
+        <View style={styles.button}>
+          <Text style={styles.buttonText}>destructive: replace</Text>
+        </View>
+      </TouchableBounce>
+      <TouchableBounce
+        onPress={() => {
+          navigator.pop();
+        }}>
+        <View style={styles.button}>
+          <Text style={styles.buttonText}>destructive: pop</Text>
+        </View>
+      </TouchableBounce>
+      <TouchableBounce
+        onPress={() =>  {
+          navigator.immediatelyResetRouteStack([
+            _getRandomRoute(),
+            _getRandomRoute(),
+          ]);
+        }}>
+        <View style={styles.button}>
+          <Text style={styles.buttonText}>destructive: Immediate set two routes</Text>
+        </View>
+      </TouchableBounce>
+      <TouchableBounce
+        onPress={() => {
+          navigator.popToTop();
+        }}>
+        <View style={styles.button}>
+          <Text style={styles.buttonText}>destructive: pop to top</Text>
+        </View>
+      </TouchableBounce>
+    </View>
+    </ScrollView>
+  );
+};
 
 class JumpingNavBar extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      tabIndex: props.initTabIndex,
-    };
-  }
-  handleWillFocus(route) {
-    var tabIndex = ROUTE_STACK.indexOf(route);
-    this.setState({ tabIndex, });
-  }
   render() {
     return (
-      <View style={styles.tabs}>
-        <TabBarIOS>
-          <TabBarIOS.Item
-            icon={require('image!tabnav_notification')}
-            selected={this.state.tabIndex === 0}
-            onPress={() => {
-              this.props.onTabIndex(0);
-              this.setState({ tabIndex: 0, });
-            }}>
-            <View />
-          </TabBarIOS.Item>
-          <TabBarIOS.Item
-            icon={require('image!tabnav_list')}
-            selected={this.state.tabIndex === 1}
-            onPress={() => {
-              this.props.onTabIndex(1);
-              this.setState({ tabIndex: 1, });
-            }}>
-            <View />
-          </TabBarIOS.Item>
-          <TabBarIOS.Item
-            icon={require('image!tabnav_settings')}
-            selected={this.state.tabIndex === 2}
-            onPress={() => {
-              this.props.onTabIndex(2);
-              this.setState({ tabIndex: 2, });
-            }}>
-            <View />
-          </TabBarIOS.Item>
-        </TabBarIOS>
+      <View style={styles.navBar}>
+        {this.props.routeStack.map((route, index) => (
+          <TouchableBounce onPress={() => {
+            this.props.navigator.jumpTo(route);
+          }}>
+            <View style={styles.navButton}>
+              <Text
+                style={[
+                  styles.navButtonText,
+                  this.props.navState.toIndex === index && styles.navButtonActive
+                ]}>
+                  {index}
+                </Text>
+            </View>
+          </TouchableBounce>
+        ))}
       </View>
     );
   }
 }
 
 var JumpingNavSample = React.createClass({
+
   render: function() {
     return (
       <Navigator
         debugOverlay={false}
-        style={styles.appContainer}
-        ref={(navigator) => {
-          this._navigator = navigator;
-        }}
-        initialRoute={ROUTE_STACK[INIT_ROUTE_INDEX]}
+        style={[styles.appContainer]}
+        initialRoute={INIT_ROUTE}
         initialRouteStack={ROUTE_STACK}
-        renderScene={this.renderScene}
-        configureScene={() => ({
-          ...Navigator.SceneConfigs.HorizontalSwipeJump,
-        })}
-        navigationBar={
-          <JumpingNavBar
-            ref={(navBar) => { this.navBar = navBar; }}
-            initTabIndex={INIT_ROUTE_INDEX}
-            routeStack={ROUTE_STACK}
-            onTabIndex={(index) => {
-              this._navigator.jumpTo(ROUTE_STACK[index]);
-            }}
-          />
-        }
+        renderScene={renderScene}
+        navigationBar={<JumpingNavBar routeStack={ROUTE_STACK} />}
+        shouldJumpOnBackstackPop={true}
       />
     );
   },
 
-  renderScene: function(route, navigator) {
-    var backBtn;
-    var forwardBtn;
-    if (ROUTE_STACK.indexOf(route) !== 0) {
-      backBtn = (
-        <NavButton
-          onPress={() => {
-            navigator.jumpBack();
-          }}
-          text="jumpBack"
-        />
-      );
-    }
-    if (ROUTE_STACK.indexOf(route) !== ROUTE_STACK.length - 1) {
-      forwardBtn = (
-        <NavButton
-          onPress={() => {
-            navigator.jumpForward();
-          }}
-          text="jumpForward"
-        />
-      );
-    }
-    return (
-      <ScrollView style={styles.scene}>
-        <Text style={styles.messageText}>#{route.randNumber}</Text>
-        {backBtn}
-        {forwardBtn}
-        <NavButton
-          onPress={() => {
-            navigator.jumpTo(ROUTE_STACK[1]);
-          }}
-          text="jumpTo middle route"
-        />
-        <NavButton
-          onPress={() => {
-            this.props.navigator.pop();
-          }}
-          text="Exit Navigation Example"
-        />
-        <NavButton
-          onPress={() => {
-            this.props.navigator.push({
-              message: 'Came from jumping example',
-            });
-          }}
-          text="Nav Menu"
-        />
-      </ScrollView>
-    );
-  },
 });
 
 var styles = StyleSheet.create({
+  scene: {
+    backgroundColor: '#eeeeee',
+  },
+  scroll: {
+    flex: 1,
+  },
   button: {
-    backgroundColor: 'white',
-    padding: 15,
-    borderBottomWidth: 1 / PixelRatio.get(),
-    borderBottomColor: '#CDCDCD',
+    backgroundColor: '#cccccc',
+    margin: 50,
+    marginTop: 26,
+    padding: 10,
   },
   buttonText: {
-    fontSize: 17,
-    fontWeight: '500',
+    fontSize: 12,
+    textAlign: 'center',
   },
   appContainer: {
     overflow: 'hidden',
     backgroundColor: '#dddddd',
     flex: 1,
   },
-  messageText: {
-    fontSize: 17,
-    fontWeight: '500',
-    padding: 15,
-    marginTop: 50,
-    marginLeft: 15,
+  navBar: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 90,
+    flexDirection: 'row',
   },
-  scene: {
+  navButton: {
     flex: 1,
-    paddingTop: 20,
-    backgroundColor: '#EAEAEA',
   },
-  tabs: {
-    height: 50,
-  }
+  navButtonText: {
+    textAlign: 'center',
+    fontSize: 32,
+    marginTop: 25,
+  },
+  navButtonActive: {
+    color: 'green',
+  },
 });
 
 module.exports = JumpingNavSample;
