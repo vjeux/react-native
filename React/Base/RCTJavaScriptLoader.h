@@ -9,6 +9,8 @@
 /**
  * Class that allows easy embedding, loading, life-cycle management of a
  * JavaScript application inside of a native application.
+ * TODO: Before loading new application source, publish global notification in
+ * JavaScript so that applications can clean up resources. (launch blocker).
  * TODO: Incremental module loading. (low pri).
  */
 @interface RCTJavaScriptLoader : NSObject

@@ -24,7 +24,7 @@
  */
 @implementation RCTJavaScriptLoader
 {
-  __weak RCTBridge *_bridge;
+  RCTBridge *_bridge;
 }
 
 /**
@@ -46,7 +46,8 @@
  */
 - (instancetype)initWithBridge:(RCTBridge *)bridge
 {
-  if ((self = [super init])) {
+  RCTAssertMainThread();
+  if (self = [super init]) {
     _bridge = bridge;
   }
   return self;
@@ -54,22 +55,12 @@
 
 - (void)loadBundleAtURL:(NSURL *)scriptURL onComplete:(void (^)(NSError *))onComplete
 {
-  if (scriptURL == nil) {
-    NSError *error = [NSError errorWithDomain:@"JavaScriptLoader" code:1 userInfo:@{
-      NSLocalizedDescriptionKey: @"No script URL provided"
-    }];
+  if (!scriptURL) {
+    NSError *error = [NSError errorWithDomain:@"JavaScriptLoader"
+                                         code:1
+                                     userInfo:@{NSLocalizedDescriptionKey: @"No script URL provided"}];
     onComplete(error);
     return;
-  }
-
-  if ([scriptURL isFileURL]) {
-    NSString *bundlePath = [[NSBundle bundleForClass:[self class]] resourcePath];
-    NSString *localPath = [scriptURL.absoluteString substringFromIndex:@"file://".length];
-
-    if (![localPath hasPrefix:bundlePath]) {
-      NSString *absolutePath = [NSString stringWithFormat:@"%@/%@", bundlePath, localPath];
-      scriptURL = [NSURL fileURLWithPath:absolutePath];
-    }
   }
 
   NSURLSessionDataTask *task = [[NSURLSession sharedSession] dataTaskWithURL:scriptURL completionHandler:
@@ -105,20 +96,15 @@
                                   if ([response isKindOfClass:[NSHTTPURLResponse class]] && [(NSHTTPURLResponse *)response statusCode] != 200) {
                                     NSDictionary *userInfo;
                                     NSDictionary *errorDetails = RCTJSONParse(rawText, nil);
-                                    if ([errorDetails isKindOfClass:[NSDictionary class]] &&
-                                        [errorDetails[@"errors"] isKindOfClass:[NSArray class]]) {
-                                      NSMutableArray *fakeStack = [[NSMutableArray alloc] init];
-                                      for (NSDictionary *err in errorDetails[@"errors"]) {
-                                        [fakeStack addObject: @{
-                                          @"methodName": err[@"description"] ?: @"",
-                                          @"file": err[@"filename"] ?: @"",
-                                          @"lineNumber": err[@"lineNumber"] ?: @0
-                                        }];
-                                      }
+                                    if ([errorDetails isKindOfClass:[NSDictionary class]]) {
                                       userInfo = @{
-                                        NSLocalizedDescriptionKey: errorDetails[@"message"] ?: @"No message provided",
-                                        @"stack": fakeStack,
-                                      };
+                                                   NSLocalizedDescriptionKey: errorDetails[@"message"] ?: @"No message provided",
+                                                   @"stack": @[@{
+                                                                 @"methodName": errorDetails[@"description"] ?: @"",
+                                                                 @"file": errorDetails[@"filename"] ?: @"",
+                                                                 @"lineNumber": errorDetails[@"lineNumber"] ?: @0
+                                                                 }]
+                                                   };
                                     } else {
                                       userInfo = @{NSLocalizedDescriptionKey: rawText};
                                     }
@@ -129,15 +115,18 @@
                                     onComplete(error);
                                     return;
                                   }
-                                  RCTSourceCode *sourceCodeModule = _bridge.modules[RCTBridgeModuleNameForClass([RCTSourceCode class])];
+
+                                  // Success!
+                                  RCTSourceCode *sourceCodeModule = _bridge.modules[NSStringFromClass([RCTSourceCode class])];
                                   sourceCodeModule.scriptURL = scriptURL;
                                   sourceCodeModule.scriptText = rawText;
 
                                   [_bridge enqueueApplicationScript:rawText url:scriptURL onComplete:^(NSError *_error) {
                                     dispatch_async(dispatch_get_main_queue(), ^{
-                                      onComplete(_error);
+                                      onComplete(error);
                                     });
                                   }];
+
                                 }];
 
   [task resume];
