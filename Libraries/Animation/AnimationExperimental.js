@@ -16,17 +16,6 @@ var AnimationUtils = require('AnimationUtils');
 
 type EasingFunction = (t: number) => number;
 
-var Properties = {
-  opacity: true,
-  position: true,
-  positionX: true,
-  positionY: true,
-  rotation: true,
-  scaleXY: true,
-};
-
-type ValueType = number | Array<number> | {[key: string]: number};
-
 /**
  * This is an experimental module that is under development, incomplete,
  * potentially buggy, not used in any production apps, and will probably change
@@ -35,34 +24,24 @@ type ValueType = number | Array<number> | {[key: string]: number};
  * Use at your own risk.
  */
 var AnimationExperimental = {
+  Mixin: require('AnimationExperimentalMixin'),
+
   startAnimation: function(
-    anim: {
-      node: any;
-      duration: number;
-      easing: ($Enum<typeof AnimationUtils.Defaults> | EasingFunction);
-      property: $Enum<typeof Properties>;
-      toValue: ValueType;
-      fromValue?: ValueType;
-      delay?: number;
-    },
-    callback?: ?(finished: bool) => void
+    node: any,
+    duration: number,
+    delay: number,
+    easing: (string | EasingFunction),
+    properties: {[key: string]: any}
   ): number {
-    var nodeHandle = anim.node.getNodeHandle();
-    var easingSample = AnimationUtils.evaluateEasingFunction(
-      anim.duration,
-      anim.easing
-    );
-    var tag: number = AnimationUtils.allocateTag();
-    var props = {};
-    props[anim.property] = {to: anim.toValue};
-    RCTAnimationManager.startAnimation(
+    var nodeHandle = +node.getNodeHandle();
+    var easingSample = AnimationUtils.evaluateEasingFunction(duration, easing);
+    var tag: number = RCTAnimationManager.startAnimation(
       nodeHandle,
-      tag,
-      anim.duration,
-      anim.delay,
+      AnimationUtils.allocateTag(),
+      duration,
+      delay,
       easingSample,
-      props,
-      callback
+      properties
     );
     return tag;
   },
@@ -71,19 +50,5 @@ var AnimationExperimental = {
     RCTAnimationManager.stopAnimation(tag);
   },
 };
-
-if (__DEV__) {
-  if (RCTAnimationManager && RCTAnimationManager.Properties) {
-    var a = Object.keys(Properties);
-    var b = RCTAnimationManager.Properties;
-    var diff = a.filter((i) => b.indexOf(i) < 0).concat(
-      b.filter((i) => a.indexOf(i) < 0)
-    );
-    if (diff.length > 0) {
-      throw new Error('JS animation properties don\'t match native properties.' +
-        JSON.stringify(diff, null, '  '));
-    }
-  }
-}
 
 module.exports = AnimationExperimental;
