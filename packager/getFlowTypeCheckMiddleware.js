@@ -8,10 +8,7 @@
  */
 'use strict';
 
-var chalk = require('chalk');
 var exec = require('child_process').exec;
-
-var hasWarned = {};
 
 function getFlowTypeCheckMiddleware(options) {
   return function(req, res, next) {
@@ -21,19 +18,13 @@ function getFlowTypeCheckMiddleware(options) {
     if (options.flowroot || options.projectRoots.length === 1) {
       var flowroot = options.flowroot || options.projectRoots[0];
     } else {
-      if (!hasWarned.noRoot) {
-        hasWarned.noRoot = true;
-        console.warn('flow: No suitable root');
-      }
+      console.warn('flow: No suitable root');
       return next();
     }
     exec('command -v flow >/dev/null 2>&1', function(error, stdout) {
       if (error) {
-        if (!hasWarned.noFlow) {
-          hasWarned.noFlow = true;
-          console.warn(chalk.yellow('flow: Skipping because not installed.  Install with ' +
-            '`brew install flow`.'));
-        }
+        console.warn('flow: Skipping because not installed.  Install with ' +
+          '`brew install flow`.');
         return next();
       } else {
         return doFlowTypecheck(res, flowroot, next);
@@ -45,19 +36,10 @@ function getFlowTypeCheckMiddleware(options) {
 function doFlowTypecheck(res, flowroot, next) {
   var flowCmd = 'cd "' + flowroot + '" && flow --json --timeout 20';
   var start = Date.now();
-  // Log start message if flow is slow to let user know something is happening.
-  var flowSlow = setTimeout(
-    function() {
-      console.log(chalk.gray('flow: Running static typechecks.'));
-    },
-    500
-  );
-  exec(flowCmd, function(flowError, stdout, stderr) {
-    clearTimeout(flowSlow);
+  console.log('flow: Running static typechecks.');
+  exec(flowCmd, function(flowError, stdout) {
     if (!flowError) {
-      console.log(chalk.gray(
-        'flow: Typechecks passed (' + (Date.now() - start) + 'ms).')
-      );
+      console.log('flow: Typechecks passed (' + (Date.now() - start) + 'ms).');
       return next();
     } else {
       try {
@@ -79,38 +61,24 @@ function doFlowTypecheck(res, flowroot, next) {
           });
           errorNum++;
         });
-        var error = {
-          status: 500,
-          message: 'Flow found type errors.  If you think these are wrong, ' +
-            'make sure your flow bin and .flowconfig are up to date, or ' +
-            'disable with --skipflow.',
-          type: 'FlowError',
-          errors: errors,
-        };
-        console.error(chalk.yellow('flow: Error running command `' + flowCmd +
-          '`:\n' + JSON.stringify(error))
-        );
-        res.writeHead(error.status, {
-          'Content-Type': 'application/json; charset=UTF-8',
-        });
-        res.end(JSON.stringify(error));
+        var message = 'Flow found type errors.  If you think these are wrong, ' +
+          'make sure flow is up to date, or disable with --skipflow.';
       } catch (e) {
-        if (stderr.match(/Could not find a \.flowconfig/)) {
-          if (!hasWarned.noConfig) {
-            hasWarned.noConfig = true;
-            console.warn(chalk.yellow('flow: ' + stderr));
-          }
-        } else {
-          if (!hasWarned.brokenFlow) {
-            hasWarned.brokenFlow = true;
-            console.warn(chalk.yellow(
-              'Flow failed to provide parseable output:\n\n`' + stdout +
-              '`.\n' + 'stderr: `' + stderr + '`'
-            ));
-          }
-        }
-        return next();
+        var message =
+          'Flow failed to provide parseable output:\n\n`' + stdout + '`';
+        console.error(message, '\nException: `', e, '`\n\n');
       }
+      var error = {
+        status: 500,
+        message: message,
+        type: 'FlowError',
+        errors: errors,
+      };
+      console.error('flow: Error running command `' + flowCmd + '`:\n', error);
+      res.writeHead(error.status, {
+        'Content-Type': 'application/json; charset=UTF-8',
+      });
+      res.end(JSON.stringify(error));
     }
   });
 }
